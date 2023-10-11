@@ -1,0 +1,11 @@
+-cp src
+
+-m Main
+
+--dce full
+
+-L hxnodejs
+-L closure
+-L hxx
+--js bin.js
+# --debug

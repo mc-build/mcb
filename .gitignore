@@ -1,0 +1,5 @@
+bin*
+node_modules/
+test-src/
+data/
+.haxelib
