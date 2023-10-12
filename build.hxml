@@ -3,9 +3,8 @@
 -m Main
 
 --dce full
-
+--resource ./src/resources/generated/io-worker.js@io-worker
 -L hxnodejs
--L closure
 -L hxx
---js bin.js
+--js bin/mcb.js
 # --debug

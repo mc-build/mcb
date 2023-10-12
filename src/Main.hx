@@ -1,5 +1,8 @@
 package;
 
+import haxe.Timer;
+import Io.MultiThreadIo;
+import Io.ThreadedIo;
 import mcl.Compiler;
 import haxe.Serializer;
 import haxe.io.Path;
@@ -47,8 +50,16 @@ class Main {
 		Compiler.instance.addFile(file, ast);
 	}
 
+	static final threadedIo = true;
+
 	static function main() {
 		var startTime = Sys.time();
+		var hasMT = Sys.args().indexOf("--io-mt");
+		var hasT = Sys.args().indexOf("--io-t");
+		if (hasMT >= 0)
+			Compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
+		else if (hasT >= 0)
+			Compiler.io = new ThreadedIo();
 		var file = Sys.args()[0] ?? "test-src";
 		var files = FileSystem.isDirectory(file) ? readDirRecursive(file).filter(f -> {
 			var ext = Path.extension(f);
@@ -59,10 +70,20 @@ class Main {
 			processFile(file);
 		}
 		Compiler.instance.compile();
+
+		Compiler.io.cleanup();
 		if (debug)
 			debugData.serialize(null);
 		var endTime = Sys.time();
 		trace("Compilation took " + (endTime - startTime) + " seconds");
+		function waitForIoDone() {
+			if (Compiler.io.finished()) {
+				trace("Finished in " + (Sys.time() - endTime) + " seconds");
+				return;
+			}
+			Timer.delay(waitForIoDone, 100);
+		}
+		waitForIoDone();
 		if (debug)
 			File.saveContent("debug.dat", debugData.toString());
 	}

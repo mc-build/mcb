@@ -15,7 +15,7 @@ import haxe.io.Path;
 
 typedef Macro = {};
 
-private class McMacro {
+private class McTemplate {
 	private var name:String;
 	private var body:Array<AstNode>;
 
@@ -65,7 +65,7 @@ private class McFile {
 	public var existingDirectories:Map<String, Bool> = new Map();
 
 	private var ast:Array<AstNode> = [];
-	private var macros:Map<String, McMacro> = new Map();
+	private var templates:Map<String, McTemplate> = new Map();
 	private var imports:Map<String, McFile> = new Map();
 
 	public function new(name:String, ast:Array<AstNode>) {
@@ -81,7 +81,7 @@ private class McFile {
 				case Import(_, importName):
 					imports.set(importName, Compiler.instance.resolve(this.name, importName));
 				case MacroDef(_, name, body):
-					macros.set(name, new McMacro(name, body));
+					templates.set(name, new McTemplate(name, body));
 				default:
 					this.ast.push(node);
 			}
@@ -104,13 +104,8 @@ private class McFile {
 		};
 	}
 
-	private function saveContent(path:String, content:String) {
-		var dir = Path.directory(path);
-		if (!existingDirectories.exists(dir)) {
-			FileSystem.createDirectory(dir);
-			existingDirectories.set(dir, true);
-		}
-		File.saveContent(path, content);
+	private inline function saveContent(path:String, content:String) {
+		Compiler.io.write(path, content);
 	}
 
 	private function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext):String {
@@ -349,6 +344,7 @@ private class McFile {
 }
 
 class Compiler {
+	public static var io:Io = new Io.SyncIo();
 	public static var instance:Compiler = new Compiler();
 
 	private var files:Map<String, McFile> = new Map();
