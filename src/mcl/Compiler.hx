@@ -224,6 +224,8 @@ private class McFile {
 			compileCommandUnit(node, newContext);
 		}
 		var result = commands.join("\n");
+		if (name != null)
+			name = injectValues(name, context, pos);
 		var id = name == null ? 'zzz/${Std.string(context.uidIndex++)}' : name;
 		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
 		return 'function ${context.namespace}:${context.path.join("/")}/$id' + (data == null ? '' : ' $data');
@@ -290,7 +292,7 @@ private class McFile {
 								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
 								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
-							case Block(pos, name, body, data):
+							case Block(_, _, body, data):
 								var embedCommands:Array<String> = [];
 								if (!isDone)
 									throw "Internal error: block continuation must be the last continuation";
@@ -396,7 +398,6 @@ private class McFile {
 				}
 				var result = commands.join("\n");
 				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-				trace('TODO: add to load tag, $functionId');
 				Compiler.instance.tags.addLoadingCommand(functionId);
 			case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
 			// ignore comments on the top level, they are allowed but have no output
