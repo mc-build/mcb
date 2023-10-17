@@ -25,6 +25,7 @@ jobs:
       - run: wget https://github.com/HaxeFoundation/haxe/releases/download/4.3.2/haxe-4.3.2-linux64.tar.gz -O ./tools/haxe.tar.gz
       - run: tar xzvf ./tools/haxe.tar.gz -C ./tools
       - run: mv ./tools/haxe_* ./tools/haxe
+      - run: sudo apt-get install neko
       - run: echo "haxe is in $(cd $1; pwd)/tools/haxe"
       - run: chmod +x ./haxe.sh
       - run: ls -l
