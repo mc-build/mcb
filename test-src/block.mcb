@@ -1,0 +1,16 @@
+function blocktest{
+    block test {
+        say named block 
+    }
+    block {
+        say unnamed block
+    }
+
+    block test2 { with some data
+        say named block2
+    }
+
+    block { with some data
+        say unnamed block2
+    }
+}

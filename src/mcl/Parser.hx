@@ -359,6 +359,13 @@ class Parser {
 						return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringTools.startsWith(v, "#")):
 						return Comment(pos, v);
+					case _ if (v == "block" || StringTools.startsWith(v, "block ")):
+						var name = StringTools.trim(v.substring("block ".length));
+						var content:Array<AstNode> = [];
+						var data = block(reader, () -> {
+							content.push(innerParse(reader));
+						});
+						return Block(pos, name, content, data);
 					default:
 						return AstNode.Raw(pos, v);
 				}

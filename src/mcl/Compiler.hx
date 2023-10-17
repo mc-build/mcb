@@ -214,7 +214,7 @@ private class McFile {
 		Compiler.io.write(path, content);
 	}
 
-	private function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext):String {
+	private function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
 		var commands:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
@@ -224,9 +224,9 @@ private class McFile {
 			compileCommandUnit(node, newContext);
 		}
 		var result = commands.join("\n");
-		var id = Std.string(context.uidIndex++);
-		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-		return 'function ${context.namespace}:${context.path.join("/")}/$id.mcfunction' + (data == null ? ' $data' : '');
+		var id = name == null ? 'zzz/${Std.string(context.uidIndex++)}' : name;
+		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
+		return 'function ${context.namespace}:${context.path.join("/")}/$id' + (data == null ? '' : ' $data');
 	}
 
 	private function compileCommandUnit(node:AstNode, context:CompilerContext):Void {
@@ -258,8 +258,8 @@ private class McFile {
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex++);
 				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-				context.append(injectValues('$execute function ${context.namespace}:${context.path.join("/")}/zzz/$id' + (data == null ? '' : ' $data'),
-					context, pos));
+				context.append(injectValues('$execute function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+					+ (data == null ? '' : ' $data'), context, pos));
 				if (continuations != null) {
 					// newContext.append('scoreboard players set %ifelse int 1');
 					var idx = 0;
@@ -288,7 +288,7 @@ private class McFile {
 									result);
 
 								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
-								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.join("/")}/zzz/$id'
+								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 							case Block(pos, name, body, data):
 								var embedCommands:Array<String> = [];
@@ -306,7 +306,7 @@ private class McFile {
 								var id = Std.string(context.uidIndex++);
 								saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))),
 									result);
-								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.join("/")}/zzz/$id'
+								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 
 							default: throw ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
@@ -320,6 +320,8 @@ private class McFile {
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileCommandUnit(v, context);
 				});
+			case Block(pos, name, body, data):
+				context.append(createAnonymousFunction(pos, body, data, context, name));
 			default:
 				Lib.debug();
 				trace(Std.string(node));
