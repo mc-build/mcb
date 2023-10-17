@@ -22,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: setup haxe
-    - run: apt install p7zip-full
+      run: apt install p7zip-full
     - run: mkdir tools
     - run: wget https://github.com/HaxeFoundation/haxe/releases/download/4.3.2/haxe-4.3.2-linux64.tar.gz -O ./tools/haxe.tar.gz
     - run: tar xzvf ./tools/haxe.tar.gz -C ./tools
