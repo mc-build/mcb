@@ -1,27 +1,105 @@
 package mcl;
 
-import haxe.macro.Expr.Catch;
+import mcl.AstNode.CompileTimeIfElseExpressions;
+import mcl.AstNode.AstNodeUtils;
+import mcl.AstNode.AstNodeIds;
 import mcl.Parser.Errors;
 import js.Syntax;
-import js.lib.Function;
 import mcl.AstNode.JsonTagType;
-import sys.FileSystem;
-import haxe.macro.Context;
-import haxe.crypto.Sha1;
-import sys.io.File;
 import mcl.Tokenizer.PosInfo;
 import js.Lib;
 import haxe.io.Path;
 
-typedef Macro = {};
+private class ErrorUtil {
+	public static function format(message:String, pos:PosInfo):String {
+		return '${pos.file}:${pos.line}:${pos.col}: ${message}';
+	}
+
+	public static function formatWithStack(message:String, stack:Array<PosInfo>):String {
+		var res = message;
+		for (pos in stack) {
+			res += '\n\tat ${pos.file}:${pos.line}:${pos.col}';
+		}
+		return res;
+	}
+
+	public static function formatContext(message:String, pos:PosInfo, context:CompilerContext):String {
+		return formatWithStack(message, context.stack.concat([pos]));
+	}
+
+	public static function unexpectedToken(node:AstNode, context:CompilerContext):String {
+		return formatContext('Unexpected: ${node}', AstNodeUtils.getPos(node), context);
+	}
+}
+
+private class TemplateArgument {
+	var name:String;
+
+	function new(s:String) {
+		this.name = s;
+	}
+
+	public static function parse(s:String, p:PosInfo) {
+		trace(s, p);
+		return new TemplateArgument(s);
+	}
+}
 
 private class McTemplate {
 	private var name:String;
 	private var body:Array<AstNode>;
+	private var overlands:Map<Array<TemplateArgument>, Array<AstNode>> = new Map();
+	private var installed:Bool = false;
+	private var loadBlock:Null<Array<AstNode>> = null;
+	private var tickBlock:Null<Array<AstNode>> = null;
+	private var file:McFile;
 
-	public function new(name:String, body:Array<AstNode>) {
+	public function new(name:String, body:Array<AstNode>, file:McFile) {
 		this.name = name;
 		this.body = body;
+		this.parse(body);
+	}
+
+	private function compileArgs(args:String, pos:PosInfo) {
+		var arguments:Array<TemplateArgument> = [];
+		var sections = args.split(' ');
+		var offset = 0;
+		for (section in sections) {
+			if (section == "") {
+				offset++;
+				continue;
+			}
+			arguments.push(TemplateArgument.parse(section, {
+				file: pos.file,
+				line: pos.line,
+				col: pos.col + offset
+			}));
+			offset += section.length;
+		}
+		return arguments;
+	}
+
+	private function parse(nodes:Array<AstNode>) {
+		for (node in nodes) {
+			switch (node) {
+				case TemplateOverload(pos, args, body):
+					overlands.set(compileArgs(args, pos), body);
+				case LoadBlock(pos, body):
+					if (loadBlock == null)
+						loadBlock = body;
+					else
+						throw ErrorUtil.format("Templates can only have one top-level load block", pos);
+				case TickBlock(pos, body):
+					if (tickBlock == null)
+						tickBlock = body;
+					else
+						throw ErrorUtil.format("Templates can only have one top-level tick block", pos);
+				case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
+				// ignore comments on the top level, they are allowed but have no output
+				default:
+					throw ErrorUtil.format("Unexpected node type: " + Std.string(node), Reflect.field(node, 'pos'));
+			}
+		}
 	}
 }
 
@@ -47,6 +125,8 @@ private class VariableMap {
 	}
 
 	public inline function fork(variables:Null<Map<String, Any>> = null):VariableMap {
+		if (variables == null)
+			return this;
 		return new VariableMap(this, variables);
 	}
 }
@@ -57,6 +137,9 @@ typedef CompilerContext = {
 	var path:Array<String>;
 	var uidIndex:Int;
 	var variables:VariableMap;
+	var replacements:VariableMap;
+	var stack:Array<PosInfo>;
+	var isTemplate:Bool;
 };
 
 private class McFile {
@@ -67,10 +150,19 @@ private class McFile {
 	private var ast:Array<AstNode> = [];
 	private var templates:Map<String, McTemplate> = new Map();
 	private var imports:Map<String, McFile> = new Map();
+	private var ext:String;
 
 	public function new(name:String, ast:Array<AstNode>) {
 		this.name = name;
 		this.ast = ast;
+		this.ext = Path.extension(name);
+	}
+
+	public function getTemplates():Map<String, McTemplate> {
+		if (this.ext == "mcbt") {
+			return templates;
+		}
+		throw "Internal error: tried to get templates from non-template file:" + this.name;
 	}
 
 	public function setup() {
@@ -80,10 +172,17 @@ private class McFile {
 			switch (node) {
 				case Import(_, importName):
 					imports.set(importName, Compiler.instance.resolve(this.name, importName));
-				case MacroDef(_, name, body):
-					templates.set(name, new McTemplate(name, body));
+				case TemplateDef(_, name, body):
+					templates.set(name, new McTemplate(name, body, this));
+				case Comment(_, _):
 				default:
 					this.ast.push(node);
+			}
+		}
+		for (dep in imports) {
+			var importedTemplates = dep.getTemplates();
+			for (k => v in importedTemplates) {
+				templates.set(k, v);
 			}
 		}
 	}
@@ -93,14 +192,21 @@ private class McFile {
 		return '$namespace:$id';
 	}
 
-	private function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String> = null,
-			uidIndex:Int = 0):CompilerContext {
+	private inline function forkCompilerContextWithAppend(context:CompilerContext, append:String->Void):CompilerContext {
+		return createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements);
+	}
+
+	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:Int,
+			stack:Array<PosInfo>, replacements:VariableMap):CompilerContext {
 		return {
 			append: append,
 			namespace: namespace,
 			path: path == null ? [] : path,
 			uidIndex: uidIndex,
-			variables: variableMap
+			variables: variableMap,
+			stack: stack,
+			replacements: replacements,
+			isTemplate: this.ext == "mcbt"
 		};
 	}
 
@@ -112,7 +218,8 @@ private class McFile {
 		var commands:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
-		}, context.variables.fork(), context.path.concat(['zzz']), context.uidIndex);
+		}, context.variables.fork(),
+			context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables);
 		for (node in body) {
 			compileCommandUnit(node, newContext);
 		}
@@ -128,22 +235,87 @@ private class McFile {
 				context.append(injectValues(value, context, pos));
 			case Comment(_, value):
 				context.append(value);
-			case AstNode.Block(pos, body, data):
+			case AstNode.Block(pos, null, body, data) | AstNode.Block(pos, "", body, data):
 				context.append(createAnonymousFunction(pos, body, data, context));
-			case ExecuteBlock(pos, execute, data, body):
+			case CompileTimeIf(pos, expression, body, elseExpressions):
+				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
+					compileCommandUnit(v, context);
+				});
+			case ExecuteBlock(pos, execute, data, body, continuations):
 				var commands:Array<String> = [];
 				var append = function(command:String) {
 					commands.push(command);
 				};
-				var newContext = createCompilerContext(context.namespace, append, context.variables.fork(), context.path, context.uidIndex);
+				var newContext = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack,
+					context.replacements);
 				for (node in body) {
 					compileCommandUnit(node, newContext);
+				}
+				if (continuations != null) {
+					context.append('scoreboard players set #ifelse int 0');
+					append('scoreboard players set #ifelse int 1');
 				}
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex++);
 				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 				context.append(injectValues('$execute function ${context.namespace}:${context.path.join("/")}/zzz/$id' + (data == null ? '' : ' $data'),
 					context, pos));
+				if (continuations != null) {
+					// newContext.append('scoreboard players set %ifelse int 1');
+					var idx = 0;
+					for (continuation in continuations) {
+						var isDone = idx == continuations.length - 1;
+						switch (continuation) {
+							case ExecuteBlock(pos, execute, data, body, _):
+								var embedCommands:Array<String> = [];
+								var embedAppend = function(command:String) {
+									embedCommands.push(command);
+								};
+								var embedContext = createCompilerContext(context.namespace, embedAppend, context.variables, context.path, context.uidIndex,
+									context.stack, context.replacements);
+
+								for (node in body) {
+									compileCommandUnit(node, embedContext);
+								}
+								if (!isDone)
+									embedAppend('scoreboard players set %ifelse int 1');
+
+								var result = commands.join("\n");
+
+								var id = Std.string(context.uidIndex++);
+
+								saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))),
+									result);
+
+								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
+								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.join("/")}/zzz/$id'
+									+ (data == null ? '' : ' $data'));
+							case Block(pos, name, body, data):
+								var embedCommands:Array<String> = [];
+								if (!isDone)
+									throw "Internal error: block continuation must be the last continuation";
+								var appendEmbed = function(command:String) {
+									embedCommands.push(command);
+								};
+								var embedContext = createCompilerContext(context.namespace, appendEmbed, context.variables, context.path, context.uidIndex,
+									context.stack, context.replacements);
+								for (node in body) {
+									compileCommandUnit(node, embedContext);
+								}
+								var result = embedCommands.join("\n");
+								var id = Std.string(context.uidIndex++);
+								saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))),
+									result);
+								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.join("/")}/zzz/$id'
+									+ (data == null ? '' : ' $data'));
+
+							default: throw ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
+									AstNodeUtils.getPos(continuation), newContext);
+						}
+						idx++;
+					}
+				}
+
 			case CompileTimeLoop(pos, expression, as, body):
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileCommandUnit(v, context);
@@ -160,7 +332,7 @@ private class McFile {
 		var append = function(command:String) {
 			commands.push(command);
 		};
-		var context = createCompilerContext(context.namespace, append, context.variables.fork(), context.path, context.uidIndex);
+		var context = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements);
 		for (node in body) {
 			compileCommandUnit(node, context);
 		}
@@ -171,7 +343,8 @@ private class McFile {
 		name = injectValues(name, context, pos);
 		var newContext = createCompilerContext(context.namespace, v -> {
 			throw "Internal error: append not available for directory context";
-		}, context.variables.fork(), context.path.concat([name]), 0);
+		}, context.variables.fork(), context.path.concat([name]), 0,
+			context.stack, context.replacements);
 		for (node in body) {
 			compileTld(node, newContext);
 		}
@@ -179,11 +352,11 @@ private class McFile {
 
 	private function compileTld(node:AstNode, context:CompilerContext) {
 		switch (node) {
-			case FunctionDef(pos, name, body):
+			case FunctionDef(pos, name, body) if (!context.isTemplate):
 				compileFunction(pos, name, body, context);
 			case Directory(pos, name, body):
 				compileDirectory(pos, name, body, context);
-			case Comment(_, _):
+			// void
 			case JsonTag(pos, name, type, value):
 				compileJsonTag(pos, name, type, value, context);
 			case JsonFile(pos, name, type, value):
@@ -192,6 +365,28 @@ private class McFile {
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileTld(v, context);
 				});
+			case CompileTimeIf(pos, expression, body, elseExpressions):
+				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
+					compileTld(v, context);
+				});
+			case ClockExpr(pos, time, body):
+				var commands:Array<String> = [];
+				var newContext = createCompilerContext(context.namespace, v -> {
+					commands.push(v);
+				}, context.variables, context.path, context.uidIndex, context.stack,
+					context.replacements);
+
+				var id = Std.string(context.uidIndex++);
+				var functionId = context.namespace + ":" + context.path.concat(["zzz", '$id']).join("/");
+				commands.push('schedule $functionId $time replace');
+				for (node in body) {
+					compileCommandUnit(node, newContext);
+				}
+				var result = commands.join("\n");
+				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+				trace('TODO: add to load tag, $functionId');
+			case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
+			// ignore comments on the top level, they are allowed but have no output
 			default:
 				throw "Internal error: unexpected node type:" + Std.string(node);
 		}
@@ -227,7 +422,8 @@ private class McFile {
 					handler(context, node);
 				}
 			} else {
-				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork([as => v]), context.path, context.uidIndex);
+				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork([as => v]), context.path, context.uidIndex,
+					context.stack, context.variables);
 				for (node in body) {
 					handler(newContext, node);
 				}
@@ -242,7 +438,8 @@ private class McFile {
 		var values:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			values.push(v);
-		}, context.variables, context.path, context.uidIndex);
+		}, context.variables, context.path, context.uidIndex, context.stack,
+			context.variables);
 		for (v in value) {
 			switch (v) {
 				case Raw(pos, value):
@@ -252,7 +449,9 @@ private class McFile {
 						return compileCommandUnit(v, context);
 					});
 				case CompileTimeIf(pos, expression, body, elseExpression):
-					compileTimeIf(expression, body, elseExpression, pos, newContext);
+					compileTimeIf(expression, body, elseExpression, pos, newContext, (v) -> {
+						compileCommandUnit(v, context);
+					});
 				default:
 					throw "Internal error: unexpected node type:" + Std.string(v);
 			}
@@ -309,20 +508,21 @@ private class McFile {
 		}
 	}
 
-	function compileTimeIf(expression:String, body:Array<AstNode>, elseExpression:Null<Array<AstNode>>, pos:PosInfo, newContext:CompilerContext,
-			isContinuation:Bool = false) {
+	function compileTimeIf(expression:String, body:Array<AstNode>, elseExpression:CompileTimeIfElseExpressions, pos:PosInfo, newContext:CompilerContext,
+			processNode:AstNode->Void, isContinuation:Bool = false) {
 		var bool = invokeExpressionInline(expression, newContext, pos);
 		if (bool) {
 			for (node in body) {
-				compileCommandUnit(node, newContext);
+				processNode(node);
 			}
-		} else if (elseExpression != null) {
-			for (node in elseExpression) {
-				switch (node) {
-					case CompileTimeIf(pos, expression, body, elseExpression):
-						compileTimeIf(expression, body, elseExpression, pos, newContext, true);
-					default:
-						compileCommandUnit(node, newContext);
+		} else {
+			for (elseNode in elseExpression) {
+				var invoke = elseNode.condition == null ? true : invokeExpressionInline(elseNode.condition, newContext, pos);
+				if (invoke) {
+					for (node in elseNode.node) {
+						processNode(node);
+					}
+					return;
 				}
 			}
 		}
@@ -331,11 +531,17 @@ private class McFile {
 	public function compile() {
 		var context = createCompilerContext(new Path(this.name).file, v -> {
 			throw "Internal error: append not available for top-level context";
-		}, new VariableMap(null, Globals.map), []);
+		}, new VariableMap(null, Globals.map), [], 0, [], new VariableMap(null, []));
+		if (context.isTemplate) {
+			if (ast.length > 0) {
+				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
+			}
+			return;
+		}
 		for (node in ast) {
 			switch (node) {
-				case Import(_, _) | MacroDef(_, _, _):
-					throw "Internal error: import or macro definition found after setup";
+				case Import(_, _) | TemplateDef(_, _, _):
+					throw "Internal error: import or template definition found after setup";
 				default:
 					compileTld(node, context);
 			}

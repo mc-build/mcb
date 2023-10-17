@@ -1,0 +1,7 @@
+{
+  "verbose": true,
+  "ignore": ["**/bin/**", "**/generated/**"],
+  "exec": "yarn build",
+  "ext": "hx,ts",
+  "watch": ["src/**/*"]
+}

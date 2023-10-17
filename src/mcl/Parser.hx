@@ -24,6 +24,11 @@ private class ArrayInput<T> implements Minified {
 		return array[index++];
 	}
 
+	@:keep
+	public function skip():Void {
+		index++;
+	}
+
 	public function peek():T {
 		return array[index];
 	}
@@ -105,15 +110,51 @@ class Parser {
 		return data == '' ? null : data;
 	}
 
-	private static function readFunction(name:String, reader:TokenInput, pos:PosInfo, isMacro:Bool = false):AstNode {
+	private static function readFunction(name:String, reader:TokenInput, pos:PosInfo):AstNode {
 		// expect(reader, function(token) return Type.enumIndex(token) == TokenIds.BracketOpen);
 		var commands:Array<AstNode> = [];
 		block(reader, () -> {
 			commands.push(innerParse(reader));
 		}, false);
-		if (isMacro)
-			return MacroDef(pos, name, commands);
 		return FunctionDef(pos, name, commands);
+	}
+
+	private static function innerParseTemplate(reader:TokenInput):AstNode {
+		return switch (reader.peek()) {
+			case Literal("load", pos):
+				reader.skip();
+				var content:Array<AstNode> = [];
+				block(reader, () -> {
+					content.push(innerParse(reader));
+				}, false);
+				AstNode.LoadBlock(pos, content);
+			case Literal("tick", pos):
+				reader.skip();
+				var content:Array<AstNode> = [];
+				block(reader, () -> {
+					content.push(innerParse(reader));
+				}, false);
+				var content:Array<AstNode> = [];
+				AstNode.TickBlock(pos, content);
+			case Literal(v, pos) if (StringTools.startsWith(v, "with ")):
+				reader.skip();
+				var args = StringTools.trim(v.substring("with ".length));
+				var content:Array<AstNode> = [];
+				block(reader, () -> {
+					content.push(innerParse(reader));
+				}, false);
+				AstNode.TemplateOverload(pos, args, content);
+			default:
+				throw unreachable(reader.next());
+		}
+	}
+
+	private static function readTemplate(name:String, reader:TokenInput, pos:PosInfo) {
+		var entries:Array<AstNode> = [];
+		block(reader, () -> {
+			entries.push(innerParseTemplate(reader));
+		}, false);
+		return AstNode.TemplateDef(pos, name, entries);
 	}
 
 	private static function pos(token:Token):PosInfo {
@@ -154,7 +195,7 @@ class Parser {
 		return nodes;
 	}
 
-	public static function parseMcbmFile(tokens:Array<Token>):Array<AstNode> {
+	public static function parseMcbtFile(tokens:Array<Token>):Array<AstNode> {
 		var reader = new TokenInput(tokens);
 		var nodes:Array<AstNode> = [];
 		while (reader.hasNext()) {
@@ -162,9 +203,9 @@ class Parser {
 			nodes.push(switch (token) {
 				case Literal(v, pos):
 					switch (v) {
-						case _ if (StringTools.startsWith(v, "macro ")):
-							var name = StringTools.trim(v.substring("macro ".length));
-							readFunction(name, reader, pos, true);
+						case _ if (StringTools.startsWith(v, "template ")):
+							var name = StringTools.trim(v.substring("template ".length));
+							readTemplate(name, reader, pos);
 						case _ if (StringTools.startsWith(v, "#")):
 							Comment(pos, v);
 						default:
@@ -177,16 +218,17 @@ class Parser {
 		return nodes;
 	}
 
+	static var loopRegExp = new EReg("(LOOP\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
+
 	public static function parserCompilerLoop(v:String, pos:PosInfo, reader:TokenInput, handler:Void->AstNode):AstNode {
 		var content:Array<AstNode> = [];
 		block(reader, () -> {
 			content.push(handler());
 		});
 		// a regex that matches LOOP(.+?)followed by an optional as [a-zA-Z]+
-		var reg = new EReg("(LOOP\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
-		if (reg.match(v)) {
-			var loop = reg.matched(1);
-			var as = reg.matched(2);
+		if (loopRegExp.match(v)) {
+			var loop = loopRegExp.matched(1);
+			var as = loopRegExp.matched(2);
 			return CompileTimeLoop(pos, loop, as, content);
 		};
 		return CompileTimeLoop(pos, v, null, content);
@@ -207,6 +249,13 @@ class Parser {
 					case _ if (StringTools.startsWith(v, "function ")):
 						var name = StringTools.trim(v.substring("function ".length));
 						readFunction(name, reader, pos);
+					case _ if (StringTools.startsWith(v, "clock ")):
+						var name = StringTools.trim(v.substring("clock ".length));
+						var content:Array<AstNode> = [];
+						block(reader, () -> {
+							content.push(innerParse(reader));
+						});
+						ClockExpr(pos, name, content);
 					case _ if (StringTools.startsWith(v, "import ")): Import(pos, v.substring("import ".length));
 					case _ if (StringTools.startsWith(v, "dir ") && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen):
 						var content:Array<AstNode> = [];
@@ -219,6 +268,8 @@ class Parser {
 					case _ if (StringTools.startsWith(v, "#")): Comment(pos, v);
 					case _ if (StringTools.startsWith(v, "LOOP")):
 						parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringTools.startsWith(v, "if")):
+						parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringTools.startsWith(v, "blocks ")):
 						var content:Array<AstNode> = [];
 						var data = block(reader, () -> {
@@ -249,11 +300,11 @@ class Parser {
 						return Comment(pos, "# debugger");
 					case "<%%":
 						var content:Array<Token> = [];
-						reader.next();
+						reader.skip();
 						while (true) {
 							switch (reader.peek()) {
-								case Literal(v, pos) if (v == "%%>"):
-									reader.next();
+								case Literal("%%>", _):
+									reader.skip();
 									break;
 								default:
 							}
@@ -262,13 +313,37 @@ class Parser {
 
 						return MultiLineScript(pos, content);
 
+					case _ if (StringTools.startsWith(v, "if ")):
+						return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringTools.startsWith(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							var data = block(reader, () -> {
 								content.push(innerParse(reader));
 							});
-							return AstNode.ExecuteBlock(pos, v, data, content);
+							var extraBlocks:Array<AstNode> = [];
+							while (true) {
+								switch (reader.peek()) {
+									case Literal("else", pos):
+										reader.skip();
+										var elseContent:Array<AstNode> = [];
+										var elseData = block(reader, () -> {
+											elseContent.push(innerParse(reader));
+										});
+										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData));
+									case Literal(v, pos) if (StringTools.startsWith(v, "else ")):
+										reader.skip();
+										var executeCommand = StringTools.trim(v.substring("else ".length));
+										var elseContent:Array<AstNode> = [];
+										var elseData = block(reader, () -> {
+											elseContent.push(innerParse(reader));
+										});
+										pos.col += 5;
+										extraBlocks.push(AstNode.ExecuteBlock(pos, executeCommand, elseData, elseContent));
+									default: break;
+								}
+							}
+							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null);
 						} else {
 							return Raw(pos, v);
 						}
@@ -284,9 +359,36 @@ class Parser {
 				var data = block(reader, () -> {
 					content.push(innerParse(reader));
 				});
-				return Block(pos, content, data);
+				return Block(pos, null, content, data);
 			default:
 				throw unreachable(token);
 		}
+	}
+
+	static function parseCompileTimeIf(v:String, pos:PosInfo, reader:TokenInput, arg:() -> AstNode) {
+		var exp = StringTools.trim(v.substring("if ".length));
+		var content:Array<AstNode> = [];
+		var data = block(reader, () -> {
+			content.push(arg());
+		}, false);
+		var elseDatas:Array<{condition:String, node:Array<AstNode>}> = [];
+
+		while (true) {
+			switch (reader.peek()) {
+				case Literal(v, pos) if (v == "else" || StringTools.startsWith(v, "else ")):
+					reader.skip();
+					var condition = v == "else" ? null : StringTools.trim(v.substring("else ".length));
+					condition = condition != null ? StringTools.startsWith(condition,
+						"if") ? StringTools.trim(condition.substring("if".length)) : condition : null;
+					var elseContent:Array<AstNode> = [];
+					block(reader, () -> {
+						elseContent.push(arg());
+					}, false);
+					elseDatas.push({condition: condition, node: elseContent});
+				default:
+					break;
+			}
+		}
+		return AstNode.CompileTimeIf(pos, exp, content, elseDatas);
 	}
 }

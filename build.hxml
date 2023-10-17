@@ -1,10 +1,25 @@
 -cp src
 
+--resource ./src/resources/generated/io-worker.js@io-worker
+
+-L hxnodejs
+-D source-map
+-D source-map-content
+--dce full
+
+-D js-es=6
+-D js-classic
+
+--each
+
 -m Main
 
---dce full
---resource ./src/resources/generated/io-worker.js@io-worker
--L hxnodejs
--L hxx
 --js bin/mcb.js
-# --debug
+--debug
+--next
+
+
+LibMain
+
+--js bin/libmcb.js
+--debug

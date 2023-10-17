@@ -6,4 +6,7 @@ esbuild.build({
   platform: "node",
   target: "node14",
   outfile: resolve(__dirname, "../src/resources/generated/io-worker.js"),
+  minifyIdentifiers: true,
+  minifyWhitespace: true,
+  minifySyntax: true,
 });

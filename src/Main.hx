@@ -37,14 +37,22 @@ class Main {
 		var content = File.getContent(file);
 		var tokens = Tokenizer.tokenize(content, file);
 		// trace(tokens);
-		var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbmFile(tokens);
-		if (debug)
+		var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
+		if (debug) {
 			debugData.serialize({
 				f: file,
 				t: tokens,
 				a: ast,
 				s: content
 			});
+
+			File.saveContent(file + ".debug.json", haxe.Json.stringify({
+				f: file,
+				t: tokens,
+				a: ast,
+				s: content
+			}));
+		}
 		// trace(Parser.parse(tokens));
 		// File.saveContent(file + ".ast.json", Json.stringify(ast, null, "  "));
 		Compiler.instance.addFile(file, ast);
@@ -64,7 +72,7 @@ class Main {
 		var files = FileSystem.isDirectory(file) ? readDirRecursive(file).filter(f -> {
 			var ext = Path.extension(f);
 			ext == "mcb"
-			|| ext == "mcbm";
+			|| ext == "mcbt";
 		}) : [file];
 		for (file in files) {
 			processFile(file);

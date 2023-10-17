@@ -3,11 +3,13 @@
     "build": "yarn build:io-worker && yarn build:haxe",
     "build:io-worker": "ts-node ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
-    "test": "node ./bin/mcb test-src --io-mt 2"
+    "test": "node ./bin/mcb test-src --io-mt 2",
+    "dev": "nodemon --config nodemon.json"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
     "esbuild": "^0.19.4",
+    "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }

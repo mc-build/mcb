@@ -51,11 +51,19 @@ class Tokenizer implements Minified {
 		var lineIdx = 0;
 		while (lineIdx < lines.length) {
 			var line = lines[lineIdx];
-			if (line.charAt(line.length - 1) == "\r") {
-				line = line.substring(0, line.length - 1);
+			var indent = indents[lineNum];
+			while (true) {
+				if (line.charAt(line.length - 1) == "\r") {
+					line = line.substring(0, line.length - 1);
+				}
+				if (StringTools.endsWith(line, "/")) {
+					line += "\n" + lines[++lineIdx];
+					lineNum++;
+				} else {
+					break;
+				}
 			}
 			lineIdx++;
-			var indent = indents[lineNum];
 			lineNum++;
 			if (line == "###") {
 				isInMultilineComment = !isInMultilineComment;

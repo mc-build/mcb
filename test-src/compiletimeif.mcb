@@ -1,0 +1,29 @@
+function fizzbuzz{
+    LOOP(0,100) as i{
+        if i % 15 == 0 {
+            say FizzBuzz
+        } else if i % 3 == 0 {
+            say Fizz
+        } else if i % 5 == 0 {
+            say Buzz
+        } else {
+            say <%i%>
+        }
+    }
+}
+
+dir tld{
+    LOOP(0,2) as i {
+        dir <%i%> {
+            if i == 0 {
+                function test{
+                    say a
+                }
+            } else{
+                function test{
+                    say b
+                }
+            }
+        }
+    }
+}
