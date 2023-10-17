@@ -26,16 +26,15 @@ jobs:
       - run: tar xzvf ./tools/haxe.tar.gz -C ./tools
       - run: mv ./tools/haxe_* ./tools/haxe
       - run: echo "haxe is in $(cd $1; pwd)/tools/haxe"
-      - run: echo "$PATH"
-      - run: echo "$(cd $1; pwd)/tools/haxe" >> $GITHUB_PATH
-      - run: echo "$PATH"
+      - run: ./haxe.sh haxelib install build.hxml
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
       - run: yarn
-      - run: yarn run build --if-present
+      - run: yarn run build:io-worker --if-present
+      - run: ./haxe.sh haxe build.hxml
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.3
         with:
