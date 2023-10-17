@@ -29,7 +29,7 @@ jobs:
       - run: echo "haxe is in $(cd $1; pwd)/tools/haxe"
       - run: chmod +x ./haxe.sh
       - run: ls -l
-      - run: sudo ./haxe.sh haxelib setup
+      - run: mkdir ./.haxelib
       - run: sudo ./haxe.sh haxelib install build.hxml
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
