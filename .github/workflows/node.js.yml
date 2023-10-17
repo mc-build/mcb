@@ -26,7 +26,7 @@ jobs:
       - run: tar xzvf ./tools/haxe.tar.gz -C ./tools
       - run: mv ./tools/haxe_* ./tools/haxe
       - run: echo "haxe is in $(cd $1; pwd)/tools/haxe"
-      - run: ./haxe.sh haxelib install build.hxml
+      - run: sudo ./haxe.sh haxelib install build.hxml
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
