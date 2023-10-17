@@ -1,5 +1,6 @@
 package;
 
+import mcl.AstNode;
 import sys.io.File;
 import mcl.Tokenizer;
 import haxe.io.Path;
@@ -27,6 +28,17 @@ class LibMain {
 
 	public static function setIoProvider(provider:Io) {
 		Compiler.io = provider;
+	}
+
+	public static function parseFile(path:String, content:String):Array<AstNode> {
+		var ext = Path.extension(path);
+		var tokens = Tokenizer.tokenize(content, path);
+		if (ext == "mcb")
+			return Parser.parseMcbFile(tokens);
+		else if (ext == "mcbt")
+			return Parser.parseMcbtFile(tokens);
+		else
+			throw "Unknown file extension: " + ext;
 	}
 
 	public static function addFileToCompiler(compiler:Compiler, path:String) {
