@@ -326,7 +326,7 @@ private class McFile {
 		}
 	}
 
-	private function compileFunction(pos:PosInfo, name:String, body:Array<AstNode>, context:CompilerContext) {
+	private function compileFunction(pos:PosInfo, name:String, body:Array<AstNode>, appendTo:Null<String>, context:CompilerContext) {
 		name = injectValues(name, context, pos);
 		var commands:Array<String> = [];
 		var append = function(command:String) {
@@ -335,6 +335,16 @@ private class McFile {
 		var context = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements);
 		for (node in body) {
 			compileCommandUnit(node, context);
+		}
+		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
+		if (appendTo != null) {
+			if (appendTo == "load") {
+				Compiler.instance.tags.addLoadingCommand(funcId);
+			} else if (appendTo == "tick") {
+				Compiler.instance.tags.addTickingCommand(funcId);
+			} else {
+				throw "Internal error: unexpected appendTo value: " + appendTo;
+			}
 		}
 		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
 	}
@@ -352,8 +362,8 @@ private class McFile {
 
 	private function compileTld(node:AstNode, context:CompilerContext) {
 		switch (node) {
-			case FunctionDef(pos, name, body) if (!context.isTemplate):
-				compileFunction(pos, name, body, context);
+			case FunctionDef(pos, name, body, appendTo) if (!context.isTemplate):
+				compileFunction(pos, name, body, appendTo, context);
 			case Directory(pos, name, body):
 				compileDirectory(pos, name, body, context);
 			// void
@@ -385,6 +395,7 @@ private class McFile {
 				var result = commands.join("\n");
 				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 				trace('TODO: add to load tag, $functionId');
+				Compiler.instance.tags.addLoadingCommand(functionId);
 			case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
 			// ignore comments on the top level, they are allowed but have no output
 			default:
@@ -556,6 +567,8 @@ class Compiler {
 	private var files:Map<String, McFile> = new Map();
 	private var alreadySetupFiles = new Map<String, Bool>();
 
+	public var tags:TagManager = new TagManager();
+
 	public function addFile(name:String, ast:Array<AstNode>) {
 		var file = new McFile(name, ast);
 		files.set(name, file);
@@ -584,6 +597,7 @@ class Compiler {
 		for (file in files) {
 			file.compile();
 		}
+		tags.writeTagFiles();
 	}
 
 	public function new() {}

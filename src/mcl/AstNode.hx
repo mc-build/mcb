@@ -14,7 +14,7 @@ enum AstNode {
 	Raw(pos:PosInfo, value:String);
 
 	// tld definitions
-	FunctionDef(pos:PosInfo, name:String, body:Array<AstNode>);
+	FunctionDef(pos:PosInfo, name:String, body:Array<AstNode>, appendTo:Null<String>);
 	TemplateDef(pos:PosInfo, name:String, body:Array<AstNode>);
 	Directory(pos:PosInfo, name:String, body:Array<AstNode>);
 

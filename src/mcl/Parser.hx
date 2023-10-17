@@ -113,10 +113,18 @@ class Parser {
 	private static function readFunction(name:String, reader:TokenInput, pos:PosInfo):AstNode {
 		// expect(reader, function(token) return Type.enumIndex(token) == TokenIds.BracketOpen);
 		var commands:Array<AstNode> = [];
+		var appendTo:Null<String> = null;
+		if (StringTools.endsWith(name, " load")) {
+			appendTo = "load";
+			name = StringTools.trim(name.substring(0, name.length - " load".length));
+		} else if (StringTools.endsWith(name, " tick")) {
+			appendTo = "tick";
+			name = StringTools.trim(name.substring(0, name.length - " tick".length));
+		}
 		block(reader, () -> {
 			commands.push(innerParse(reader));
 		}, false);
-		return FunctionDef(pos, name, commands);
+		return FunctionDef(pos, name, commands, appendTo);
 	}
 
 	private static function innerParseTemplate(reader:TokenInput):AstNode {
