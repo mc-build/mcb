@@ -26,7 +26,9 @@ jobs:
       - run: tar xzvf ./tools/haxe.tar.gz -C ./tools
       - run: mv ./tools/haxe_* ./tools/haxe
       - run: echo "haxe is in $(cd $1; pwd)/tools/haxe"
+      - run: echo "$PATH"
       - run: echo "$(cd $1; pwd)/tools/haxe" >> $GITHUB_PATH
+      - run: echo "$PATH"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
