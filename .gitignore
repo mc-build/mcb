@@ -4,3 +4,4 @@ node_modules/
 *generated*
 debug.dat
 *.debug.json
+tools/
