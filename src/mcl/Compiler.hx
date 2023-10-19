@@ -103,7 +103,7 @@ private class McTemplate {
 	}
 }
 
-private class VariableMap {
+class VariableMap {
 	var parent:Null<VariableMap>;
 	var variables:Map<String, Any>;
 	private var _cache:Null<Map<String, Any>>;
@@ -542,10 +542,10 @@ private class McFile {
 		}
 	}
 
-	public function compile() {
+	public function compile(vars:VariableMap) {
 		var context = createCompilerContext(new Path(this.name).file, v -> {
 			throw "Internal error: append not available for top-level context";
-		}, new VariableMap(null, Globals.map), [], 0, [], new VariableMap(null, []));
+		}, new VariableMap(vars, Globals.map), [], 0, [], new VariableMap(null, []));
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
@@ -590,7 +590,7 @@ class Compiler {
 		throw "Failed to resolve import: " + resolved;
 	}
 
-	public function compile() {
+	public function compile(root:VariableMap) {
 		for (file in files) {
 			if (alreadySetupFiles.exists(file.name))
 				continue;
@@ -598,7 +598,7 @@ class Compiler {
 		}
 
 		for (file in files) {
-			file.compile();
+			file.compile(root);
 		}
 		tags.writeTagFiles();
 	}

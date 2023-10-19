@@ -1,5 +1,6 @@
 package;
 
+import js.Syntax;
 import haxe.Timer;
 import Io.MultiThreadIo;
 import Io.ThreadedIo;
@@ -77,7 +78,10 @@ class Main {
 		for (file in files) {
 			processFile(file);
 		}
-		Compiler.instance.compile();
+		var config = Syntax.code('require({0})', Path.join([Sys.getCwd(), file, "config.js"]));
+		trace(config);
+		var jsRoot = new VariableMap(null, [for (k in Reflect.fields(config)) k => Reflect.field(config, k)]);
+		Compiler.instance.compile(jsRoot);
 
 		Compiler.io.cleanup();
 		if (debug)
