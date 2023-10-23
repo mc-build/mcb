@@ -399,7 +399,7 @@ private class McFile {
 				var result = commands.join("\n");
 				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 				Compiler.instance.tags.addLoadingCommand(functionId);
-			case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
+			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output
 			default:
 				throw "Internal error: unexpected node type:" + Std.string(node);

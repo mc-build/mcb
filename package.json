@@ -6,6 +6,7 @@
     "test": "node ./bin/mcb test-src --io-mt 2",
     "dev": "nodemon --config nodemon.json"
   },
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.8.4",
     "esbuild": "^0.19.4",

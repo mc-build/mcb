@@ -1,12 +1,12 @@
 function fizzbuzz{
     LOOP(0,100) as i{
-        if i % 15 == 0 {
+        IF i % 15 == 0 {
             say FizzBuzz
-        } else if i % 3 == 0 {
+        } ELSE IF i % 3 == 0 {
             say Fizz
-        } else if i % 5 == 0 {
+        } ELSE IF i % 5 == 0 {
             say Buzz
-        } else {
+        } ELSE {
             say <%i%>
         }
     }
@@ -15,11 +15,11 @@ function fizzbuzz{
 dir tld{
     LOOP(0,2) as i {
         dir <%i%> {
-            if i == 0 {
+            IF i == 0 {
                 function test{
                     say a
                 }
-            } else{
+            } ELSE {
                 function test{
                     say b
                 }

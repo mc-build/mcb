@@ -276,7 +276,7 @@ class Parser {
 					case _ if (StringTools.startsWith(v, "#")): Comment(pos, v);
 					case _ if (StringTools.startsWith(v, "LOOP")):
 						parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
-					case _ if (StringTools.startsWith(v, "if")):
+					case _ if (StringTools.startsWith(v, "IF")):
 						parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringTools.startsWith(v, "blocks ")):
 						var content:Array<AstNode> = [];
@@ -321,7 +321,7 @@ class Parser {
 
 						return MultiLineScript(pos, content);
 
-					case _ if (StringTools.startsWith(v, "if ")):
+					case _ if (StringTools.startsWith(v, "IF")):
 						return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringTools.startsWith(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
@@ -381,7 +381,7 @@ class Parser {
 	}
 
 	static function parseCompileTimeIf(v:String, pos:PosInfo, reader:TokenInput, arg:() -> AstNode) {
-		var exp = StringTools.trim(v.substring("if ".length));
+		var exp = StringTools.trim(v.substring("IF".length));
 		var content:Array<AstNode> = [];
 		var data = block(reader, () -> {
 			content.push(arg());
@@ -390,11 +390,11 @@ class Parser {
 
 		while (true) {
 			switch (reader.peek()) {
-				case Literal(v, pos) if (v == "else" || StringTools.startsWith(v, "else ")):
+				case Literal(v, pos) if (v == "ELSE" || StringTools.startsWith(v, "ELSE ")):
 					reader.skip();
-					var condition = v == "else" ? null : StringTools.trim(v.substring("else ".length));
+					var condition = v == "ELSE" ? null : StringTools.trim(v.substring("ELSE ".length));
 					condition = condition != null ? StringTools.startsWith(condition,
-						"if") ? StringTools.trim(condition.substring("if".length)) : condition : null;
+						"IF") ? StringTools.trim(condition.substring("IF".length)) : condition : null;
 					var elseContent:Array<AstNode> = [];
 					block(reader, () -> {
 						elseContent.push(arg());
