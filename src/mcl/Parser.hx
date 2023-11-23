@@ -95,12 +95,14 @@ class Parser {
 		}
 	}
 
-	private static function block(reader:TokenInput, sub:Void->Void, allowData:Bool = true):Null<String> {
+	private static function block(reader:TokenInput, sub:Void->Void, allowData:Bool = true, ?onLastToken:Token->Void):Null<String> {
 		var data = expectThenData(reader, allowData);
 		while (true) {
 			var token = reader.peek();
 			switch (token) {
 				case BracketClose(_):
+					if (onLastToken != null)
+						onLastToken(token);
 					break;
 				default:
 					sub();
@@ -144,7 +146,7 @@ class Parser {
 				}, false);
 				var content:Array<AstNode> = [];
 				AstNode.TickBlock(pos, content);
-			case Literal(v, pos) if (StringTools.startsWith(v, "with ")):
+			case Literal(v, pos) if (v == "with" || StringTools.startsWith(v, "with ")):
 				reader.skip();
 				var args = StringTools.trim(v.substring("with ".length));
 				var content:Array<AstNode> = [];
@@ -167,15 +169,13 @@ class Parser {
 
 	private static function pos(token:Token):PosInfo {
 		return switch (token) {
-			case Literal(_, pos) | BracketOpen(pos, _) | BracketClose(pos):
-				pos;
+			case Literal(_, pos) | BracketOpen(pos, _) | BracketClose(pos): pos;
 		}
 	}
 
 	private static function json(reader:TokenInput):AstNode {
 		var pos = pos(reader.peek());
 		var depth = 0;
-
 		var result = "";
 		do {
 			var token = reader.next();
@@ -191,7 +191,7 @@ class Parser {
 					result += v;
 			}
 		} while (depth > 0);
-		return Raw(pos, result);
+		return Raw(pos, result, []);
 	}
 
 	public static function parseMcbFile(tokens:Array<Token>):Array<AstNode> {
@@ -232,8 +232,7 @@ class Parser {
 		var content:Array<AstNode> = [];
 		block(reader, () -> {
 			content.push(handler());
-		});
-		// a regex that matches LOOP(.+?)followed by an optional as [a-zA-Z]+
+		}); // a regex that matches LOOP(.+?)followed by an optional as [a-zA-Z]+
 		if (loopRegExp.match(v)) {
 			var loop = loopRegExp.matched(1);
 			var as = loopRegExp.matched(2);
@@ -249,8 +248,7 @@ class Parser {
 			// case Literal(v, _) if (StringTools.startsWith(v, "import ")):
 			// 	trace(v);
 			// case Literal(v, _) if (v.charAt(0) == "#"):
-			case Literal(v, pos):
-				switch (v) {
+			case Literal(v, pos): switch (v) {
 					case "___internal_debugger":
 						Lib.debug();
 						return Comment(pos, "# debugger");
@@ -274,10 +272,8 @@ class Parser {
 							throw unreachable(Literal(v, pos));
 						Directory(pos, v.substring("dir ".length), content);
 					case _ if (StringTools.startsWith(v, "#")): Comment(pos, v);
-					case _ if (StringTools.startsWith(v, "LOOP")):
-						parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
-					case _ if (StringTools.startsWith(v, "IF")):
-						parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringTools.startsWith(v, "LOOP")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringTools.startsWith(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringTools.startsWith(v, "blocks ")):
 						var content:Array<AstNode> = [];
 						var data = block(reader, () -> {
@@ -292,8 +288,7 @@ class Parser {
 					default:
 						throw unreachable(Literal(v, pos));
 				}
-			case var node:
-				throw unreachable(node);
+			case var node: throw unreachable(node);
 		}
 	}
 
@@ -318,13 +313,9 @@ class Parser {
 							}
 							content.push(reader.next());
 						}
-
 						return MultiLineScript(pos, content);
-
-					case _ if (StringTools.startsWith(v, "IF")):
-						return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
-					case _ if (StringTools.startsWith(v, "execute ")):
-						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
+					case _ if (StringTools.startsWith(v, "IF")): return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
+					case _ if (StringTools.startsWith(v, "execute ")): if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							var data = block(reader, () -> {
 								content.push(innerParse(reader));
@@ -353,12 +344,10 @@ class Parser {
 							}
 							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null);
 						} else {
-							return Raw(pos, v);
+							return readRaw(pos, v, reader);
 						}
-					case _ if (StringTools.startsWith(v, "LOOP")):
-						return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
-					case _ if (StringTools.startsWith(v, "#")):
-						return Comment(pos, v);
+					case _ if (StringTools.startsWith(v, "LOOP")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
+					case _ if (StringTools.startsWith(v, "#")): return Comment(pos, v);
 					case _ if (v == "block" || StringTools.startsWith(v, "block ")):
 						var name = StringTools.trim(v.substring("block ".length));
 						var content:Array<AstNode> = [];
@@ -367,7 +356,7 @@ class Parser {
 						});
 						return Block(pos, name, content, data);
 					default:
-						return AstNode.Raw(pos, v);
+						return readRaw(pos, v, reader);
 				}
 			case BracketOpen(pos, _):
 				var content:Array<AstNode> = [];
@@ -378,6 +367,33 @@ class Parser {
 			default:
 				throw unreachable(token);
 		}
+	}
+
+	static function readRaw(pos:PosInfo, v:String, reader:TokenInput) {
+		var content:Array<AstNode> = [];
+		var line = pos.line;
+		while (true) {
+			switch (reader.peek()) {
+				case Literal(v, pos) if (pos.line == line):
+					reader.skip();
+					content.push(Raw(pos, v, []));
+				case BracketOpen(pos, data) if (pos.line == line):
+					block(reader, () -> {
+						content.push(innerParse(reader));
+					}, true, t -> {
+						switch (t) {
+							case BracketClose(pos):
+								line = pos.line;
+							default:
+						}
+					});
+				case BracketClose(pos) if (pos.line == line):
+					throw unreachable(Literal(v, pos));
+				default:
+					break;
+			}
+		}
+		return AstNode.Raw(pos, v, content);
 	}
 
 	static function parseCompileTimeIf(v:String, pos:PosInfo, reader:TokenInput, arg:() -> AstNode) {

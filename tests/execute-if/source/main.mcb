@@ -1,0 +1,9 @@
+function test{
+    execute if score a b = 2 run {
+        say 1
+    } else execute if score a b = 3 run {
+        say 2
+    } else {
+        say 3
+    }
+}

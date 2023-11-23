@@ -1,0 +1,7 @@
+data/main/functions/zzz/0.mcfunction:
+schedule main:zzz/0 1t replace
+say hi
+----------------
+data/minecraft/tags/functions/load.json:
+{"values":["main:zzz/0"]}
+----------------

@@ -1,0 +1,24 @@
+template test {
+  tick {
+    say ticking
+  }
+  load {
+    say on load
+  }
+  with a:int b {
+    LOOP(0,a) as i{
+        say <%a-i%>
+    }
+    say a = <%a%>
+    say b = <%b%>
+  }
+  with a:raw {
+    say a = <%a%>
+  }
+}
+
+template long{
+  with{
+    say this is a really really long command I would not want to type out by hand every time
+  }
+}

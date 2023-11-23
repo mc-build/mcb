@@ -1,0 +1,11 @@
+template testcase {
+    with value:int {
+        IF(value === 0){
+            say <%value%> is 0
+        }ELSE IF(value === 1){
+            say <%value%> is 1
+        }ELSE {
+            say <%value%> is not 0 or 1
+        }
+    }
+}

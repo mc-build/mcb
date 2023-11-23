@@ -10,6 +10,13 @@
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/bin/mcb.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/bin/testbed.js"
     }
   ]
 }

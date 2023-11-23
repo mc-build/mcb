@@ -1,0 +1,17 @@
+template with-args{
+    with a:int b:int c:int {
+        say a=<%a%>
+        say b=<%b%>
+        say c=<%c%>
+    }
+    with a:int b:raw {
+        say a=<%a%> (<%typeof a%>)
+        say b=<%b%> (<%typeof b%>)
+    }
+}
+
+template without-args {
+    with {
+        say this has no arguments
+    }
+}

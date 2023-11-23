@@ -1,5 +1,6 @@
 package mcl;
 
+import js.Syntax;
 import js.lib.Object;
 import Type.ValueType;
 import haxe.iterators.ArrayIterator;
@@ -54,12 +55,12 @@ class Globals {
 		[TClass(Array)] => (args:Array<Any>) -> {
 			return cast new ArrayIterator(args[0]);
 		},
-		[TClass(Object), TBool] => (args:Array<Any>) -> {
+		[TObject, TBool] => (args:Array<Any>) -> {
 			return new ArrayIterator(args[1] == false ? cast Object.keys(args[0]) : cast Object.values(args[0]));
 		},
 		[TFunction] => (args) -> {
-			var iterator = cast args[0];
-			return iterator();
+			var iterator:Void->js.lib.Iterator<Any> = cast args[0];
+			return new ArrayIterator(Syntax.code('Array.from({0})', iterator()));
 		},
 	];
 

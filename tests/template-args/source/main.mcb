@@ -1,0 +1,12 @@
+import ./test.mcbt
+
+dir test{
+    function with-args{
+        with-args 1 2
+        #---------
+        with-args 1 2 3
+    }
+    function without-args{
+        without-args
+    }
+}

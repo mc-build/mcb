@@ -1,0 +1,6 @@
+import ./test.mcbt
+function test{
+    testcase 0
+    testcase 1
+    testcase 2
+}

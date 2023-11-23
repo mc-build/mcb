@@ -1,0 +1,8 @@
+dir test{
+    function onload load{
+        say this will run on load
+    }
+    function ontick tick{
+        say this will run every tick
+    }
+}

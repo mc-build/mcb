@@ -1,5 +1,6 @@
 package;
 
+import mcl.TemplateRegisterer;
 import js.Syntax;
 import haxe.Timer;
 import Io.MultiThreadIo;
@@ -69,6 +70,7 @@ class Main {
 			Compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
 		else if (hasT >= 0)
 			Compiler.io = new ThreadedIo();
+		TemplateRegisterer.register();
 		var file = Sys.args()[0] ?? "test-src";
 		var files = FileSystem.isDirectory(file) ? readDirRecursive(file).filter(f -> {
 			var ext = Path.extension(f);

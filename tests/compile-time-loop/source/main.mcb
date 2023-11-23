@@ -1,0 +1,31 @@
+dir test{
+    function int-int{
+        LOOP(1,10) as i {
+            say <%i%>
+        }
+    }
+    
+    function array {
+        LOOP([1,2,7,9]) as i {
+            say <%i%>
+        }
+    }
+    dir object{
+        function true {
+            LOOP({a:1,b:2,c:3},true) as i {
+                say <%i%>
+            }
+        }
+        function false{
+            LOOP({a:1,b:2,c:3},false) as i {
+                say <%i%>
+            }
+        }
+    }
+
+    function itterator-function{
+        LOOP(itteratorFunction) as i{
+            say <%i%>
+        }
+    }
+}

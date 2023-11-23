@@ -23,3 +23,9 @@ LibMain
 
 --js bin/libmcb.js
 --debug
+--next
+
+-m testbed.TestMain
+
+--js bin/testbed.js
+# --debug

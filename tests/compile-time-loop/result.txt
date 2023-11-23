@@ -1,0 +1,34 @@
+data/main/functions/test/int-int.mcfunction:
+say 1
+say 2
+say 3
+say 4
+say 5
+say 6
+say 7
+say 8
+say 9
+----------------
+data/main/functions/test/array.mcfunction:
+say 1
+say 2
+say 7
+say 9
+----------------
+data/main/functions/test/object/true.mcfunction:
+say 1
+say 2
+say 3
+----------------
+data/main/functions/test/object/false.mcfunction:
+say a
+say b
+say c
+----------------
+data/main/functions/test/itterator-function.mcfunction:
+say 1
+say 3
+say 5
+say 7
+say 9
+----------------

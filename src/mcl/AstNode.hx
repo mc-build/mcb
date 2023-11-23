@@ -11,7 +11,7 @@ enum JsonTagType {
 typedef CompileTimeIfElseExpressions = Array<{condition:Null<String>, node:Array<AstNode>}>;
 
 enum AstNode {
-	Raw(pos:PosInfo, value:String);
+	Raw(pos:PosInfo, value:String, continuations:Null<Array<AstNode>>);
 
 	// tld definitions
 	FunctionDef(pos:PosInfo, name:String, body:Array<AstNode>, appendTo:Null<String>);

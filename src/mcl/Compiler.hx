@@ -9,6 +9,7 @@ import mcl.AstNode.JsonTagType;
 import mcl.Tokenizer.PosInfo;
 import js.Lib;
 import haxe.io.Path;
+import mcl.args.TemplateArgument;
 
 private class ErrorUtil {
 	public static function format(message:String, pos:PosInfo):String {
@@ -29,19 +30,6 @@ private class ErrorUtil {
 
 	public static function unexpectedToken(node:AstNode, context:CompilerContext):String {
 		return formatContext('Unexpected: ${node}', AstNodeUtils.getPos(node), context);
-	}
-}
-
-private class TemplateArgument {
-	var name:String;
-
-	function new(s:String) {
-		this.name = s;
-	}
-
-	public static function parse(s:String, p:PosInfo) {
-		trace(s, p);
-		return new TemplateArgument(s);
 	}
 }
 
@@ -101,12 +89,37 @@ private class McTemplate {
 			}
 		}
 	}
+
+	public function process(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
+		var argstring = StringTools.ltrim(value.substring(this.name.length));
+		for (types => overloadBody in overlands) {
+			var args:Map<String, Any> = new Map();
+			var successCount = 0;
+			var thisArgString = argstring;
+			for (arg in types) {
+				var x = arg.parseValue(thisArgString, pos);
+				if (!x.success)
+					break;
+				args.set(arg.name, x.value);
+				thisArgString = StringTools.ltrim(thisArgString.substring(x.raw.length));
+				successCount++;
+			}
+			if (successCount != types.length || thisArgString != "")
+				continue;
+			file.embed(context, pos, args, overloadBody);
+			// trace("MATCHED", types, args);
+			return;
+		}
+		throw "Failed to find matching template overload for: " + value;
+	}
 }
 
 class VariableMap {
 	var parent:Null<VariableMap>;
 	var variables:Map<String, Any>;
 	private var _cache:Null<Map<String, Any>>;
+
+	public static var globals:VariableMap = new VariableMap(null, Globals.map);
 
 	public function new(parent:Null<VariableMap>, variables:Null<Map<String, Any>> = null) {
 		this.parent = parent;
@@ -231,10 +244,32 @@ private class McFile {
 		return 'function ${context.namespace}:${context.path.join("/")}/$id' + (data == null ? '' : ' $data');
 	}
 
+	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>) {
+		var newContext = createCompilerContext(context.namespace, context.append, new VariableMap(VariableMap.globals, varmap), context.path,
+			context.uidIndex, context.stack, context.replacements);
+		for (node in body) {
+			compileCommandUnit(node, newContext);
+		}
+	}
+
+	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
+		for (k => v in templates) {
+			if (value == k || StringTools.startsWith(value, k)) {
+				// trace(this, context, pos, value, extras);
+				v.process(this, context, pos, value, extras);
+				return;
+			}
+		}
+		if (extras != null && extras.length > 0) {
+			throw ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context);
+		}
+		context.append(injectValues(value, context, pos));
+	}
+
 	private function compileCommandUnit(node:AstNode, context:CompilerContext):Void {
 		switch (node) {
-			case Raw(pos, value):
-				context.append(injectValues(value, context, pos));
+			case Raw(pos, value, extras):
+				processTemplate(context, pos, value, extras);
 			case Comment(_, value):
 				context.append(value);
 			case AstNode.Block(pos, null, body, data) | AstNode.Block(pos, "", body, data):
@@ -456,7 +491,10 @@ private class McFile {
 			context.variables);
 		for (v in value) {
 			switch (v) {
-				case Raw(pos, value):
+				case Raw(pos, value, extra):
+					if (extra != null || extra.length > 0) {
+						throw ErrorUtil.formatContext("Unexpected extra data in json tag", pos, context);
+					}
 					values.push(injectValues(value, context, pos));
 				case CompileTimeLoop(pos, expression, as, body):
 					processCompilerLoop(expression, as, context, body, pos, (context, v) -> {

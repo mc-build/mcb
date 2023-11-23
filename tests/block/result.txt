@@ -1,0 +1,18 @@
+data/main/functions/test_block.mcfunction:
+say named block
+----------------
+data/main/functions/zzz/0.mcfunction:
+say unnamed block
+----------------
+data/main/functions/test2.mcfunction:
+say named block2
+----------------
+data/main/functions/zzz/1.mcfunction:
+say unnamed block2
+----------------
+data/main/functions/test.mcfunction:
+function main:/test_block
+function main:/zzz/0
+function main:/test2 with some data
+function main:/zzz/1 with some data
+----------------

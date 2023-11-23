@@ -1,0 +1,12 @@
+data/main/functions/test/onload.mcfunction:
+say this will run on load
+----------------
+data/main/functions/test/ontick.mcfunction:
+say this will run every tick
+----------------
+data/minecraft/tags/functions/tick.json:
+{"values":["main:test/ontick"]}
+----------------
+data/minecraft/tags/functions/load.json:
+{"values":["main:test/onload"]}
+----------------
