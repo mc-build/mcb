@@ -1,9 +1,0 @@
-dir tickloadtest {
-    function ticking tick{
-        say tick
-    }
-
-    function loading load{
-        say load
-    }       
-}

@@ -1,5 +1,0 @@
-import ./template.mcbt
-function test{
-    test 10 hello
-    long
-}
