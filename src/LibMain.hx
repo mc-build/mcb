@@ -22,8 +22,8 @@ enum IoType {
 @:keepSub
 @:expose("mcb")
 class LibMain {
-	public static function createCompiler() {
-		return new Compiler();
+	public static function createCompiler(baseDir:String) {
+		return new Compiler(null, baseDir);
 	}
 
 	public static function setIoProvider(provider:Io) {

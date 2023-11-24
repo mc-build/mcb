@@ -48,6 +48,7 @@ private class McTemplate {
 		this.name = name;
 		this.body = body;
 		this.parse(body);
+		this.file = file;
 	}
 
 	private function compileArgs(args:String, pos:PosInfo) {
@@ -105,12 +106,13 @@ private class McTemplate {
 		}
 		if (defs.length > 0) {
 			var pos = AstNodeUtils.getPos(defs[0]);
+			var info = Compiler.instance.getInitialPathInfo(this.file.name);
 			into.embed({
 				append: function(v) {
 					throw ErrorUtil.formatContext("tried to append to a Void context (template virtual context)", pos, context);
 				},
-				namespace: Compiler.instance.packNamespace,
-				path: [],
+				namespace: info.namespace,
+				path: info.path,
 				uidIndex: 0,
 				variables: new VariableMap(null),
 				stack: context.stack,
@@ -704,11 +706,12 @@ class McFile {
 
 class Compiler {
 	public static var io:Io = new Io.SyncIo();
-	public static var instance:Compiler = new Compiler();
+	public static var instance:Compiler = new Compiler(null, "/");
 
 	private var files:Map<String, McFile> = new Map();
 	private var alreadySetupFiles = new Map<String, Bool>();
 
+	public var baseDir:String;
 	public var tags:TagManager = new TagManager();
 	public var packNamespace:String = 'mcb-${Date.now()}';
 
@@ -730,6 +733,20 @@ class Compiler {
 		throw "Failed to resolve import: " + resolved;
 	}
 
+	public function getInitialPathInfo(p:String):{
+		namespace:String,
+		path:Array<String>
+	} {
+		var projectPath = (StringTools.startsWith(p, this.baseDir) ? p.substring(this.baseDir.length) : p).split("\\").join("/");
+		var parts = projectPath.split("/");
+		var namespace = Path.withoutExtension(parts[0]);
+		var path = parts.slice(1).join("/");
+		return {
+			namespace: namespace,
+			path: parts.length > 1 ? Path.withoutExtension(path).split("/") : []
+		};
+	}
+
 	public function compile(root:VariableMap) {
 		for (file in files) {
 			if (alreadySetupFiles.exists(file.name))
@@ -743,7 +760,7 @@ class Compiler {
 		tags.writeTagFiles();
 	}
 
-	public function new(?packNamespace:String) {
+	public function new(?packNamespace:String, baseDir:String) {
 		if (packNamespace != null)
 			this.packNamespace = packNamespace;
 	}

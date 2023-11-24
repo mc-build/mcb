@@ -1,23 +1,23 @@
-data/mcb-test-template-tickload/functions/test/zzz/0.mcfunction:
+data/test/functions/test/zzz/0.mcfunction:
 say blocks should not conflict (0)
 ----------------
-data/mcb-test-template-tickload/functions/test/load.mcfunction:
+data/test/functions/test/load.mcfunction:
 say load
-function mcb-test-template-tickload:test/zzz/0
+function test:test/zzz/0
 ----------------
-data/mcb-test-template-tickload/functions/test/zzz/1.mcfunction:
+data/test/functions/test/zzz/1.mcfunction:
 say blocks should not conflict (1)
 ----------------
-data/mcb-test-template-tickload/functions/test/tick.mcfunction:
+data/test/functions/test/tick.mcfunction:
 say tick
-function mcb-test-template-tickload:test/zzz/1
+function test:test/zzz/1
 ----------------
 data/main/functions/main.mcfunction:
 say hi
 ----------------
 data/minecraft/tags/functions/tick.json:
-{"values":["mcb-test-template-tickload:test/tick"]}
+{"values":["test:test/tick"]}
 ----------------
 data/minecraft/tags/functions/load.json:
-{"values":["mcb-test-template-tickload:test/load"]}
+{"values":["test:test/load"]}
 ----------------
