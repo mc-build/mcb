@@ -25,3 +25,7 @@ data/main/functions/test/literal-args.mcfunction:
 say test
 say bar
 ----------------
+data/main/functions/test/js-cache.mcfunction:
+say [1,2,"3",true]
+say no
+----------------

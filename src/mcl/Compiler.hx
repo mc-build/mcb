@@ -1,5 +1,6 @@
 package mcl;
 
+import haxe.ds.IntMap;
 import mcl.AstNode.CompileTimeIfElseExpressions;
 import mcl.AstNode.AstNodeUtils;
 import mcl.AstNode.AstNodeIds;
@@ -119,14 +120,19 @@ private class McTemplate {
 		}
 	}
 
+	var jsValueCache:IntMap<Any> = new IntMap();
+
 	public function process(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
 		var argstring = StringTools.ltrim(value.substring(this.name.length));
+		jsValueCache.clear();
+		TemplateArgument.jsCache = jsValueCache;
 		for (types => overloadBody in overloads) {
 			var args:Map<String, Any> = new Map();
 			var successCount = 0;
 			var pidx = 0;
 			var argList:Array<Any> = [argstring].concat(extras == null ? [] : cast extras);
 			var lastEntryWasBlock = false;
+			var jsCacheIdx = 0;
 			for (arg in types) {
 				while (pidx < argList.length && argList[pidx] == "")
 					pidx++;
@@ -147,12 +153,38 @@ private class McTemplate {
 				} else {
 					if (Syntax.typeof(argList[pidx]) != 'string')
 						break; // this is a failure case as we are looking for a string but have something else
-					var x = arg.parseValue(argList[pidx], pos, context);
+					var s:String = cast argList[pidx];
+					var jsBlockRaw:String = null;
+					if (s.charAt(0) == "<" && s.charAt(1) == "%" && !arg.expectJsValue) {
+						var end = s.indexOf("%>");
+						if (end == -1)
+							throw ErrorUtil.formatContext("Unexpected end of inline script block", pos, context);
+						var script = s.substring(2, end);
+						jsBlockRaw = script;
+						if (jsValueCache.exists(jsCacheIdx)) {
+							var jsVal = jsValueCache.get(jsCacheIdx);
+							s = Std.string(jsVal);
+						} else {
+							var jsVal = McFile.invokeExpressionInline(script, context, pos);
+							jsValueCache.set(jsCacheIdx, jsVal);
+							s = Std.string(jsVal);
+						}
+						jsCacheIdx++;
+					} else if (arg.expectJsValue) {
+						TemplateArgument.jsCacheIdx = jsCacheIdx;
+						jsCacheIdx++;
+					}
+
+					var x = arg.parseValue(s, pos, context);
 					if (!x.success)
 						break;
 					if (arg.name != null)
 						args.set(arg.name, x.value);
-					argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(x.raw.length));
+					if (jsBlockRaw != null) {
+						argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(jsBlockRaw.length + 4));
+					} else {
+						argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(x.raw.length));
+					}
 					successCount++;
 					lastEntryWasBlock = false;
 				}

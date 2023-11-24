@@ -1,5 +1,7 @@
 package mcl;
 
+import mcl.args.WordTemplateArgument;
+import mcl.args.FloatTemplateArgument;
 import mcl.args.BlockTemplateArgument;
 import mcl.args.JsTemplateArgument;
 import mcl.args.IntTemplateArgument;
@@ -11,5 +13,7 @@ class TemplateRegisterer {
 		IntTemplateArgument.register();
 		JsTemplateArgument.register();
 		BlockTemplateArgument.register();
+		FloatTemplateArgument.register();
+		WordTemplateArgument.register();
 	}
 }

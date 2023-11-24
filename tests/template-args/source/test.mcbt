@@ -38,3 +38,12 @@ template arg-literal{
         say bar
     }
 }
+
+template js-cache{
+    with a:int {
+        say no
+    }
+    with b:js {
+        say <%JSON.stringify(b)%>
+    }
+}

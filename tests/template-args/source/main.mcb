@@ -2,7 +2,7 @@ import ./test.mcbt
 
 dir test{
     function with-args{
-        with-args 1 2
+        with-args <%1%> 2
         #---------
         with-args 1 2 3
     }
@@ -23,5 +23,10 @@ dir test{
     function literal-args{
         arg-literal test
         arg-literal bar
+    }
+
+    function js-cache{
+        js-cache <%[1,2,'3',true]%>
+        js-cache <%1%>
     }
 }

@@ -1,5 +1,6 @@
 package mcl.args;
 
+import haxe.ds.IntMap;
 import mcl.Compiler.McFile;
 import mcl.Compiler.CompilerContext;
 import mcl.Tokenizer.PosInfo;
@@ -10,7 +11,10 @@ class TemplateArgument {
 	public var name:String;
 	public var pos:PosInfo;
 	public var expectBlock:Bool = false;
+	public var expectJsValue:Bool = false;
 
+	static public var jsCache:IntMap<Any> = null;
+	static public var jsCacheIdx:Int = 0;
 	public static var argumentTypes = new Map<String, Class<TemplateArgument>>();
 
 	function new(s:String, pos:PosInfo) {
