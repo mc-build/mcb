@@ -21,3 +21,7 @@ say hi
 data/main/functions/test/block-args.mcfunction:
 function main:test/zzz/0
 ----------------
+data/main/functions/test/literal-args.mcfunction:
+say test
+say bar
+----------------

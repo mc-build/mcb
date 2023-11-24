@@ -18,10 +18,14 @@ class TemplateArgument {
 		this.pos = pos;
 	}
 
-	public static function parse(s:String, p:PosInfo) {
+	public static function parse(s:String, p:PosInfo):TemplateArgument {
 		var colon = s.indexOf(":");
-		var type = colon == -1 ? 'raw' : s.substring(colon + 1);
+		var type = colon == -1 ? 'literal' : s.substring(colon + 1);
 		var name = colon == -1 ? s : s.substring(0, colon);
+
+		if (type == 'literal') {
+			return new LiteralTemplateArgument(p, name);
+		}
 		if (!argumentTypes.exists(type))
 			throw "Unknown template argument type: '" + type + "'";
 		return Type.createInstance(argumentTypes.get(type), [name]);

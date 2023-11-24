@@ -29,3 +29,12 @@ template arg-block {
         <%embed(a)%>
     }
 }
+
+template arg-literal{
+    with test {
+        say test
+    }
+    with bar {
+        say bar
+    }
+}

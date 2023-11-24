@@ -150,7 +150,8 @@ private class McTemplate {
 					var x = arg.parseValue(argList[pidx], pos, context);
 					if (!x.success)
 						break;
-					args.set(arg.name, x.value);
+					if (arg.name != null)
+						args.set(arg.name, x.value);
 					argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(x.raw.length));
 					successCount++;
 					lastEntryWasBlock = false;

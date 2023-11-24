@@ -19,4 +19,9 @@ dir test{
             say hi
         }
     }
+
+    function literal-args{
+        arg-literal test
+        arg-literal bar
+    }
 }

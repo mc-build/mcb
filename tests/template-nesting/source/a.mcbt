@@ -1,0 +1,6 @@
+# import ./b.mcbt
+template a{
+    with {
+        b
+    }
+}

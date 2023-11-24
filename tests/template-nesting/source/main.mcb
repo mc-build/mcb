@@ -1,0 +1,4 @@
+import ./a.mcbt
+function test{
+    a
+}
