@@ -418,15 +418,18 @@ class McFile {
 				for (node in body) {
 					compileCommandUnit(node, newContext);
 				}
-				if (continuations != null) {
-					context.append('scoreboard players set #ifelse int 0');
-					append('scoreboard players set #ifelse int 1');
-				}
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex++);
 				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-				context.append(injectValues('$execute function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
-					+ (data == null ? '' : ' $data'), context, pos));
+				if (continuations != null) {
+					context.append('scoreboard players set #ifelse int 0');
+					context.append(injectValues('execute store success score #ifelse int${execute.substring(7)} function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+						+ (data == null ? '' : ' $data'),
+						context, pos));
+				} else {
+					context.append(injectValues('$execute function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+						+ (data == null ? '' : ' $data'), context, pos));
+				}
 				if (continuations != null) {
 					// newContext.append('scoreboard players set %ifelse int 1');
 					var idx = 0;
@@ -444,9 +447,6 @@ class McFile {
 								for (node in body) {
 									compileCommandUnit(node, embedContext);
 								}
-								if (!isDone)
-									embedAppend('scoreboard players set %ifelse int 1');
-
 								var result = commands.join("\n");
 
 								var id = Std.string(context.uidIndex++);
@@ -455,7 +455,7 @@ class McFile {
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 
 								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
-								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+								context.append('execute if score #ifelse int matches 0 ${isDone ? '' : 'store success score #ifelse int '}$executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 							case Block(_, _, body, data):
 								var embedCommands:Array<String> = [];

@@ -1,17 +1,15 @@
 data/main/functions/zzz/0.mcfunction:
 say 1
-scoreboard players set #ifelse int 1
 ----------------
 data/main/functions/zzz/1.mcfunction:
 say 1
-scoreboard players set #ifelse int 1
 ----------------
 data/main/functions/zzz/2.mcfunction:
 say 3
 ----------------
 data/main/functions/test.mcfunction:
 scoreboard players set #ifelse int 0
-execute if score a b = 2 run function main:zzz/0
-execute if score #ifelse int matches 0 if score a b = 3 run run function main:zzz/1
+execute store success score #ifelse int if score a b = 2 run function main:zzz/0
+execute if score #ifelse int matches 0 store success score #ifelse int if score a b = 3 run run function main:zzz/1
 execute if score #ifelse int matches 0 run function main:zzz/2
 ----------------
