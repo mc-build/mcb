@@ -828,5 +828,6 @@ class Compiler {
 	public function new(?packNamespace:String, baseDir:String) {
 		if (packNamespace != null)
 			this.packNamespace = packNamespace;
+		this.baseDir = baseDir;
 	}
 }
