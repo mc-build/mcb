@@ -15,3 +15,17 @@ template without-args {
         say this has no arguments
     }
 }
+
+template arg-js {
+    with a:js {
+        LOOP(a) as item{
+            say item=<%item%> (<%typeof item%>)
+        }
+    }
+}
+
+template arg-block {
+    with a:block {
+        <%embed(a)%>
+    }
+}

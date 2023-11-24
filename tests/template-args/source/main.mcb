@@ -9,4 +9,14 @@ dir test{
     function without-args{
         without-args
     }
+
+    function js-args{
+        arg-js <%[1,2n,'3',true]%>
+    }
+
+    function block-args{
+        arg-block {
+            say hi
+        }
+    }
 }

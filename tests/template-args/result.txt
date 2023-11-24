@@ -9,3 +9,15 @@ say c=3
 data/main/functions/test/without-args.mcfunction:
 say this has no arguments
 ----------------
+data/main/functions/test/js-args.mcfunction:
+say item=1 (number)
+say item=2 (bigint)
+say item=3 (string)
+say item=true (boolean)
+----------------
+data/main/functions/test/zzz/0.mcfunction:
+say hi
+----------------
+data/main/functions/test/block-args.mcfunction:
+function main:test/zzz/0
+----------------

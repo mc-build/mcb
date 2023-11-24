@@ -1,5 +1,6 @@
 package mcl.args;
 
+import mcl.Compiler.CompilerContext;
 import mcl.Tokenizer.PosInfo;
 import mcl.args.TemplateArgument;
 
@@ -8,7 +9,7 @@ class RawTemplateArgument extends TemplateArgument {
 		TemplateArgument.register("raw", RawTemplateArgument);
 	}
 
-	public override function parseValue(value:String, pos:PosInfo):TemplateParseResult {
+	public override function parseValue(value:String, pos:PosInfo, ctx:CompilerContext):TemplateParseResult {
 		return {
 			success: true,
 			value: value,

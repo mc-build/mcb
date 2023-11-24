@@ -36,7 +36,7 @@ private class ErrorUtil {
 private class McTemplate {
 	private var name:String;
 	private var body:Array<AstNode>;
-	private var overlands:Map<Array<TemplateArgument>, Array<AstNode>> = new Map();
+	private var overloads:Map<Array<TemplateArgument>, Array<AstNode>> = new Map();
 	private var installed:Bool = false;
 	private var loadBlock:Null<Array<AstNode>> = null;
 	private var tickBlock:Null<Array<AstNode>> = null;
@@ -72,7 +72,7 @@ private class McTemplate {
 		for (node in nodes) {
 			switch (node) {
 				case TemplateOverload(pos, args, body):
-					overlands.set(compileArgs(args, pos), body);
+					overloads.set(compileArgs(args, pos), body);
 				case LoadBlock(pos, body):
 					if (loadBlock == null)
 						loadBlock = body;
@@ -121,19 +121,44 @@ private class McTemplate {
 
 	public function process(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
 		var argstring = StringTools.ltrim(value.substring(this.name.length));
-		for (types => overloadBody in overlands) {
+		for (types => overloadBody in overloads) {
 			var args:Map<String, Any> = new Map();
 			var successCount = 0;
-			var thisArgString = argstring;
+			var pidx = 0;
+			var argList:Array<Any> = [argstring].concat(extras == null ? [] : cast extras);
+			var lastEntryWasBlock = false;
 			for (arg in types) {
-				var x = arg.parseValue(thisArgString, pos);
-				if (!x.success)
-					break;
-				args.set(arg.name, x.value);
-				thisArgString = StringTools.ltrim(thisArgString.substring(x.raw.length));
-				successCount++;
+				while (pidx < argList.length && argList[pidx] == "")
+					pidx++;
+				if (pidx >= argList.length)
+					break; // this is a failure case as we are looking for more arguments but have run out
+				if (arg.expectBlock) {
+					if (!Type.enumEq(Type.typeof(argList[pidx]), TEnum(AstNode)))
+						break; // this is a failure case as we are looking for a block but have something else
+					var x = arg.parseValueBlock(argList[pidx], pos, context);
+					if (!x.success) {
+						break;
+					}
+					lastEntryWasBlock = true;
+					args.set(arg.name, x.value);
+					argList[pidx] = x.raw;
+					successCount++;
+					pidx++;
+				} else {
+					if (Syntax.typeof(argList[pidx]) != 'string')
+						break; // this is a failure case as we are looking for a string but have something else
+					var x = arg.parseValue(argList[pidx], pos, context);
+					if (!x.success)
+						break;
+					args.set(arg.name, x.value);
+					argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(x.raw.length));
+					successCount++;
+					lastEntryWasBlock = false;
+				}
 			}
-			if (successCount != types.length || thisArgString != "")
+			while (pidx < argList.length && argList[pidx] == "")
+				pidx++;
+			if (successCount != types.length || pidx != argList.length || (argList[pidx - 1] != "" && !lastEntryWasBlock))
 				continue;
 			if (!this.hasBeenUsed)
 				this.inject(context, file);
@@ -186,7 +211,7 @@ typedef CompilerContext = {
 	var isTemplate:Bool;
 };
 
-private class McFile {
+class McFile {
 	public var name:String;
 
 	public var existingDirectories:Map<String, Bool> = new Map();
@@ -258,7 +283,7 @@ private class McFile {
 		Compiler.io.write(path, content);
 	}
 
-	private function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
+	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
 		var commands:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
@@ -555,8 +580,12 @@ private class McFile {
 		if (target.indexOf("<%") == -1)
 			return target;
 		var variables = context.variables.get();
-		var argList:Array<String> = [];
-		var valueList:Array<Any> = [];
+		var argList:Array<String> = ['embed'];
+		var valueList:Array<Any> = [
+			function(v) {
+				return v.embedTo(context, pos, this);
+			}
+		];
 		for (k => v in variables) {
 			argList.push(k);
 			valueList.push(v);
@@ -583,7 +612,7 @@ private class McFile {
 		}
 	}
 
-	function invokeExpressionInline(expression:String, context:CompilerContext, pos:PosInfo):Any {
+	public static function invokeExpressionInline(expression:String, context:CompilerContext, pos:PosInfo):Any {
 		var variables = context.variables.get();
 		var argList:Array<String> = [];
 		var valueList:Array<Any> = [];

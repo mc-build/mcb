@@ -1,5 +1,7 @@
 package mcl.args;
 
+import mcl.Compiler.McFile;
+import mcl.Compiler.CompilerContext;
 import mcl.Tokenizer.PosInfo;
 
 typedef TemplateParseResult = {success:Bool, ?value:Dynamic, ?raw:String};
@@ -7,6 +9,7 @@ typedef TemplateParseResult = {success:Bool, ?value:Dynamic, ?raw:String};
 class TemplateArgument {
 	public var name:String;
 	public var pos:PosInfo;
+	public var expectBlock:Bool = false;
 
 	public static var argumentTypes = new Map<String, Class<TemplateArgument>>();
 
@@ -24,7 +27,11 @@ class TemplateArgument {
 		return Type.createInstance(argumentTypes.get(type), [name]);
 	}
 
-	public function parseValue(s:String, p:PosInfo):TemplateParseResult {
+	public function parseValue(s:String, p:PosInfo, context:CompilerContext):TemplateParseResult {
+		throw "override this method in subclass, plz thx";
+	}
+
+	public function parseValueBlock(s:AstNode, p:PosInfo, context:CompilerContext):TemplateParseResult {
 		throw "override this method in subclass, plz thx";
 	}
 

@@ -377,15 +377,11 @@ class Parser {
 					reader.skip();
 					content.push(Raw(pos, v, []));
 				case BracketOpen(pos, data) if (pos.line == line):
-					block(reader, () -> {
-						content.push(innerParse(reader));
-					}, true, t -> {
-						switch (t) {
-							case BracketClose(pos):
-								line = pos.line;
-							default:
-						}
+					var blockContent:Array<AstNode> = [];
+					var blockData = block(reader, () -> {
+						blockContent.push(innerParse(reader));
 					});
+					content.push(Block(pos, null, blockContent, blockData));
 				case BracketClose(pos) if (pos.line == line):
 					throw unreachable(Literal(v, pos));
 				default:
