@@ -253,8 +253,11 @@ class McFile {
 
 	private var ast:Array<AstNode> = [];
 	private var templates:Map<String, McTemplate> = new Map();
+	private var exportedTemplates:Map<String, McTemplate> = new Map();
 	private var imports:Map<String, McFile> = new Map();
 	private var ext:String;
+	private var loadCommands:Array<String> = [];
+	private var tickCommands:Array<String> = [];
 
 	public function new(name:String, ast:Array<AstNode>) {
 		this.name = name;
@@ -264,7 +267,7 @@ class McFile {
 
 	public function getTemplates():Map<String, McTemplate> {
 		if (this.ext == "mcbt") {
-			return templates;
+			return exportedTemplates;
 		}
 		throw "Internal error: tried to get templates from non-template file:" + this.name;
 	}
@@ -277,7 +280,9 @@ class McFile {
 				case Import(_, importName):
 					imports.set(importName, Compiler.instance.resolve(this.name, importName));
 				case TemplateDef(_, name, body):
-					templates.set(name, new McTemplate(name, body, this));
+					var template = new McTemplate(name, body, this);
+					templates.set(name, template);
+					exportedTemplates.set(name, template);
 				case Comment(_, _):
 				default:
 					this.ast.push(node);
@@ -454,6 +459,20 @@ class McFile {
 				});
 			case Block(pos, name, body, data):
 				context.append(createAnonymousFunction(pos, body, data, context, name));
+			case LoadBlock(pos, body):
+				var newContext = forkCompilerContextWithAppend(context, v -> {
+					loadCommands.push(v);
+				});
+				for (node in body) {
+					compileCommandUnit(node, newContext);
+				}
+			case TickBlock(pos, body):
+				var newContext = forkCompilerContextWithAppend(context, v -> {
+					tickCommands.push(v);
+				});
+				for (node in body) {
+					compileCommandUnit(node, newContext);
+				}
 			default:
 				Lib.debug();
 				trace(Std.string(node));
@@ -684,9 +703,11 @@ class McFile {
 	}
 
 	public function compile(vars:VariableMap) {
-		var context = createCompilerContext(new Path(this.name).file, v -> {
+		var info = Compiler.instance.getInitialPathInfo(this.name);
+		var context = createCompilerContext(info.namespace, v -> {
 			throw "Internal error: append not available for top-level context";
-		}, new VariableMap(vars, Globals.map), [], 0, [], new VariableMap(null, []));
+		}, new VariableMap(vars, Globals.map), info.path, 0, [],
+			new VariableMap(null, []));
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
@@ -700,6 +721,14 @@ class McFile {
 				default:
 					compileTld(node, context);
 			}
+		}
+		if (loadCommands.length > 0) {
+			saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['load.mcfunction']))), loadCommands.join("\n"));
+			Compiler.instance.tags.addLoadingCommand(context.namespace + ":" + context.path.concat(['load']).join("/"));
+		}
+		if (tickCommands.length > 0) {
+			saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['tick.mcfunction']))), tickCommands.join("\n"));
+			Compiler.instance.tags.addTickingCommand(context.namespace + ":" + context.path.concat(['tick']).join("/"));
 		}
 	}
 }
@@ -738,6 +767,8 @@ class Compiler {
 		path:Array<String>
 	} {
 		var projectPath = (StringTools.startsWith(p, this.baseDir) ? p.substring(this.baseDir.length) : p).split("\\").join("/");
+		if (projectPath.charAt(0) == "/")
+			projectPath = projectPath.substring(1);
 		var parts = projectPath.split("/");
 		var namespace = Path.withoutExtension(parts[0]);
 		var path = parts.slice(1).join("/");

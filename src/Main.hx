@@ -64,23 +64,26 @@ class Main {
 
 	static function main() {
 		var startTime = Sys.time();
+		var dir = Sys.args()[0] ?? "test-src";
 		var hasMT = Sys.args().indexOf("--io-mt");
 		var hasT = Sys.args().indexOf("--io-t");
+		var isFile = !FileSystem.isDirectory(dir);
+		var baseDir = isFile ? Path.directory(dir) : dir;
+		Compiler.instance.baseDir = baseDir;
 		if (hasMT >= 0)
 			Compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
 		else if (hasT >= 0)
 			Compiler.io = new ThreadedIo();
 		TemplateRegisterer.register();
-		var file = Sys.args()[0] ?? "test-src";
-		var files = FileSystem.isDirectory(file) ? readDirRecursive(file).filter(f -> {
+		var files = !isFile ? readDirRecursive(dir).filter(f -> {
 			var ext = Path.extension(f);
 			ext == "mcb"
 			|| ext == "mcbt";
-		}) : [file];
+		}) : [dir];
 		for (file in files) {
 			processFile(file);
 		}
-		var config = Syntax.code('require({0})', Path.join([Sys.getCwd(), file, "config.js"]));
+		var config = Syntax.code('require({0})', Path.join([Sys.getCwd(), dir, "config.js"]));
 		trace(config);
 		var jsRoot = new VariableMap(null, [for (k in Reflect.fields(config)) k => Reflect.field(config, k)]);
 		Compiler.instance.compile(jsRoot);

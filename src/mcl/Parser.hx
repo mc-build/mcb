@@ -211,6 +211,8 @@ class Parser {
 							readTemplate(name, reader, pos);
 						case _ if (StringTools.startsWith(v, "#")):
 							Comment(pos, v);
+						case _ if (StringTools.startsWith(v, "import ")):
+							Import(pos, v.substring("import ".length));
 						default:
 							throw unreachable(token);
 					}
@@ -350,6 +352,18 @@ class Parser {
 							content.push(innerParse(reader));
 						});
 						return Block(pos, name, content, data);
+					case _ if (v == "tick"):
+						var content:Array<AstNode> = [];
+						block(reader, () -> {
+							content.push(innerParse(reader));
+						}, false);
+						return TickBlock(pos, content);
+					case _ if (v == "load"):
+						var content:Array<AstNode> = [];
+						block(reader, () -> {
+							content.push(innerParse(reader));
+						}, false);
+						return LoadBlock(pos, content);
 					default:
 						return readRaw(pos, v, reader);
 				}
