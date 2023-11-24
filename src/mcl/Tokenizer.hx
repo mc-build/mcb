@@ -26,7 +26,7 @@ enum Brackets {
 	Round;
 }
 
-class Tokenizer implements Minified {
+class Tokenizer {
 	public static function tokenize(code:String, file:String):Array<Token> {
 		var isInMultilineComment = false;
 		var indents:Array<Int> = [];

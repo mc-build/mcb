@@ -297,7 +297,7 @@ class McFile {
 			name = injectValues(name, context, pos);
 		var id = name == null ? 'zzz/${Std.string(context.uidIndex++)}' : name;
 		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
-		return 'function ${context.namespace}:${context.path.join("/")}/$id' + (data == null ? '' : ' $data');
+		return 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data');
 	}
 
 	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {

@@ -11,8 +11,8 @@ data/main/functions/zzz/1.mcfunction:
 say unnamed block2
 ----------------
 data/main/functions/test.mcfunction:
-function main:/test_block
-function main:/zzz/0
-function main:/test2 with some data
-function main:/zzz/1 with some data
+function main:test_block
+function main:zzz/0
+function main:test2 with some data
+function main:zzz/1 with some data
 ----------------

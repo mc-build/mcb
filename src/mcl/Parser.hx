@@ -1,17 +1,13 @@
 package mcl;
 
-import mcl.Tokenizer.Brackets;
 import js.Lib;
-import js.Syntax;
 import mcl.Tokenizer.PosInfo;
 import mcl.AstNode.JsonTagType;
-import haxe.macro.Context;
-import MinificationHelper.Minified;
 import haxe.extern.Rest;
 import mcl.Tokenizer.TokenIds;
 import mcl.Tokenizer.Token;
 
-private class ArrayInput<T> implements Minified {
+private class ArrayInput<T> {
 	var array:Array<T>;
 	var index:Int;
 
