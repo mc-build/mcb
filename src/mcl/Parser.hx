@@ -144,7 +144,6 @@ class Parser {
 				block(reader, () -> {
 					content.push(innerParse(reader));
 				}, false);
-				var content:Array<AstNode> = [];
 				AstNode.TickBlock(pos, content);
 			case Literal(v, pos) if (v == "with" || StringTools.startsWith(v, "with ")):
 				reader.skip();

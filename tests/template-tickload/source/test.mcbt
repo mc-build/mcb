@@ -1,0 +1,17 @@
+template test{
+    load{
+        say load
+        block{
+            say blocks should not conflict (0)
+        }
+    }
+    tick{
+        say tick
+        block{
+            say blocks should not conflict (1)
+        }
+    }
+    with{
+        say hi
+    }
+}

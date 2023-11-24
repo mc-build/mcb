@@ -41,6 +41,7 @@ private class McTemplate {
 	private var loadBlock:Null<Array<AstNode>> = null;
 	private var tickBlock:Null<Array<AstNode>> = null;
 	private var file:McFile;
+	private var hasBeenUsed = false;
 
 	public function new(name:String, body:Array<AstNode>, file:McFile) {
 		this.name = name;
@@ -90,6 +91,34 @@ private class McTemplate {
 		}
 	}
 
+	private function inject(context:CompilerContext, into:McFile) {
+		this.hasBeenUsed = true;
+		var defs:Array<AstNode> = [];
+		if (loadBlock != null && loadBlock.length > 0) {
+			var pos = AstNodeUtils.getPos(loadBlock[0]);
+			defs.push(AstNode.FunctionDef(pos, "load", cast loadBlock, "load"));
+		}
+		if (tickBlock != null && tickBlock.length > 0) {
+			var pos = AstNodeUtils.getPos(tickBlock[0]);
+			defs.push(AstNode.FunctionDef(pos, "tick", cast tickBlock, "tick"));
+		}
+		if (defs.length > 0) {
+			var pos = AstNodeUtils.getPos(defs[0]);
+			into.embed({
+				append: function(v) {
+					throw ErrorUtil.formatContext("tried to append to a Void context (template virtual context)", pos, context);
+				},
+				namespace: Compiler.instance.packNamespace,
+				path: [],
+				uidIndex: 0,
+				variables: new VariableMap(null),
+				stack: context.stack,
+				replacements: new VariableMap(null),
+				isTemplate: false
+			}, pos, new Map(), [AstNode.Directory(pos, this.name, defs)], true);
+		}
+	}
+
 	public function process(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
 		var argstring = StringTools.ltrim(value.substring(this.name.length));
 		for (types => overloadBody in overlands) {
@@ -106,6 +135,8 @@ private class McTemplate {
 			}
 			if (successCount != types.length || thisArgString != "")
 				continue;
+			if (!this.hasBeenUsed)
+				this.inject(context, file);
 			file.embed(context, pos, args, overloadBody);
 			// trace("MATCHED", types, args);
 			return;
@@ -205,7 +236,7 @@ private class McFile {
 		return '$namespace:$id';
 	}
 
-	private inline function forkCompilerContextWithAppend(context:CompilerContext, append:String->Void):CompilerContext {
+	public inline function forkCompilerContextWithAppend(context:CompilerContext, append:String->Void):CompilerContext {
 		return createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements);
 	}
 
@@ -244,11 +275,15 @@ private class McFile {
 		return 'function ${context.namespace}:${context.path.join("/")}/$id' + (data == null ? '' : ' $data');
 	}
 
-	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>) {
+	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {
 		var newContext = createCompilerContext(context.namespace, context.append, new VariableMap(VariableMap.globals, varmap), context.path,
 			context.uidIndex, context.stack, context.replacements);
 		for (node in body) {
-			compileCommandUnit(node, newContext);
+			if (useTld) {
+				compileTld(node, newContext);
+			} else {
+				compileCommandUnit(node, newContext);
+			}
 		}
 	}
 
@@ -371,10 +406,13 @@ private class McFile {
 		var append = function(command:String) {
 			commands.push(command);
 		};
-		var context = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements);
+		var newContext = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack,
+			context.replacements);
 		for (node in body) {
-			compileCommandUnit(node, context);
+			compileCommandUnit(node, newContext);
 		}
+		context.uidIndex = newContext.uidIndex;
+
 		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
 		if (appendTo != null) {
 			if (appendTo == "load") {
@@ -397,6 +435,7 @@ private class McFile {
 		for (node in body) {
 			compileTld(node, newContext);
 		}
+		context.uidIndex = newContext.uidIndex;
 	}
 
 	private function compileTld(node:AstNode, context:CompilerContext) {
@@ -609,6 +648,7 @@ class Compiler {
 	private var alreadySetupFiles = new Map<String, Bool>();
 
 	public var tags:TagManager = new TagManager();
+	public var packNamespace:String = 'mcb-${Date.now()}';
 
 	public function addFile(name:String, ast:Array<AstNode>) {
 		var file = new McFile(name, ast);
@@ -641,5 +681,8 @@ class Compiler {
 		tags.writeTagFiles();
 	}
 
-	public function new() {}
+	public function new(?packNamespace:String) {
+		if (packNamespace != null)
+			this.packNamespace = packNamespace;
+	}
 }
