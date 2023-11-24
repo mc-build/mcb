@@ -26,10 +26,6 @@ class LibMain {
 		return new Compiler(null, baseDir);
 	}
 
-	public static function setIoProvider(provider:Io) {
-		Compiler.io = provider;
-	}
-
 	public static function parseFile(path:String, content:String):Array<AstNode> {
 		var ext = Path.extension(path);
 		var tokens = Tokenizer.tokenize(content, path);

@@ -26,7 +26,9 @@ class BoundBlock {
 			replacements: this.ctx.replacements,
 			stack: this.ctx.stack,
 			append: (s:String) -> content.push(s),
-			templates: this.ctx.templates
+			templates: this.ctx.templates,
+			requireTemplateKeyword: this.ctx.requireTemplateKeyword,
+			compiler: this.ctx.compiler,
 		};
 		file.embed(ctx, pos, new Map(), [this.node]);
 		return content.join("\n");

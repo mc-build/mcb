@@ -106,7 +106,7 @@ private class McTemplate {
 		}
 		if (defs.length > 0) {
 			var pos = AstNodeUtils.getPos(defs[0]);
-			var info = Compiler.instance.getInitialPathInfo(this.file.name);
+			var info = context.compiler.getInitialPathInfo(this.file.name);
 			into.embed({
 				append: function(v) {
 					throw ErrorUtil.formatContext("tried to append to a Void context (template virtual context)", pos, context);
@@ -118,7 +118,9 @@ private class McTemplate {
 				templates: this.file.templates,
 				stack: context.stack,
 				replacements: new VariableMap(null),
-				isTemplate: false
+				isTemplate: false,
+				requireTemplateKeyword: true,
+				compiler: context.compiler
 			}, pos, new Map(), [AstNode.Directory(pos, this.name, defs)], true);
 		}
 	}
@@ -207,7 +209,9 @@ private class McTemplate {
 				templates: this.file.templates,
 				stack: context.stack,
 				replacements: context.replacements,
-				isTemplate: false
+				isTemplate: false,
+				requireTemplateKeyword: true,
+				compiler: context.compiler
 			};
 			file.embed(newContext, pos, args, overloadBody);
 			// trace("MATCHED", types, args);
@@ -258,6 +262,8 @@ typedef CompilerContext = {
 	var stack:Array<PosInfo>;
 	var isTemplate:Bool;
 	var templates:Map<String, McTemplate>;
+	var requireTemplateKeyword:Bool;
+	var compiler:Compiler;
 };
 
 class McFile {
@@ -288,13 +294,13 @@ class McFile {
 		throw "Internal error: tried to get templates from non-template file:" + this.name;
 	}
 
-	public function setup() {
+	public function setup(compiler:Compiler) {
 		var ast = this.ast;
 		this.ast = [];
 		for (node in ast) {
 			switch (node) {
 				case Import(_, importName):
-					imports.set(importName, Compiler.instance.resolve(this.name, importName));
+					imports.set(importName, compiler.resolve(this.name, importName));
 				case TemplateDef(_, name, body):
 					var template = new McTemplate(name, body, this);
 					templates.set(name, template);
@@ -319,11 +325,11 @@ class McFile {
 
 	public inline function forkCompilerContextWithAppend(context:CompilerContext, append:String->Void):CompilerContext {
 		return createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements,
-			context.templates);
+			context.templates, context.requireTemplateKeyword, context.compiler);
 	}
 
 	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:Int,
-			stack:Array<PosInfo>, replacements:VariableMap, templates:Map<String, McTemplate>):CompilerContext {
+			stack:Array<PosInfo>, replacements:VariableMap, templates:Map<String, McTemplate>, requireTemplateKeyword:Bool, compiler:Compiler):CompilerContext {
 		return {
 			append: append,
 			namespace: namespace,
@@ -333,20 +339,23 @@ class McFile {
 			stack: stack,
 			replacements: replacements,
 			isTemplate: this.ext == "mcbt",
-			templates: templates
+			templates: templates,
+			requireTemplateKeyword: requireTemplateKeyword,
+			compiler: compiler
 		};
 	}
 
-	private inline function saveContent(path:String, content:String) {
-		Compiler.io.write(path, content);
+	private inline function saveContent(context:CompilerContext, path:String, content:String) {
+		context.compiler.io.write(path, content);
 	}
 
 	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
 		var commands:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
-		}, context.variables.fork(),
-			context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables, context.templates);
+		},
+			context.variables.fork(), context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables, context.templates,
+			context.requireTemplateKeyword, context.compiler);
 		for (node in body) {
 			compileCommandUnit(node, newContext);
 		}
@@ -354,13 +363,13 @@ class McFile {
 		if (name != null)
 			name = injectValues(name, context, pos);
 		var id = name == null ? 'zzz/${Std.string(context.uidIndex++)}' : name;
-		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
+		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
 		return 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data');
 	}
 
 	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {
 		var newContext = createCompilerContext(context.namespace, context.append, new VariableMap(VariableMap.globals, varmap), context.path,
-			context.uidIndex, context.stack, context.replacements, context.templates);
+			context.uidIndex, context.stack, context.replacements, context.templates, context.requireTemplateKeyword, context.compiler);
 		for (node in body) {
 			if (useTld) {
 				compileTld(node, newContext);
@@ -371,6 +380,9 @@ class McFile {
 	}
 
 	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
+		if (StringTools.startsWith(value, "template ")) {
+			value = value.substring(9);
+		}
 		for (k => v in context.templates) {
 			if (value == k || StringTools.startsWith(value, k)) {
 				// trace(this, context, pos, value, extras);
@@ -402,7 +414,7 @@ class McFile {
 					commands.push(command);
 				};
 				var newContext = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack,
-					context.replacements, context.templates);
+					context.replacements, context.templates, context.requireTemplateKeyword, context.compiler);
 				for (node in body) {
 					compileCommandUnit(node, newContext);
 				}
@@ -412,7 +424,7 @@ class McFile {
 				}
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex++);
-				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 				context.append(injectValues('$execute function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 					+ (data == null ? '' : ' $data'), context, pos));
 				if (continuations != null) {
@@ -427,7 +439,7 @@ class McFile {
 									embedCommands.push(command);
 								};
 								var embedContext = createCompilerContext(context.namespace, embedAppend, context.variables, context.path, context.uidIndex,
-									context.stack, context.replacements, context.templates);
+									context.stack, context.replacements, context.templates, context.requireTemplateKeyword, context.compiler);
 
 								for (node in body) {
 									compileCommandUnit(node, embedContext);
@@ -439,8 +451,8 @@ class McFile {
 
 								var id = Std.string(context.uidIndex++);
 
-								saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))),
-									result);
+								saveContent(context,
+									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 
 								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
 								context.append('execute if score #ifelse int matches 0 $executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
@@ -453,14 +465,14 @@ class McFile {
 									embedCommands.push(command);
 								};
 								var embedContext = createCompilerContext(context.namespace, appendEmbed, context.variables, context.path, context.uidIndex,
-									context.stack, context.replacements, context.templates);
+									context.stack, context.replacements, context.templates, context.requireTemplateKeyword, context.compiler);
 								for (node in body) {
 									compileCommandUnit(node, embedContext);
 								}
 								var result = embedCommands.join("\n");
 								var id = Std.string(context.uidIndex++);
-								saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))),
-									result);
+								saveContent(context,
+									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 
@@ -504,7 +516,7 @@ class McFile {
 			commands.push(command);
 		};
 		var newContext = createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack,
-			context.replacements, context.templates);
+			context.replacements, context.templates, context.requireTemplateKeyword, context.compiler);
 		for (node in body) {
 			compileCommandUnit(node, newContext);
 		}
@@ -513,22 +525,23 @@ class McFile {
 		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
 		if (appendTo != null) {
 			if (appendTo == "load") {
-				Compiler.instance.tags.addLoadingCommand(funcId);
+				context.compiler.tags.addLoadingCommand(funcId);
 			} else if (appendTo == "tick") {
-				Compiler.instance.tags.addTickingCommand(funcId);
+				context.compiler.tags.addTickingCommand(funcId);
 			} else {
 				throw "Internal error: unexpected appendTo value: " + appendTo;
 			}
 		}
-		saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
+		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
 	}
 
 	private function compileDirectory(pos:PosInfo, name:String, body:Array<AstNode>, context:CompilerContext) {
 		name = injectValues(name, context, pos);
 		var newContext = createCompilerContext(context.namespace, v -> {
 			throw "Internal error: append not available for directory context";
-		}, context.variables.fork(),
-			context.path.concat([name]), 0, context.stack, context.replacements, context.templates);
+		},
+			context.variables.fork(), context.path.concat([name]), 0, context.stack, context.replacements, context.templates, context.requireTemplateKeyword,
+			context.compiler);
 		for (node in body) {
 			compileTld(node, newContext);
 		}
@@ -558,8 +571,9 @@ class McFile {
 				var commands:Array<String> = [];
 				var newContext = createCompilerContext(context.namespace, v -> {
 					commands.push(v);
-				}, context.variables, context.path, context.uidIndex,
-					context.stack, context.replacements, context.templates);
+				},
+					context.variables, context.path, context.uidIndex, context.stack, context.replacements, context.templates, context.requireTemplateKeyword,
+					context.compiler);
 
 				var id = Std.string(context.uidIndex++);
 				var functionId = context.namespace + ":" + context.path.concat(["zzz", '$id']).join("/");
@@ -568,8 +582,8 @@ class McFile {
 					compileCommandUnit(node, newContext);
 				}
 				var result = commands.join("\n");
-				saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-				Compiler.instance.tags.addLoadingCommand(functionId);
+				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+				context.compiler.tags.addLoadingCommand(functionId);
 			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output
 			default:
@@ -585,7 +599,7 @@ class McFile {
 			default: throw "Internal error: unexpected json tag type:" + Std.string(type);
 		}
 		var path = Path.join(context.path.concat(filePath.concat([name + ".json"])));
-		saveContent(path, stringifyJsonTag(pos, name, value, context));
+		saveContent(context, path, stringifyJsonTag(pos, name, value, context));
 	}
 
 	function compileJsonFile(pos:PosInfo, name:String, type:JsonTagType, value:Array<AstNode>, context:CompilerContext) {
@@ -595,7 +609,7 @@ class McFile {
 			default: throw "Internal error: unexpected json tag type:" + Std.string(type);
 		}
 		var path = Path.join(context.path.concat(filePath.concat([name + ".json"])));
-		saveContent(path, stringifyJsonTag(pos, name, value, context));
+		saveContent(context, path, stringifyJsonTag(pos, name, value, context));
 	}
 
 	function processCompilerLoop(expression:String, as:Null<String>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
@@ -608,7 +622,7 @@ class McFile {
 				}
 			} else {
 				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork([as => v]), context.path, context.uidIndex,
-					context.stack, context.variables, context.templates);
+					context.stack, context.variables, context.templates, context.requireTemplateKeyword, context.compiler);
 				for (node in body) {
 					handler(newContext, node);
 				}
@@ -623,8 +637,9 @@ class McFile {
 		var values:Array<String> = [];
 		var newContext = createCompilerContext(context.namespace, v -> {
 			values.push(v);
-		}, context.variables, context.path, context.uidIndex,
-			context.stack, context.variables, context.templates);
+		},
+			context.variables, context.path, context.uidIndex, context.stack, context.variables, context.templates, context.requireTemplateKeyword,
+			context.compiler);
 		for (v in value) {
 			switch (v) {
 				case Raw(pos, value, extra):
@@ -720,12 +735,12 @@ class McFile {
 		}
 	}
 
-	public function compile(vars:VariableMap) {
-		var info = Compiler.instance.getInitialPathInfo(this.name);
+	public function compile(vars:VariableMap, compiler:Compiler) {
+		var info = compiler.getInitialPathInfo(this.name);
 		var context = createCompilerContext(info.namespace, v -> {
 			throw "Internal error: append not available for top-level context";
-		}, new VariableMap(vars, Globals.map), info.path, 0, [],
-			new VariableMap(null, []), templates);
+		}, new VariableMap(vars, Globals.map),
+			info.path, 0, [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler);
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
@@ -741,19 +756,20 @@ class McFile {
 			}
 		}
 		if (loadCommands.length > 0) {
-			saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'load.mcfunction']))), loadCommands.join("\n"));
-			Compiler.instance.tags.addLoadingCommand(context.namespace + ":" + context.path.concat(['load']).join("/"));
+			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'load.mcfunction']))),
+				loadCommands.join("\n"));
+			compiler.tags.addLoadingCommand(context.namespace + ":" + context.path.concat(['load']).join("/"));
 		}
 		if (tickCommands.length > 0) {
-			saveContent(Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'tick.mcfunction']))), tickCommands.join("\n"));
-			Compiler.instance.tags.addTickingCommand(context.namespace + ":" + context.path.concat(['tick']).join("/"));
+			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'tick.mcfunction']))),
+				tickCommands.join("\n"));
+			compiler.tags.addTickingCommand(context.namespace + ":" + context.path.concat(['tick']).join("/"));
 		}
 	}
 }
 
 class Compiler {
-	public static var io:Io = new Io.SyncIo();
-	public static var instance:Compiler = new Compiler(null, "/");
+	public var io:Io = new Io.SyncIo();
 
 	private var files:Map<String, McFile> = new Map();
 	private var alreadySetupFiles = new Map<String, Bool>();
@@ -773,7 +789,7 @@ class Compiler {
 		if (files.exists(resolved)) {
 			if (!alreadySetupFiles.exists(resolved)) {
 				alreadySetupFiles.set(resolved, true);
-				files.get(resolved).setup();
+				files.get(resolved).setup(this);
 			}
 			return files.get(resolved);
 		}
@@ -800,13 +816,13 @@ class Compiler {
 		for (file in files) {
 			if (alreadySetupFiles.exists(file.name))
 				continue;
-			file.setup();
+			file.setup(this);
 		}
 
 		for (file in files) {
-			file.compile(root);
+			file.compile(root, this);
 		}
-		tags.writeTagFiles();
+		tags.writeTagFiles(this);
 	}
 
 	public function new(?packNamespace:String, baseDir:String) {

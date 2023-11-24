@@ -18,14 +18,14 @@ class TagManager {
 		loadFunctionEntries.add(command);
 	}
 
-	public function writeTagFiles() {
+	public function writeTagFiles(compiler:Compiler) {
 		var basePath = Path.join(['data', 'minecraft', 'tags', 'functions']);
 		var tickPath = Path.join([basePath, 'tick.json']);
 		var loadPath = Path.join([basePath, 'load.json']);
 		if (tickFunctionEntries.size > 0)
-			Compiler.io.write(tickPath, Json.stringify({values: [for (k in tickFunctionEntries) k]}));
+			compiler.io.write(tickPath, Json.stringify({values: [for (k in tickFunctionEntries) k]}));
 
 		if (loadFunctionEntries.size > 0)
-			Compiler.io.write(loadPath, Json.stringify({values: [for (k in loadFunctionEntries) k]}));
+			compiler.io.write(loadPath, Json.stringify({values: [for (k in loadFunctionEntries) k]}));
 	}
 }

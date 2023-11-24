@@ -34,7 +34,7 @@ class Main {
 		return result;
 	}
 
-	static function processFile(file:String) {
+	static function processFile(compiler:Compiler, file:String) {
 		var ext = Path.extension(file);
 		var content = File.getContent(file);
 		var tokens = Tokenizer.tokenize(content, file);
@@ -57,7 +57,7 @@ class Main {
 		}
 		// trace(Parser.parse(tokens));
 		// File.saveContent(file + ".ast.json", Json.stringify(ast, null, "  "));
-		Compiler.instance.addFile(file, ast);
+		compiler.addFile(file, ast);
 	}
 
 	static final threadedIo = true;
@@ -69,11 +69,11 @@ class Main {
 		var hasT = Sys.args().indexOf("--io-t");
 		var isFile = !FileSystem.isDirectory(dir);
 		var baseDir = isFile ? Path.directory(dir) : dir;
-		Compiler.instance.baseDir = baseDir;
+		var compiler = new Compiler(null, baseDir);
 		if (hasMT >= 0)
-			Compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
+			compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
 		else if (hasT >= 0)
-			Compiler.io = new ThreadedIo();
+			compiler.io = new ThreadedIo();
 		TemplateRegisterer.register();
 		var files = !isFile ? readDirRecursive(dir).filter(f -> {
 			var ext = Path.extension(f);
@@ -81,20 +81,20 @@ class Main {
 			|| ext == "mcbt";
 		}) : [dir];
 		for (file in files) {
-			processFile(file);
+			processFile(compiler, file);
 		}
 		var config = Syntax.code('require({0})', Path.join([Sys.getCwd(), dir, "config.js"]));
 		trace(config);
 		var jsRoot = new VariableMap(null, [for (k in Reflect.fields(config)) k => Reflect.field(config, k)]);
-		Compiler.instance.compile(jsRoot);
+		compiler.compile(jsRoot);
 
-		Compiler.io.cleanup();
+		compiler.io.cleanup();
 		if (debug)
 			debugData.serialize(null);
 		var endTime = Sys.time();
 		trace("Compilation took " + (endTime - startTime) + " seconds");
 		function waitForIoDone() {
-			if (Compiler.io.finished()) {
+			if (compiler.io.finished()) {
 				trace("Finished in " + (Sys.time() - endTime) + " seconds");
 				return;
 			}
