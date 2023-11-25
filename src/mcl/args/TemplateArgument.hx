@@ -7,6 +7,7 @@ import mcl.Tokenizer.PosInfo;
 
 typedef TemplateParseResult = {success:Bool, ?value:Dynamic, ?raw:String};
 
+@:expose
 class TemplateArgument {
 	public var name:String;
 	public var pos:PosInfo;

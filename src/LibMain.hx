@@ -12,12 +12,6 @@ import Io.SyncIo;
 
 typedef CompileOptions = {};
 
-enum IoType {
-	Sync;
-	Thread;
-	ThreadPool(size:Int);
-}
-
 @:keep
 @:keepSub
 @:expose("mcb")
@@ -43,16 +37,14 @@ class LibMain {
 		compiler.addFile(path, ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens));
 	}
 
-	public static final IoType = IoType;
-
-	public static function createIoProvider(type:IoType):Io {
-		switch (type) {
-			case Sync:
+	public static function createIoProvider(threadCount:Int):Io {
+		switch (threadCount) {
+			case 0:
 				return new SyncIo();
-			case Thread:
+			case 1:
 				return new ThreadedIo();
-			case ThreadPool(size):
-				return new MultiThreadIo(size);
+			default:
+				return new MultiThreadIo(threadCount);
 		}
 	}
 }

@@ -26,6 +26,7 @@ enum Brackets {
 	Round;
 }
 
+@:expose
 class Tokenizer {
 	public static function tokenize(code:String, file:String):Array<Token> {
 		var isInMultilineComment = false;

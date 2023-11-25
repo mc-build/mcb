@@ -768,6 +768,7 @@ class McFile {
 	}
 }
 
+@:expose
 class Compiler {
 	public var io:Io = new Io.SyncIo();
 

@@ -12,6 +12,7 @@ interface Io {
 	public function finished():Bool;
 }
 
+@:expose("io.SyncIo")
 class SyncIo implements Io {
 	public function new() {}
 
@@ -38,6 +39,7 @@ typedef IoEntry = {
 	var c:String;
 };
 
+@:expose("io.ThreadedIo")
 class ThreadedIo implements Io {
 	var enableLog:Bool = false;
 	var proc:Any;
@@ -116,6 +118,7 @@ class ThreadedIo implements Io {
 	}
 }
 
+@:expose("io.MultiThreadIo")
 class MultiThreadIo implements Io {
 	var threads:Array<ThreadedIo> = [];
 	var idx:Int = 0;

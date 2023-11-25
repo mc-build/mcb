@@ -44,6 +44,7 @@ enum abstract Errors(String) from String to String {
 	var ErrorWhilstEvaluatingExpression = "Error whilst evaluating expression: '{}' at {}:{}:{}";
 }
 
+@:expose
 class Parser {
 	public static function format(template:String, data:Rest<Dynamic>):String {
 		var regex = new EReg("\\{\\}", "");

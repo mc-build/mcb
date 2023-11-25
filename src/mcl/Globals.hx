@@ -45,6 +45,7 @@ class McIntIterator {
 	}
 }
 
+@:expose("globals")
 class Globals {
 	public static final loopVariants:Map<Array<Dynamic>, Array<Any>->Any> = [
 		[TInt, TInt] => (args:Array<Any>) -> {
@@ -84,4 +85,20 @@ class Globals {
 			throw "Invalid arguments for LOOP (" + args.toArray().map(v -> Std.string(Type.typeof(v))).join(", ") + ")";
 		},
 	];
+
+	public static function set(name:String, value:Any):Void {
+		map.set(name, value);
+	}
+
+	public static function get(name:String):Any {
+		return map.get(name);
+	}
+
+	public static function has(name:String):Bool {
+		return map.exists(name);
+	}
+
+	public static function delete(name:String):Bool {
+		return map.remove(name);
+	}
 }
