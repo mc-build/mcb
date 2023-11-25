@@ -301,7 +301,6 @@ class Parser {
 						return Comment(pos, "# debugger");
 					case "<%%":
 						var content:Array<Token> = [];
-						reader.skip();
 						while (true) {
 							switch (reader.peek()) {
 								case Literal("%%>", _):

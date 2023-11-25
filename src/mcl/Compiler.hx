@@ -1,5 +1,7 @@
 package mcl;
 
+import js.lib.Symbol;
+import mcl.Tokenizer.Token;
 import haxe.ds.IntMap;
 import mcl.AstNode.CompileTimeIfElseExpressions;
 import mcl.AstNode.AstNodeUtils;
@@ -396,8 +398,33 @@ class McFile {
 		context.append(injectValues(value, context, pos));
 	}
 
+	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>) {
+		var str = "";
+		for (t in tokens) {
+			switch (t) {
+				case Literal(v, pos):
+					str += v;
+				case BracketOpen(pos, data):
+					str += '{${data}';
+				case BracketClose(pos):
+					str += '}';
+			}
+		}
+		var names:Array<String> = ['emit'];
+		var values:Array<Any> = [context.append];
+		var jsEnv = context.variables.get();
+		for (k => v in jsEnv) {
+			names.push(k);
+			values.push(v);
+		}
+
+		Syntax.code('new Function(...{0},{1})(...{2})', names, str, values);
+	}
+
 	private function compileCommandUnit(node:AstNode, context:CompilerContext):Void {
 		switch (node) {
+			case MultiLineScript(pos, value):
+				processMlScript(context, pos, value);
 			case Raw(pos, value, extras):
 				processTemplate(context, pos, value, extras);
 			case Comment(_, value):

@@ -1,0 +1,3 @@
+data/main/functions/test.mcfunction:
+say hello world
+----------------

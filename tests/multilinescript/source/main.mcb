@@ -1,0 +1,5 @@
+function test{
+    <%%
+        emit("say hello world");
+    %%>
+}
