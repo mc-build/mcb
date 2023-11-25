@@ -2,6 +2,6 @@
   "verbose": true,
   "ignore": ["**/bin/**", "**/generated/**"],
   "exec": "yarn build",
-  "ext": "hx,ts,mcb,mcbt,txt,js",
-  "watch": ["src/**/*", "tests/**/*"]
+  "ext": "hx,ts,mcb,mcbt,txt,js,hxml",
+  "watch": ["src/**/*", "tests/**/*", "build.hxml"]
 }

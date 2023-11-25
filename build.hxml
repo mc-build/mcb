@@ -10,22 +10,19 @@
 -D js-es=6
 -D js-classic
 
+--debug
 --each
 
 -m Main
 
 --js bin/mcb.js
---debug
 --next
 
-
-LibMain
+-m LibMain
 
 --js bin/libmcb.js
---debug
 --next
 
 -m testbed.TestMain
 
 --js bin/testbed.js
-# --debug

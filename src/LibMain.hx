@@ -1,5 +1,7 @@
 package;
 
+import mcl.TemplateRegisterer;
+import mcl.args.TemplateArgument;
 import mcl.AstNode;
 import sys.io.File;
 import mcl.Tokenizer;
@@ -16,6 +18,10 @@ typedef CompileOptions = {};
 @:keepSub
 @:expose("mcb")
 class LibMain {
+	public static function main() {
+		TemplateRegisterer.register();
+	}
+
 	public static function createCompiler(baseDir:String) {
 		return new Compiler(null, baseDir);
 	}
