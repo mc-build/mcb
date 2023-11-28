@@ -29,6 +29,7 @@ class BoundBlock {
 			templates: this.ctx.templates,
 			requireTemplateKeyword: this.ctx.requireTemplateKeyword,
 			compiler: this.ctx.compiler,
+			globalVariables: context.globalVariables
 		};
 		file.embed(ctx, pos, new Map(), [this.node]);
 		return content.join("\n");

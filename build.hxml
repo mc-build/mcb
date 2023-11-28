@@ -15,7 +15,7 @@
 
 -m Main
 
---js bin/mcb.js
+--js bin/mcb-debug.js
 --next
 
 -m LibMain
@@ -26,3 +26,9 @@
 -m testbed.TestMain
 
 --js bin/testbed.js
+
+--next
+
+-m mcb.Cli
+
+--js bin/mcb.js
