@@ -7,3 +7,5 @@ debug.dat
 tools/
 test-src/
 data/
+dist/
+types/
