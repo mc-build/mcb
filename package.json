@@ -1,14 +1,18 @@
 {
   "scripts": {
-    "build": "yarn build:io-worker && yarn build:haxe",
+    "build": "yarn build:io-worker && powershell ./build.ps1",
     "build:io-worker": "ts-node ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
     "test": "node ./bin/mcb test-src --io-mt 2",
-    "dev": "nodemon --config nodemon.json"
+    "dev": "nodemon --config nodemon.json",
+    "postinstall": "yarn setup",
+    "setup": "dts2hx chokidar"
   },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.8.4",
+    "chokidar": "^3.5.3",
+    "dts2hx": "^0.20.0",
     "esbuild": "^0.19.4",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",

@@ -23,7 +23,7 @@ class LibMain {
 	}
 
 	public static function createCompiler(baseDir:String) {
-		return new Compiler(null, baseDir);
+		return new Compiler(baseDir);
 	}
 
 	public static function parseFile(path:String, content:String):Array<AstNode> {

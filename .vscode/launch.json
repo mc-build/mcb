@@ -14,21 +14,15 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/bin/mcb.js"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch dts",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/bin/util/dtsgen.js"
+      "program": "${workspaceFolder}/dist/mcb.js",
+      "args": ["--help"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch Tests",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/bin/testbed.js"
+      "program": "${workspaceFolder}/dist/testbed.js"
     }
   ]
 }

@@ -69,7 +69,7 @@ class Main {
 		var hasT = Sys.args().indexOf("--io-t");
 		var isFile = !FileSystem.isDirectory(dir);
 		var baseDir = isFile ? Path.directory(dir) : dir;
-		var compiler = new Compiler(null, baseDir);
+		var compiler = new Compiler(baseDir);
 		if (hasMT >= 0)
 			compiler.io = new MultiThreadIo(Std.parseInt(Sys.args()[hasMT + 1]));
 		else if (hasT >= 0)

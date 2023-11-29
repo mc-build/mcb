@@ -1,0 +1,15 @@
+import ./lib-config.js
+template test{
+    with{
+        say hi
+    }
+    load {
+        scoreboard objectives add const dummy
+    }
+    with a:int {
+        block {
+            say int (<%a%>)
+        }
+        scoreboard players set <%a%> const <%a%>
+    }
+}

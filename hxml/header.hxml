@@ -1,0 +1,13 @@
+-cp src
+
+--resource ./src/resources/generated/io-worker.js@io-worker
+
+-L genes
+-L hxnodejs
+-L chokidar
+-L mcli
+
+-D dts
+-D js-es=6
+-D js-classic
+--dce full

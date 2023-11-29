@@ -1,0 +1,7 @@
+hxml/header.hxml
+-m testbed.TestMain
+
+--js ./bin/testbed.js
+--cmd yarn ts-node ./scripts/compile-output.ts bin/testbed.js
+
+--next

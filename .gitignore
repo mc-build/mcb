@@ -5,7 +5,7 @@ node_modules/
 debug.dat
 *.debug.json
 tools/
-test-src/
+test/src/
 data/
 dist/
 types/

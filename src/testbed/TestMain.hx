@@ -14,7 +14,7 @@ class TestMain {
 		var tests = TestBuilder.getTests();
 		for (t in tests) {
 			var io = new TestIo();
-			var compiler = new Compiler('mcb-test-${t.name}', "");
+			var compiler = new Compiler("");
 			compiler.io = io;
 			for (f in t.sources) {
 				var ext = Path.extension(f.path);

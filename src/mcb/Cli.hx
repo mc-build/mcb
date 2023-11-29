@@ -1,53 +1,70 @@
 package mcb;
 
+import node.fs.WatchOptions;
 import sys.FileSystem;
 import haxe.io.Path;
 import mcl.AstNode;
 import mcl.Tokenizer.Token;
 import sys.io.File;
 import haxe.Unserializer;
+import mcli.CommandLine;
+import Chokidar;
 
-typedef DebugFile = {
-	f:String,
-	t:Array<Token>,
-	a:AstNode,
-	s:String
-}
+class Cli extends CommandLine {
+	public var libPath:String = Path.join([Path.directory(Sys.programPath()), "./.mcblib"]);
+	public var baseDir:String = Sys.getCwd();
+	public var configPath:String = Path.join([this.baseDir, "./config"]);
 
-class Cli {
-	public static function loadDebugProject(file:String, outdir:String) {
-		var reader = new Unserializer(File.getContent(file));
+	// 	2+ = thread pool (must be a power of 2)
+	// 	0 = synchronous (default)\n
+	// 	1 = threaded\n
+	public var ioThreadCount:Int = 0;
 
-		var files = [];
+	@:skip private var didRun:Bool = false;
 
-		while (true) {
-			var item:Null<DebugFile> = reader.unserialize();
+	public function build() {
+		didRun = true;
+		mcb.AppMain.doBuild({
+			watch: false,
+			libDir: this.libPath,
+			baseDir: this.baseDir,
+			configPath: this.configPath,
+		});
+	}
 
-			if (item == null) {
-				break;
-			}
-			var p = Path.join([outdir, item.f]);
-			FileSystem.createDirectory(Path.directory(p));
-			File.saveContent(p, item.s);
-			File.saveContent(p + ".tokens", Std.string(item.t));
-			File.saveContent(p + ".ast", Std.string(item.a));
+	public function help() {
+		Sys.println("MCB - A Minecraft Data Pack build tool.");
+		Sys.println("");
+		Sys.println("Usage:");
+		Sys.println("mcb build");
+		Sys.println("mcb watch");
+		Sys.println("");
+		Sys.println("Flags:");
+		Sys.println(this.showUsage());
+		Sys.exit(0);
+	}
+
+	public function runDefault(?mode:String) {
+		if (didRun)
+			return;
+		switch (mode) {
+			case "build":
+				this.build();
+			case "watch":
+				this.watch();
+			default:
+				this.help();
 		}
+	}
 
-		trace(files);
-
-		var x = AstNode.Comment({
-			file: "test",
-			line: 1,
-			col: 1
-		}, "");
+	@:alias("watch") public function watch() {
+		didRun = true;
+		// AppMain.doBuild({
+		// 	watch: true,
+		// });
 	}
 
 	public static function main() {
-		var args = Sys.args();
-		if (args[0] == "debug") {
-			var file = args[1];
-			var outdir = args[2];
-			Cli.loadDebugProject(file, outdir);
-		}
+		new mcli.Dispatch(Sys.args()).dispatch(new Cli());
 	}
 }

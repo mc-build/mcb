@@ -8,6 +8,6 @@ build({
   outdir: "dist",
   platform: "node",
   minifySyntax: false,
-  minifyWhitespace: true,
-  minifyIdentifiers: true,
+  // minifyWhitespace: true,
+  // minifyIdentifiers: true,
 });

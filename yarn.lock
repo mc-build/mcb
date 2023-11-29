@@ -217,7 +217,7 @@ braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-chokidar@^3.5.2:
+chokidar@^3.5.2, chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
@@ -253,6 +253,13 @@ diff@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
+
+dts2hx@^0.20.0:
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/dts2hx/-/dts2hx-0.20.0.tgz#6fcf796fc23d558ec2f19d20087f83264aa098b5"
+  integrity sha512-+rDmhgRoYwlljTHzah4y4wnenKlBOOJLbm8TDnMtlzLRD1N2Vl3aVyQgqDpGAualNJ4bha1qTwGtJ+FMiuBy9w==
+  dependencies:
+    typescript "3.7.4"
 
 esbuild@^0.19.4:
   version "0.19.4"
@@ -457,6 +464,11 @@ ts-node@^10.9.1:
     make-error "^1.1.1"
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
+
+typescript@3.7.4:
+  version "3.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
+  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
 
 typescript@^5.2.2:
   version "5.2.2"

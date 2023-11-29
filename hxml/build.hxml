@@ -1,0 +1,8 @@
+--each
+
+hxml/packages/cli.hxml
+hxml/packages/testbed.hxml
+hxml/packages/debug.hxml
+hxml/packages/lib.hxml
+# don't compile the library version of the codebase since it can be tree shaken
+# --cmd yarn ts-node ./scripts/compile-output.ts bin/libmcb.js

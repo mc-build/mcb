@@ -14,7 +14,7 @@ import js.Lib;
 import haxe.io.Path;
 import mcl.args.TemplateArgument;
 
-private class ErrorUtil {
+class ErrorUtil {
 	public static function format(message:String, pos:PosInfo):String {
 		return '${pos.file}:${pos.line}:${pos.col}: ${message}';
 	}
@@ -36,7 +36,7 @@ private class ErrorUtil {
 	}
 }
 
-private class McTemplate {
+class McTemplate {
 	private var name:String;
 	private var body:Array<AstNode>;
 	private var overloads:Map<Array<TemplateArgument>, Array<AstNode>> = new Map();
@@ -271,6 +271,11 @@ typedef CompilerContext = {
 	var globalVariables:VariableMap;
 };
 
+enum ImportFileType {
+	IMcFile(f:McFile);
+	IJsFile(f:Any);
+}
+
 class McFile {
 	public var name:String;
 
@@ -285,6 +290,7 @@ class McFile {
 	private var ext:String;
 	private var loadCommands:Array<String> = [];
 	private var tickCommands:Array<String> = [];
+	private var fileJs:Any = {};
 
 	public function new(name:String, ast:Array<AstNode>) {
 		this.name = name;
@@ -305,7 +311,13 @@ class McFile {
 		for (node in ast) {
 			switch (node) {
 				case Import(_, importName):
-					imports.set(importName, compiler.resolve(this.name, importName));
+					var res = compiler.resolve(this.name, importName);
+					switch (res) {
+						case IMcFile(f):
+							imports.set(importName, f);
+						case IJsFile(f):
+							Syntax.code('Object.assign({0}, {1});', this.fileJs, f);
+					}
 				case TemplateDef(_, name, body):
 					var template = new McTemplate(name, body, this);
 					templates.set(name, template);
@@ -798,6 +810,7 @@ class Compiler {
 
 	private var files:Map<String, McFile> = new Map();
 	private var alreadySetupFiles = new Map<String, Bool>();
+	private var libStore:Null<LibStore> = null;
 
 	public var baseDir:String;
 	public var tags:TagManager = new TagManager();
@@ -808,17 +821,28 @@ class Compiler {
 		files.set(name, file);
 	}
 
-	public function resolve(baseFile:String, resolutionPath:String):McFile {
-		var base = Path.directory(baseFile);
-		var resolved = Path.join([base, resolutionPath]);
-		if (files.exists(resolved)) {
-			if (!alreadySetupFiles.exists(resolved)) {
-				alreadySetupFiles.set(resolved, true);
-				files.get(resolved).setup(this);
+	public function resolve(baseFile:String, resolutionPath:String):ImportFileType {
+		if (resolutionPath.charAt(0) == ".") {
+			var base = Path.directory(baseFile);
+			var resolved = Path.join([base, resolutionPath]);
+			if (Path.extension(resolutionPath) == "js") {
+				return IJsFile(Syntax.code('require({0})', resolved));
 			}
-			return files.get(resolved);
+			if (files.exists(resolved)) {
+				if (!alreadySetupFiles.exists(resolved)) {
+					alreadySetupFiles.set(resolved, true);
+					files.get(resolved).setup(this);
+				}
+				return IMcFile(files.get(resolved));
+			}
+			throw "Failed to resolve import: " + resolved;
+		} else {
+			return IMcFile(this.libStore.lookup(resolutionPath, {
+				file: baseFile,
+				line: 0,
+				col: 0
+			}, this));
 		}
-		throw "Failed to resolve import: " + resolved;
 	}
 
 	public function getInitialPathInfo(p:String):{
@@ -850,9 +874,8 @@ class Compiler {
 		tags.writeTagFiles(this);
 	}
 
-	public function new(?packNamespace:String, baseDir:String) {
-		if (packNamespace != null)
-			this.packNamespace = packNamespace;
+	public function new(baseDir:String, ?lib:LibStore) {
 		this.baseDir = baseDir;
+		this.libStore = lib;
 	}
 }
