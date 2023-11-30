@@ -1,14 +1,28 @@
 {
+  "name": "mc-build",
+  "version": "3.0.1-alpha.0",
+  "description": "A language for creating minecraft datapacks",
+  "module": "dist/libmcb.js",
+  "bin": {
+    "mcb3": "./dist/mcb.js"
+  },
+  "types": "dist/libmcb.d.ts",
+  "repository": "git@github.com:mc-build/mcb.git",
+  "author": "Ian Senne <ian@iansenne.com>",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "scripts"
+  ],
   "scripts": {
     "build": "yarn build:io-worker && powershell ./build.ps1",
     "build:io-worker": "ts-node ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
     "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
-    "postinstall": "yarn setup",
-    "setup": "dts2hx chokidar"
+    "setup": "dts2hx chokidar",
+    "dist":"yarn build"
   },
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.8.4",
     "chokidar": "^3.5.3",

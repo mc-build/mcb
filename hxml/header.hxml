@@ -10,4 +10,5 @@
 -D dts
 -D js-es=6
 -D js-classic
+-D no-deprecation-warnings
 --dce full
