@@ -1,5 +1,5 @@
 module.exports = {
-  itteratorFunction: function* () {
+  iteratorFunction: function* () {
     yield 1;
     yield 3;
     yield 5;

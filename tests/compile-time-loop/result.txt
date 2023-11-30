@@ -25,7 +25,7 @@ say a
 say b
 say c
 ----------------
-data/main/functions/test/itterator-function.mcfunction:
+data/main/functions/test/iterator-function.mcfunction:
 say 1
 say 3
 say 5

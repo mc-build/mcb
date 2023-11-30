@@ -3,7 +3,7 @@
     "build": "yarn build:io-worker && powershell ./build.ps1",
     "build:io-worker": "ts-node ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
-    "test": "node ./bin/mcb test-src --io-mt 2",
+    "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
     "postinstall": "yarn setup",
     "setup": "dts2hx chokidar"

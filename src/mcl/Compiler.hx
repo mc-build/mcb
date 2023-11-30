@@ -35,6 +35,13 @@ class ErrorUtil {
 		return formatContext('Unexpected: ${node}', AstNodeUtils.getPos(node), context);
 	}
 }
+private class UidTracker{
+	private var uid:Int = 0;
+	public function new(){}
+	public function get():Int{
+		return uid++;
+	}
+}
 
 class McTemplate {
 	private var name:String;
@@ -115,7 +122,7 @@ class McTemplate {
 				},
 				namespace: info.namespace,
 				path: info.path,
-				uidIndex: 0,
+				uidIndex: context.uidIndex,
 				variables: new VariableMap(context.globalVariables),
 				templates: this.file.templates,
 				stack: context.stack,
@@ -219,7 +226,6 @@ class McTemplate {
 			};
 			file.embed(newContext, pos, args, overloadBody);
 			// trace("MATCHED", types, args);
-			context.uidIndex = newContext.uidIndex;
 			return;
 		}
 		throw "Failed to find matching template overload for: " + value;
@@ -260,7 +266,7 @@ typedef CompilerContext = {
 	var append:String->Void;
 	var namespace:String;
 	var path:Array<String>;
-	var uidIndex:Int;
+	var uidIndex:UidTracker;
 	var variables:VariableMap;
 	var replacements:VariableMap;
 	var stack:Array<PosInfo>;
@@ -345,7 +351,7 @@ class McFile {
 			context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables);
 	}
 
-	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:Int,
+	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:UidTracker,
 			stack:Array<PosInfo>, replacements:VariableMap, templates:Map<String, McTemplate>, requireTemplateKeyword:Bool, compiler:Compiler,
 			globalVariables:VariableMap):CompilerContext {
 		return {
@@ -381,7 +387,7 @@ class McFile {
 		var result = commands.join("\n");
 		if (name != null)
 			name = injectValues(name, context, pos);
-		var id = name == null ? 'zzz/${Std.string(context.uidIndex++)}' : name;
+		var id = name == null ? 'zzz/${Std.string(context.uidIndex.get())}' : name;
 		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
 		return 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data');
 	}
@@ -463,7 +469,7 @@ class McFile {
 					compileCommandUnit(node, newContext);
 				}
 				var result = commands.join("\n");
-				var id = Std.string(context.uidIndex++);
+				var id = Std.string(context.uidIndex.get());
 				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 				if (continuations != null) {
 					context.append('scoreboard players set #ifelse int 0');
@@ -491,8 +497,7 @@ class McFile {
 									compileCommandUnit(node, embedContext);
 								}
 								var result = commands.join("\n");
-
-								var id = Std.string(context.uidIndex++);
+								var id = Std.string(context.uidIndex.get());
 
 								saveContent(context,
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
@@ -512,7 +517,7 @@ class McFile {
 									compileCommandUnit(node, embedContext);
 								}
 								var result = embedCommands.join("\n");
-								var id = Std.string(context.uidIndex++);
+								var id = Std.string(context.uidIndex.get());
 								saveContent(context,
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
@@ -561,7 +566,6 @@ class McFile {
 		for (node in body) {
 			compileCommandUnit(node, newContext);
 		}
-		context.uidIndex = newContext.uidIndex;
 
 		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
 		if (appendTo != null) {
@@ -581,12 +585,11 @@ class McFile {
 		var newContext = createCompilerContext(context.namespace, v -> {
 			throw "Internal error: append not available for directory context";
 		},
-			context.variables, context.path.concat([name]), 0, context.stack, context.replacements, context.templates, context.requireTemplateKeyword,
+			context.variables, context.path.concat([name]), new UidTracker(), context.stack, context.replacements, context.templates, context.requireTemplateKeyword,
 			context.compiler, context.globalVariables);
 		for (node in body) {
 			compileTld(node, newContext);
 		}
-		context.uidIndex = newContext.uidIndex;
 	}
 
 	private function compileTld(node:AstNode, context:CompilerContext) {
@@ -614,7 +617,7 @@ class McFile {
 					commands.push(v);
 				});
 
-				var id = Std.string(context.uidIndex++);
+				var id = Std.string(context.uidIndex.get());
 				var functionId = context.namespace + ":" + context.path.concat(["zzz", '$id']).join("/");
 				commands.push('schedule $functionId $time replace');
 				for (node in body) {
@@ -665,7 +668,6 @@ class McFile {
 				for (node in body) {
 					handler(newContext, node);
 				}
-				context.uidIndex = newContext.uidIndex;
 			}
 		}
 	}
@@ -776,7 +778,7 @@ class McFile {
 		var context = createCompilerContext(info.namespace, v -> {
 			throw "Internal error: append not available for top-level context";
 		},
-			new VariableMap(vars, Globals.map), info.path, 0, [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler, vars);
+			new VariableMap(vars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler, vars);
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);

@@ -23,8 +23,8 @@ dir test{
         }
     }
 
-    function itterator-function{
-        LOOP(itteratorFunction) as i{
+    function iterator-function{
+        LOOP(iteratorFunction) as i{
             say <%i%>
         }
     }
