@@ -1,0 +1,6 @@
+template test{
+	with{
+		say hi
+		say hi2
+	}
+}

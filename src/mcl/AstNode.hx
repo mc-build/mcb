@@ -46,6 +46,8 @@ enum AstNode {
 	TemplateOverload(pos:PosInfo, args:String, body:Array<AstNode>);
 
 	ClockExpr(pos:PosInfo, time:String, body:Array<AstNode>);
+
+	Execute(pos:PosInfo,command:String,value:AstNode);
 }
 
 class AstNodeUtils {
@@ -88,4 +90,6 @@ enum abstract AstNodeIds(Int) from Int {
 
 	// clock
 	var ClockExpr = 19;
+
+	var Execute = 20;
 }

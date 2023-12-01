@@ -1,0 +1,7 @@
+import ./template.mcbt
+function test{
+	execute run block test_block {
+		say test
+	}
+	execute run test
+}

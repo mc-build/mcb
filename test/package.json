@@ -1,5 +1,8 @@
 {
 	"scripts": {
-		"build":"node ../dist/mcb build"
+		"build": "mcb3"
+	},
+	"dependencies": {
+		"mc-build": "file:.."
 	}
 }

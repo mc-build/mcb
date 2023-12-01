@@ -459,6 +459,23 @@ class McFile {
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommandUnit(v, context);
 				});
+			case Execute(pos,command,value):
+				var commands:Array<String> = [];
+				var newContext = forkCompilerContextWithAppend(context, v -> {
+					commands.push(v);
+				});
+				compileCommandUnit(value,newContext);
+				if(commands.length == 0){
+					throw ErrorUtil.formatContext("Unexpected empty execute", pos, context);
+				}
+				if(commands.length == 1){
+					context.append(injectValues('$command ${commands[0]}', context, pos));
+				}else {
+					var id = Std.string(context.uidIndex.get());
+					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"])));
+					saveContent(context, path, commands.join("\n"));
+					context.append(injectValues('$command function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}', context, pos));
+				}
 			case ExecuteBlock(pos, execute, data, body, continuations):
 				var commands:Array<String> = [];
 				var append = function(command:String) {
