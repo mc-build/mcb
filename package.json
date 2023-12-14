@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.0.1-alpha.2",
+  "version": "3.0.1-alpha.3",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
@@ -21,7 +21,7 @@
     "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
     "setup": "dts2hx chokidar",
-    "dist":"yarn build"
+    "dist": "yarn build"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
