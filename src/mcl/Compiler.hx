@@ -1,5 +1,6 @@
 package mcl;
 
+import ext.Module;
 import mcl.Parser.TokenInput;
 import mcl.Tokenizer.Token;
 import haxe.ds.IntMap;
@@ -448,7 +449,7 @@ class McFile {
 					str += '}';
 			}
 		}
-		var names:Array<String> = ['emit', 'context', "embed"];
+		var names:Array<String> = ['emit', 'context', "embed", "require"];
 		var emit = (c:String) -> context.append(c);
 		function emitMcb(code:String) {
 			this.compileInline(context, code);
@@ -467,7 +468,8 @@ class McFile {
 			context,
 			function(v) {
 				return v.embedTo(context, pos, this);
-			}
+			},
+			Module.createRequire(this.name)
 		];
 		var jsEnv = context.variables.get();
 		for (k => v in jsEnv) {
@@ -825,10 +827,15 @@ class McFile {
 
 	public function compile(vars:VariableMap, compiler:Compiler) {
 		var info = compiler.getInitialPathInfo(this.name);
+		var thisFileVars = new VariableMap(vars, [
+			for (k in Reflect.fields(this.fileJs))
+				k => Reflect.field(this.fileJs, k)
+		]);
 		var context = createCompilerContext(info.namespace, v -> {
 			throw "Internal error: append not available for top-level context";
 		},
-			new VariableMap(vars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler, vars);
+			new VariableMap(thisFileVars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler,
+			thisFileVars);
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
