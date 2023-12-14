@@ -1,10 +1,12 @@
 {
   "name": "mc-build",
-  "version": "3.0.2-alpha.0",
+  "version": "3.0.2-alpha.1",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
-    "mcb3": "./dist/mcb.js"
+    "mcb3": "./dist/mcb.js",
+    "mc-build": "./dist/mcb.js",
+    "mcb": "./dist/mcb.js"
   },
   "types": "dist/libmcb.d.ts",
   "repository": "git@github.com:mc-build/mcb.git",

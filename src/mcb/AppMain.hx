@@ -102,6 +102,7 @@ class AppMain {
 		TemplateRegisterer.register();
 		watch = opts.watch;
 		var files = compile(opts);
+		Sys.println('Processed ${files.length} files.');
 		if (opts.watch) {
 			var watcher = Chokidar.watch(files, {ignoreInitial: true});
 			watcher.on("change", () -> {
@@ -125,6 +126,7 @@ class AppMain {
 					watcher.add([for (f in newFileSet) f]);
 					Sys.println('Added ${newFileSet.size} files to the watch list.');
 				}
+				files = newFiles;
 			});
 		}
 	}
