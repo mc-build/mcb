@@ -37,4 +37,8 @@ $ npm i -g mc-build
 
 [https://github.com/mc-build/mcb/wiki](https://github.com/mc-build/mcb/wiki)
 
-### I as well as the mc-build project am not affiliated with Mojang in any way.
+### NOTES:
+
+the require call in script block does not have a test case as the testing enviroment does not provide full file paths as the `Module.createRequire` call expects
+
+**I as well as the mc-build project am not affiliated with Mojang in any way.**
