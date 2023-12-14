@@ -1,0 +1,12 @@
+data/test/functions/zzz/0.mcfunction:
+say 1
+say 2
+----------------
+data/test/functions/zzz/1.mcfunction:
+say 3
+say 4
+----------------
+data/test/functions/test.mcfunction:
+function test:zzz/0
+function test:zzz/1 with storage a:b test
+----------------

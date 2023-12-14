@@ -1,0 +1,6 @@
+data/test/functions/zzz/0.mcfunction:
+say hi
+----------------
+data/test/functions/test.mcfunction:
+function test:zzz/0
+----------------

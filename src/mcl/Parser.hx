@@ -7,7 +7,7 @@ import haxe.extern.Rest;
 import mcl.Tokenizer.TokenIds;
 import mcl.Tokenizer.Token;
 
-private class ArrayInput<T> {
+class ArrayInput<T> {
 	var array:Array<T>;
 	var index:Int;
 
@@ -32,6 +32,7 @@ private class ArrayInput<T> {
 	public function hasNext():Bool {
 		return index < array.length;
 	}
+
 	public function insert(token:T):Void {
 		array.insert(index, token);
 	}
@@ -229,6 +230,7 @@ class Parser {
 
 	static var loopRegExp = new EReg("(LOOP\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
 	static var executeRegExp = new EReg("\\b(run\\s+?)\\b", "");
+
 	public static function parserCompilerLoop(v:String, pos:PosInfo, reader:TokenInput, handler:Void->AstNode):AstNode {
 		var content:Array<AstNode> = [];
 		block(reader, () -> {
@@ -293,7 +295,7 @@ class Parser {
 		}
 	}
 
-	private static function innerParse(reader:TokenInput):AstNode {
+	public static function innerParse(reader:TokenInput):AstNode {
 		var token = reader.peek();
 		switch (token) {
 			case Literal(v, pos):
@@ -316,15 +318,15 @@ class Parser {
 						return MultiLineScript(pos, content);
 					case _ if (StringTools.startsWith(v, "IF")): return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
 
-					case _ if (StringTools.startsWith(v, "execute ")): 
+					case _ if (StringTools.startsWith(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
-							if(!StringTools.endsWith(v,"run") && executeRegExp.match(v)){
+							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {
 								var p = executeRegExp.matchedPos();
 								var subPos:PosInfo = {file: pos.file, line: pos.line, col: pos.col + p.pos + p.len};
-								var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)),subPos);
+								var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)), subPos);
 								reader.insert(continuationToken);
-								return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)),innerParse(reader));
+								return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
 							}
 							var data = block(reader, () -> {
 								content.push(innerParse(reader));
@@ -353,12 +355,13 @@ class Parser {
 							}
 							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null);
 						} else {
-							if(!executeRegExp.match(v))return readRaw(pos, v, reader);
+							if (!executeRegExp.match(v))
+								return readRaw(pos, v, reader);
 							var p = executeRegExp.matchedPos();
 							var subPos:PosInfo = {file: pos.file, line: pos.line, col: pos.col + p.pos + p.len};
 							var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)), subPos);
 							reader.insert(continuationToken);
-							return Execute(pos, StringTools.rtrim(v.substring(0,p.pos + 3)), innerParse(reader));
+							return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
 						}
 					case _ if (StringTools.startsWith(v, "LOOP")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringTools.startsWith(v, "#")): return Comment(pos, v);

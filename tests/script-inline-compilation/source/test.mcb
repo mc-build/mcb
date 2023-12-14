@@ -1,0 +1,5 @@
+function test{
+    <%%
+        emit.mcb("block {\nsay hi\n}");
+    %%>
+}

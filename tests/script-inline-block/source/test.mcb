@@ -1,0 +1,6 @@
+function test{
+    <%%
+        emit.block(["say 1","say 2"]);
+        emit.block(["say 3","say 4"],"with storage a:b test");
+    %%>
+}

@@ -1,6 +1,6 @@
 package mcl;
 
-import js.lib.Symbol;
+import mcl.Parser.TokenInput;
 import mcl.Tokenizer.Token;
 import haxe.ds.IntMap;
 import mcl.AstNode.CompileTimeIfElseExpressions;
@@ -35,10 +35,13 @@ class ErrorUtil {
 		return formatContext('Unexpected: ${node}', AstNodeUtils.getPos(node), context);
 	}
 }
-private class UidTracker{
+
+private class UidTracker {
 	private var uid:Int = 0;
-	public function new(){}
-	public function get():Int{
+
+	public function new() {}
+
+	public function get():Int {
 		return uid++;
 	}
 }
@@ -422,6 +425,17 @@ class McFile {
 		context.append(injectValues(value, context, pos));
 	}
 
+	private function compileInline(context:CompilerContext, code:String) {
+		var tokens = Tokenizer.tokenize(code, '<inline ${this.name}>');
+		var tokenInput = new TokenInput(tokens);
+		var astNodes:Array<AstNode> = [];
+		while (tokenInput.hasNext()) {
+			astNodes.push(Parser.innerParse(tokenInput));
+		}
+		for (node in astNodes)
+			this.compileCommandUnit(node, context);
+	}
+
 	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>) {
 		var str = "";
 		for (t in tokens) {
@@ -434,8 +448,27 @@ class McFile {
 					str += '}';
 			}
 		}
-		var names:Array<String> = ['emit', 'context'];
-		var values:Array<Any> = [context.append, context];
+		var names:Array<String> = ['emit', 'context', "embed"];
+		var emit = (c:String) -> context.append(c);
+		function emitMcb(code:String) {
+			this.compileInline(context, code);
+		}
+		function emitBlock(commands:Array<String>, ?data:String) {
+			var id = 'zzz/${Std.string(context.uidIndex.get())}';
+			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
+			context.append('function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
+		}
+		untyped {
+			emit.mcb = emitMcb;
+			emit.block = emitBlock;
+		}
+		var values:Array<Any> = [
+			emit,
+			context,
+			function(v) {
+				return v.embedTo(context, pos, this);
+			}
+		];
 		var jsEnv = context.variables.get();
 		for (k => v in jsEnv) {
 			names.push(k);
@@ -459,18 +492,18 @@ class McFile {
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommandUnit(v, context);
 				});
-			case Execute(pos,command,value):
+			case Execute(pos, command, value):
 				var commands:Array<String> = [];
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				});
-				compileCommandUnit(value,newContext);
-				if(commands.length == 0){
+				compileCommandUnit(value, newContext);
+				if (commands.length == 0) {
 					throw ErrorUtil.formatContext("Unexpected empty execute", pos, context);
 				}
-				if(commands.length == 1){
+				if (commands.length == 1) {
 					context.append(injectValues('$command ${commands[0]}', context, pos));
-				}else {
+				} else {
 					var id = Std.string(context.uidIndex.get());
 					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"])));
 					saveContent(context, path, commands.join("\n"));
@@ -602,8 +635,8 @@ class McFile {
 		var newContext = createCompilerContext(context.namespace, v -> {
 			throw "Internal error: append not available for directory context";
 		},
-			context.variables, context.path.concat([name]), new UidTracker(), context.stack, context.replacements, context.templates, context.requireTemplateKeyword,
-			context.compiler, context.globalVariables);
+			context.variables, context.path.concat([name]), new UidTracker(), context.stack, context.replacements, context.templates,
+			context.requireTemplateKeyword, context.compiler, context.globalVariables);
 		for (node in body) {
 			compileTld(node, newContext);
 		}
