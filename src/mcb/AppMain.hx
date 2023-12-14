@@ -1,5 +1,6 @@
 package mcb;
 
+import js.lib.Set;
 import mcl.TemplateRegisterer;
 import mcl.LibStore;
 import mcl.Parser;
@@ -47,7 +48,9 @@ class AppMain {
 	private static function discoverConfigFile(p:String):Null<String> {
 		var ext = Path.extension(p);
 		if (ext == null) {
-			if (FileSystem.exists(p + ".js")) {
+			if (FileSystem.exists(p + ".cjs")) {
+				return p + ".cjs";
+			} else if (FileSystem.exists(p + ".js")) {
 				return p + ".js";
 			} else if (FileSystem.exists(p + ".json")) {
 				return p + ".json";
@@ -78,21 +81,51 @@ class AppMain {
 		var configPath = discoverConfigFile(opts.configPath);
 		var config = Syntax.code('require({0})', configPath);
 		var sourceFiles = getFilesInDirectory(srcDir);
+		var observableSourceFiles:Array<String> = [];
 		for (f in sourceFiles) {
 			var ext = Path.extension(f);
+			// if (ext != "mcb" && ext != "mcbt")
+			// 	continue;
 			var tokens = Tokenizer.tokenize(File.getContent(f), f);
 			var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
 			compiler.addFile(f, ast);
+			observableSourceFiles.push(f);
 		}
 		compiler.compile(new VariableMap(null, ["config" => config]));
+		var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
+		return observableSourceFiles.concat(npmCacheFiles);
 	}
+
+	public static var watch:Bool = false;
 
 	public static function doBuild(opts:BuildOpts) {
 		TemplateRegisterer.register();
+		watch = opts.watch;
+		var files = compile(opts);
 		if (opts.watch) {
-			// compile(opts);
-		} else {
-			compile(opts);
+			var watcher = Chokidar.watch(files, {ignoreInitial: true});
+			watcher.on("change", () -> {
+				untyped {
+					require.cache = {};
+				}
+				var newFiles = compile(opts);
+				var oldFileSet = new Set(files);
+				var newFileSet = new Set(newFiles);
+				for (file in newFiles) {
+					oldFileSet.delete(file);
+				}
+				for (file in files) {
+					newFileSet.delete(file);
+				}
+				if (oldFileSet.size > 0) {
+					watcher.unwatch([for (f in oldFileSet) f]);
+					Sys.println('Removed ${oldFileSet.size} files from the watch list.');
+				}
+				if (newFileSet.size > 0) {
+					watcher.add([for (f in newFileSet) f]);
+					Sys.println('Added ${newFileSet.size} files to the watch list.');
+				}
+			});
 		}
 	}
 }

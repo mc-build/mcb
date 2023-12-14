@@ -59,12 +59,19 @@ class Cli extends CommandLine {
 
 	@:alias("watch") public function watch() {
 		didRun = true;
-		// AppMain.doBuild({
-		// 	watch: true,
-		// });
+		AppMain.doBuild({
+			watch: true,
+			libDir: this.libPath,
+			baseDir: this.baseDir,
+			configPath: this.configPath,
+		});
 	}
 
 	public static function main() {
 		new mcli.Dispatch(Sys.args()).dispatch(new Cli());
+	}
+
+	@:alias("create") public function init(name:String) {
+		didRun = true;
 	}
 }

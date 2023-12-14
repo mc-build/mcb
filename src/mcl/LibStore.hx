@@ -53,8 +53,11 @@ class LibStore {
 		var files = getFilesInDirectory(baseDir);
 		var result = new Map<String, McFile>();
 		for (f in files) {
-			var tokens = Tokenizer.tokenize(File.getContent(f), f);
 			var ext = Path.extension(f);
+			if (ext != "mbt" && ext != "mcbt")
+				continue;
+
+			var tokens = Tokenizer.tokenize(File.getContent(f), f);
 			var ast = ext == 'mcb' ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
 			var mcFile = new McFile(f, ast);
 			mcFile.setup(compiler);

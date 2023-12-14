@@ -877,7 +877,8 @@ class Compiler {
 		if (resolutionPath.charAt(0) == ".") {
 			var base = Path.directory(baseFile);
 			var resolved = Path.join([base, resolutionPath]);
-			if (Path.extension(resolutionPath) == "js") {
+			var ext = Path.extension(resolutionPath);
+			if (StringTools.endsWith(ext, "js") || ext == "json") {
 				return IJsFile(Syntax.code('require({0})', resolved));
 			}
 			if (files.exists(resolved)) {
