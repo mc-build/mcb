@@ -84,8 +84,8 @@ class AppMain {
 		var observableSourceFiles:Array<String> = [];
 		for (f in sourceFiles) {
 			var ext = Path.extension(f);
-			// if (ext != "mcb" && ext != "mcbt")
-			// 	continue;
+			if (ext != "mcb" && ext != "mcbt")
+				continue;
 			var tokens = Tokenizer.tokenize(File.getContent(f), f);
 			var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
 			compiler.addFile(f, ast);
