@@ -15,16 +15,6 @@ say 2
 say 7
 say 9
 ----------------
-data/main/functions/test/object/true.mcfunction:
-say 1
-say 2
-say 3
-----------------
-data/main/functions/test/object/false.mcfunction:
-say a
-say b
-say c
-----------------
 data/main/functions/test/iterator-function.mcfunction:
 say 1
 say 3

@@ -10,18 +10,6 @@ dir test{
             say <%i%>
         }
     }
-    dir object{
-        function true {
-            LOOP({a:1,b:2,c:3},true) as i {
-                say <%i%>
-            }
-        }
-        function false{
-            LOOP({a:1,b:2,c:3},false) as i {
-                say <%i%>
-            }
-        }
-    }
 
     function iterator-function{
         LOOP(iteratorFunction) as i{

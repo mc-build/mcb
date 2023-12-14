@@ -56,9 +56,6 @@ class Globals {
 		[TClass(Array)] => (args:Array<Any>) -> {
 			return cast new ArrayIterator(args[0]);
 		},
-		[TObject, TBool] => (args:Array<Any>) -> {
-			return new ArrayIterator(args[1] == false ? cast Object.keys(args[0]) : cast Object.values(args[0]));
-		},
 		[TFunction] => (args) -> {
 			var iterator:Void->js.lib.Iterator<Any> = cast args[0];
 			return new ArrayIterator(Syntax.code('Array.from({0})', iterator()));
