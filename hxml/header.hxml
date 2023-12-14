@@ -2,10 +2,8 @@
 
 --resource ./src/resources/generated/io-worker.js@io-worker
 
--L genes
--L hxnodejs
+lib.hxml
 -L chokidar
--L mcli
 
 -D dts
 -D js-es=6
