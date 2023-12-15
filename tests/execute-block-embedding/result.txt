@@ -1,11 +1,11 @@
 data/test/functions/test_block.mcfunction:
 say test
 ----------------
-data/test/functions/zzz/0.mcfunction:
+data/test/functions/zzz/1.mcfunction:
 say hi
 say hi2
 ----------------
 data/test/functions/test.mcfunction:
 execute run function test:test_block
-execute run function test:zzz/0
+execute run function test:zzz/1
 ----------------

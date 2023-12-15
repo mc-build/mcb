@@ -1,13 +1,17 @@
 package testbed;
 
+import js.Lib;
+
 class TestIo implements Io {
 	var files:Map<String, String> = new Map();
 
 	public function new() {}
 
 	public function write(path:String, content:String) {
-		if (files.exists(path))
+		if (files.exists(path)) {
+			Lib.debug();
 			trace("Warning: overwriting file " + path);
+		}
 		files.set(path, content);
 	}
 

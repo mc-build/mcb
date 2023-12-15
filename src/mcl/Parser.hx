@@ -317,7 +317,12 @@ class Parser {
 						}
 						return MultiLineScript(pos, content);
 					case _ if (StringTools.startsWith(v, "IF")): return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
-
+					case _ if (StringTools.startsWith(v, "function ")):
+						var target = v.substring("function ".length);
+						var end = target.indexOf(" ");
+						var name = target.substring(0, end == -1 ? target.length : end);
+						var data = target.substring(name.length + 1);
+						return FunctionCall(pos, name, data);
 					case _ if (StringTools.startsWith(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];

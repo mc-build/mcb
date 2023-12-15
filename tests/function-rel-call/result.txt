@@ -1,0 +1,7 @@
+data/main/functions/zzz/0.mcfunction:
+function main:zzz/0
+function main:test
+----------------
+data/main/functions/test.mcfunction:
+function main:zzz/0
+----------------
