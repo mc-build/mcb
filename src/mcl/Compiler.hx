@@ -511,7 +511,6 @@ class McFile {
 				if (name.charAt(0) == "^") {
 					var levels = Std.parseInt(name.substring(1));
 					var fn = context.functions[context.functions.length - levels - 1];
-					trace(context.functions, levels, fn);
 					if (fn == null) {
 						throw ErrorUtil.formatContext("Unexpected function call: " + name, pos, context);
 					}
