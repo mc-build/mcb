@@ -394,7 +394,7 @@ class McFile {
 			context.variables.fork(), context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables, context.templates,
 			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]));
 		for (node in body) {
-			compileCommandUnit(node, newContext);
+			compileCommand(node, newContext);
 		}
 		var result = commands.join("\n");
 		if (name != null)
@@ -411,7 +411,7 @@ class McFile {
 			if (useTld) {
 				compileTld(node, newContext);
 			} else {
-				compileCommandUnit(node, newContext);
+				compileCommand(node, newContext);
 			}
 		}
 	}
@@ -441,7 +441,7 @@ class McFile {
 			astNodes.push(Parser.innerParse(tokenInput));
 		}
 		for (node in astNodes)
-			this.compileCommandUnit(node, context);
+			this.compileCommand(node, context);
 	}
 
 	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>) {
@@ -480,7 +480,7 @@ class McFile {
 			Module.createRequire(this.name)
 			#else
 			(s) -> {
-				throw "Require not available";
+				throw "Require not available in this build of mcl.Compiler, please compile without the disableRequire flag set";
 			}
 			#end
 		];
@@ -493,7 +493,7 @@ class McFile {
 		Syntax.code('new Function(...{0},{1})(...{2})', names, str, values);
 	}
 
-	private function compileCommandUnit(node:AstNode, context:CompilerContext):Void {
+	private function compileCommand(node:AstNode, context:CompilerContext):Void {
 		switch (node) {
 			case MultiLineScript(pos, value):
 				processMlScript(context, pos, value);
@@ -505,7 +505,7 @@ class McFile {
 				context.append(createAnonymousFunction(pos, body, data, context));
 			case CompileTimeIf(pos, expression, body, elseExpressions):
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
-					compileCommandUnit(v, context);
+					compileCommand(v, context);
 				});
 			case FunctionCall(pos, name, data):
 				if (name.charAt(0) == "^") {
@@ -526,7 +526,7 @@ class McFile {
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				}, context.functions.concat([callSignature]));
-				compileCommandUnit(value, newContext);
+				compileCommand(value, newContext);
 				if (commands.length == 0) {
 					throw ErrorUtil.formatContext("Unexpected empty execute", pos, context);
 				}
@@ -547,7 +547,7 @@ class McFile {
 				var callSignature = '${context.namespace}:${context.path.concat(["zzz", uid]).join("/")}';
 				var newContext:CompilerContext = forkCompilerContextWithAppend(context, append, context.functions.concat([callSignature]));
 				for (node in body) {
-					compileCommandUnit(node, newContext);
+					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex.get());
@@ -577,7 +577,7 @@ class McFile {
 								var embedContext = forkCompilerContextWithAppend(context, embedAppend, context.functions.concat([callSignature]));
 
 								for (node in body) {
-									compileCommandUnit(node, embedContext);
+									compileCommand(node, embedContext);
 								}
 								var result = commands.join("\n");
 
@@ -598,7 +598,7 @@ class McFile {
 								var callSignature = '${context.namespace}:${context.path.concat(["zzz", id]).join("/")}';
 								var embedContext = forkCompilerContextWithAppend(context, appendEmbed, context.functions.concat([callSignature]));
 								for (node in body) {
-									compileCommandUnit(node, embedContext);
+									compileCommand(node, embedContext);
 								}
 								var result = embedCommands.join("\n");
 								saveContent(context,
@@ -615,7 +615,7 @@ class McFile {
 
 			case CompileTimeLoop(pos, expression, as, body):
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
-					return compileCommandUnit(v, context);
+					return compileCommand(v, context);
 				});
 			case Block(pos, name, body, data):
 				context.append(createAnonymousFunction(pos, body, data, context, name));
@@ -624,14 +624,14 @@ class McFile {
 					loadCommands.push(v);
 				}, context.functions.concat([null]));
 				for (node in body) {
-					compileCommandUnit(node, newContext);
+					compileCommand(node, newContext);
 				}
 			case TickBlock(pos, body):
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					tickCommands.push(v);
 				}, context.functions.concat([null]));
 				for (node in body) {
-					compileCommandUnit(node, newContext);
+					compileCommand(node, newContext);
 				}
 			default:
 				Lib.debug();
@@ -648,7 +648,7 @@ class McFile {
 		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
 		var newContext = forkCompilerContextWithAppend(context, append, context.functions.concat([funcId]));
 		for (node in body) {
-			compileCommandUnit(node, newContext);
+			compileCommand(node, newContext);
 		}
 
 		if (appendTo != null) {
@@ -704,7 +704,7 @@ class McFile {
 				var functionId = context.namespace + ":" + context.path.concat(["zzz", '$id']).join("/");
 				commands.push('schedule $functionId $time replace');
 				for (node in body) {
-					compileCommandUnit(node, newContext);
+					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
 				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
@@ -770,11 +770,11 @@ class McFile {
 					values.push(injectValues(value, context, pos));
 				case CompileTimeLoop(pos, expression, as, body):
 					processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
-						return compileCommandUnit(v, context);
+						return compileCommand(v, context);
 					});
 				case CompileTimeIf(pos, expression, body, elseExpression):
 					compileTimeIf(expression, body, elseExpression, pos, newContext, (v) -> {
-						compileCommandUnit(v, context);
+						compileCommand(v, context);
 					});
 				default:
 					throw "Internal error: unexpected node type:" + Std.string(v);
