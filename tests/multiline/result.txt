@@ -1,0 +1,4 @@
+data/main/functions/foobarbazboo.mcfunction:
+say \
+	hi
+----------------

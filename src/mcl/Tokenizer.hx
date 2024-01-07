@@ -1,5 +1,6 @@
 package mcl;
 
+import haxe.Json;
 import MinificationHelper.Minified;
 
 typedef PosInfo = {
@@ -29,6 +30,7 @@ enum Brackets {
 @:expose
 class Tokenizer {
 	public static function tokenize(code:String, file:String):Array<Token> {
+		js.Lib.debug();
 		var isInMultilineComment = false;
 		var indents:Array<Int> = [];
 		var lines:Array<String> = [
@@ -55,12 +57,13 @@ class Tokenizer {
 		while (lineIdx < lines.length) {
 			var line = lines[lineIdx];
 			var indent = indents[lineNum];
+			var internalLineNum = 0;
 			while (true) {
-				if (line.charAt(line.length - 1) == "\r") {
+				while (line.charAt(line.length - 1) == "\n" || line.charAt(line.length - 1) == "\r") {
 					line = line.substring(0, line.length - 1);
 				}
-				if (StringTools.endsWith(line, "/")) {
-					line += "\n" + lines[++lineIdx];
+				if (StringTools.endsWith(line, "\\")) {
+					line += "\n\t" + lines[++lineIdx];
 					lineNum++;
 				} else {
 					break;
