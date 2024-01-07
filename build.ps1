@@ -11,9 +11,12 @@ If (Test-Path dist) {
 
 If ($buildType -eq "cli") {
     haxe hxml/build.hxml
-} Else {
+}
+Else {
     haxe hxml/build.hxml
 }
 Remove-Item -Recurse -Force bin
 
 Copy-Item -Recurse mcblib-src dist/.mcblib
+
+Copy-Item -Recurse venv-scripts dist/.venv/scripts

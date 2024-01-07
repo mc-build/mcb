@@ -10,7 +10,6 @@ import haxe.Serializer;
 import haxe.io.Path;
 import sys.FileSystem;
 import mcl.Parser;
-import haxe.Json;
 import sys.io.File;
 import mcl.Tokenizer;
 

@@ -31,19 +31,21 @@ class Tokenizer {
 	public static function tokenize(code:String, file:String):Array<Token> {
 		var isInMultilineComment = false;
 		var indents:Array<Int> = [];
-		var lines = code.split("\n").map(function(line) {
-			var indent = 0;
-			while (switch (line.charAt(0)) {
-					case " " | "\t":
-						line = line.substring(1);
-						indent++;
-						true;
-					default:
-						false;
-				}) {}
-			indents.push(indent);
-			return line;
-		});
+		var lines:Array<String> = [
+			for (line in code.split("\n")) {
+				var indent = 0;
+				while (switch (line.charAt(0)) {
+						case " " | "\t":
+							line = line.substring(1);
+							indent++;
+							true;
+						default:
+							false;
+					}) {}
+				indents.push(indent);
+				line;
+			}
+		];
 
 		var result:Array<Token> = [];
 

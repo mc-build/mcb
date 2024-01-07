@@ -135,7 +135,9 @@ class McTemplate {
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
 				globalVariables: context.globalVariables,
-				functions: context.functions
+				functions: context.functions,
+				baseNamespaceInfo: context.baseNamespaceInfo,
+				currentFunction: context.currentFunction
 			}, pos, new Map(), [AstNode.Directory(pos, this.name, defs)], true);
 		}
 	}
@@ -228,7 +230,9 @@ class McTemplate {
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
 				globalVariables: context.globalVariables,
-				functions: context.functions
+				functions: context.functions,
+				baseNamespaceInfo: context.baseNamespaceInfo,
+				currentFunction: context.currentFunction
 			};
 			file.embed(newContext, pos, args, overloadBody);
 			// trace("MATCHED", types, args);
@@ -268,6 +272,11 @@ class VariableMap {
 	}
 }
 
+typedef BaseNameInfo = {
+	var namespace:String;
+	var path:Array<String>;
+};
+
 typedef CompilerContext = {
 	var append:String->Void;
 	var namespace:String;
@@ -282,7 +291,11 @@ typedef CompilerContext = {
 	var compiler:Compiler;
 	var globalVariables:VariableMap;
 
+	// list of function ids
 	var functions:Array<String>;
+	// pathlike array of the current function
+	var currentFunction:Null<Array<String>>;
+	var baseNamespaceInfo:BaseNameInfo;
 };
 
 enum ImportFileType {
@@ -356,12 +369,13 @@ class McFile {
 
 	public inline function forkCompilerContextWithAppend(context:CompilerContext, append:String->Void, functions:Array<String>):CompilerContext {
 		return createCompilerContext(context.namespace, append, context.variables, context.path, context.uidIndex, context.stack, context.replacements,
-			context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, functions);
+			context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, functions, context.baseNamespaceInfo,
+			context.currentFunction);
 	}
 
 	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:UidTracker,
 			stack:Array<PosInfo>, replacements:VariableMap, templates:Map<String, McTemplate>, requireTemplateKeyword:Bool, compiler:Compiler,
-			globalVariables:VariableMap, functions:Array<String>):CompilerContext {
+			globalVariables:VariableMap, functions:Array<String>, baseNameInfo:BaseNameInfo, currentFunction:Null<Array<String>>):CompilerContext {
 		return {
 			append: append,
 			namespace: namespace,
@@ -375,7 +389,9 @@ class McFile {
 			requireTemplateKeyword: requireTemplateKeyword,
 			compiler: compiler,
 			globalVariables: globalVariables,
-			functions: functions
+			functions: functions,
+			baseNamespaceInfo: baseNameInfo,
+			currentFunction: currentFunction
 		};
 	}
 
@@ -388,11 +404,13 @@ class McFile {
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
 		var id = name == null ? 'zzz/${uid}' : name;
 		var callSig = context.namespace + ":" + context.path.concat(name == null ? ['zzz', uid] : [name]).join("/");
+		Lib.debug();
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
 		},
 			context.variables.fork(), context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables, context.templates,
-			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]));
+			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]), context.baseNamespaceInfo,
+			context.currentFunction);
 		for (node in body) {
 			compileCommand(node, newContext);
 		}
@@ -406,7 +424,8 @@ class McFile {
 	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {
 		var newContext = createCompilerContext(context.namespace, context.append,
 			new VariableMap(VariableMap.globals, context.globalVariables.fork(varmap).get()), context.path, context.uidIndex, context.stack,
-			context.replacements, context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions);
+			context.replacements, context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions,
+			context.baseNamespaceInfo, context.currentFunction);
 		for (node in body) {
 			if (useTld) {
 				compileTld(node, newContext);
@@ -508,15 +527,38 @@ class McFile {
 					compileCommand(v, context);
 				});
 			case FunctionCall(pos, name, data):
-				if (name.charAt(0) == "^") {
-					var levels = Std.parseInt(name.substring(1));
-					var fn = context.functions[context.functions.length - levels - 1];
-					if (fn == null) {
-						throw ErrorUtil.formatContext("Unexpected function call: " + name, pos, context);
-					}
-					context.append(injectValues('function ${fn}${data.length == 0 ? '' : ' $data'}', context, pos));
-				} else {
-					context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+				name = injectValues(name, context, pos);
+				// sanity check * and . calls
+				// support scripting
+				// testcases
+				switch (name.charAt(0)) {
+					case "^": // hiarchial function call
+						var levels = Std.parseInt(name.substring(1));
+						var fn = context.functions[context.functions.length - levels - 1];
+						if (fn == null) {
+							throw ErrorUtil.formatContext("Unexpected function call: " + name, pos, context);
+						}
+						context.append(injectValues('function ${fn}${data.length == 0 ? '' : ' $data'}', context, pos));
+					case "*": // root function call
+						context.append(injectValues('function ${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}', context, pos));
+					case ".":
+						var path = context.currentFunction.concat(name.split("/"));
+						var resolved:Array<String> = [];
+						for (node in path) {
+							switch (node) {
+								case "..":
+									if (resolved.length == 0)
+										throw ErrorUtil.formatContext("Invalid function call: " + name, pos, context);
+									resolved.pop();
+								case "." | "":
+								// ignore
+								default:
+									resolved.push(node);
+							}
+						}
+						context.append(injectValues('function ${context.namespace}:${resolved.join("/")} ${data.length == 0 ? '' : ' $data'}', context, pos));
+					default:
+						context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 				}
 			case Execute(pos, command, value):
 				var commands:Array<String> = [];
@@ -646,6 +688,7 @@ class McFile {
 		};
 		var funcId = context.namespace + ":" + context.path.concat([name]).join("/");
 		var newContext = forkCompilerContextWithAppend(context, append, context.functions.concat([funcId]));
+		newContext.currentFunction = context.path;
 		for (node in body) {
 			compileCommand(node, newContext);
 		}
@@ -668,7 +711,7 @@ class McFile {
 			throw "Internal error: append not available for directory context";
 		},
 			context.variables, context.path.concat([name]), new UidTracker(), context.stack, context.replacements, context.templates,
-			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions);
+			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions, context.baseNamespaceInfo, context.currentFunction);
 		for (node in body) {
 			compileTld(node, newContext);
 		}
@@ -747,7 +790,7 @@ class McFile {
 			} else {
 				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork([as => v]), context.path, context.uidIndex,
 					context.stack, context.variables, context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables,
-					context.functions);
+					context.functions, context.baseNamespaceInfo, context.currentFunction);
 				for (node in body) {
 					handler(newContext, node);
 				}
@@ -757,7 +800,6 @@ class McFile {
 
 	function stringifyJsonTag(pos:PosInfo, name:String, value:Array<AstNode>, context:CompilerContext) {
 		name = injectValues(name, context, pos);
-		var res = "";
 		var values:Array<String> = [];
 		var newContext = forkCompilerContextWithAppend(context, v -> values.push(v), context.functions);
 		for (v in value) {
@@ -866,7 +908,7 @@ class McFile {
 			throw "Internal error: append not available for top-level context";
 		},
 			new VariableMap(thisFileVars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler,
-			thisFileVars, []);
+			thisFileVars, [], info, null);
 		if (context.isTemplate) {
 			if (ast.length > 0) {
 				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);

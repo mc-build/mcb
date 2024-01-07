@@ -31,6 +31,8 @@ class BoundBlock {
 			compiler: this.ctx.compiler,
 			globalVariables: this.ctx.globalVariables,
 			functions: this.ctx.functions,
+			baseNamespaceInfo: context.baseNamespaceInfo,
+			currentFunction: this.ctx.currentFunction
 		};
 		file.embed(ctx, pos, new Map(), [this.node]);
 		return content.join("\n");

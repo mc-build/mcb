@@ -1,5 +1,6 @@
 package mcb;
 
+import mcb.venv.Venv;
 import node.fs.WatchOptions;
 import sys.FileSystem;
 import haxe.io.Path;
@@ -38,13 +39,15 @@ class Cli extends CommandLine {
 		Sys.println("Usage:");
 		Sys.println("mcb build");
 		Sys.println("mcb watch");
+		Sys.println("mcb venv setup <name>");
+		Sys.println("mcb venv activate");
 		Sys.println("");
 		Sys.println("Flags:");
 		Sys.println(this.showUsage());
 		Sys.exit(0);
 	}
 
-	public function runDefault(?mode:String) {
+	public function runDefault(?mode:String, ?venvAction:String, ?venvName:String) {
 		if (didRun)
 			return;
 		switch (mode) {
@@ -52,8 +55,25 @@ class Cli extends CommandLine {
 				this.build();
 			case "watch":
 				this.watch();
+			case "venv":
+				switch (venvAction) {
+					case "setup":
+						Venv.create(venvName);
+					case "activate":
+						Venv.activate();
+				}
 			default:
 				this.help();
+		}
+	}
+
+	@:alias("venv") public function venv(?action:String, ?name:String) {
+		didRun = true;
+		switch (action) {
+			case "setup":
+				Venv.create(name);
+			case "activate":
+				Venv.activate();
 		}
 	}
 
