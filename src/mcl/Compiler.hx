@@ -1,5 +1,6 @@
 package mcl;
 
+import strutils.StringUtils;
 import ext.Module;
 import mcl.Parser.TokenInput;
 import mcl.Tokenizer.Token;
@@ -436,7 +437,7 @@ class McFile {
 	}
 
 	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
-		if (StringTools.startsWith(value, "template ")) {
+		if (StringUtils.startsWithConstExpr(value, "template ")) {
 			value = value.substring(9);
 		}
 		for (k => v in context.templates) {
@@ -625,7 +626,7 @@ class McFile {
 								saveContent(context,
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
 
-								var executeCommandArgs = StringTools.startsWith(execute, "execute ") ? execute.substring(8) : execute;
+								var executeCommandArgs = StringUtils.startsWithConstExpr(execute, "execute ") ? execute.substring(8) : execute;
 								context.append('execute if score #ifelse int matches 0 ${isDone ? '' : 'store success score #ifelse int '}$executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 							case Block(_, _, body, data):

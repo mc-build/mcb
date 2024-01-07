@@ -1,5 +1,6 @@
 package mcl;
 
+import strutils.StringUtils;
 import js.Lib;
 import mcl.Tokenizer.PosInfo;
 import mcl.AstNode.JsonTagType;
@@ -146,7 +147,7 @@ class Parser {
 					content.push(innerParse(reader));
 				}, false);
 				AstNode.TickBlock(pos, content);
-			case Literal(v, pos) if (v == "with" || StringTools.startsWith(v, "with ")):
+			case Literal(v, pos) if (v == "with" || StringUtils.startsWithConstExpr(v, "with ")):
 				reader.skip();
 				var args = StringTools.trim(v.substring("with ".length));
 				var content:Array<AstNode> = [];
@@ -211,12 +212,12 @@ class Parser {
 			nodes.push(switch (token) {
 				case Literal(v, pos):
 					switch (v) {
-						case _ if (StringTools.startsWith(v, "template ")):
+						case _ if (StringUtils.startsWithConstExpr(v, "template ")):
 							var name = StringTools.trim(v.substring("template ".length));
 							readTemplate(name, reader, pos);
-						case _ if (StringTools.startsWith(v, "#")):
+						case _ if (StringUtils.startsWithConstExpr(v, "#")):
 							Comment(pos, v);
-						case _ if (StringTools.startsWith(v, "import ")):
+						case _ if (StringUtils.startsWithConstExpr(v, "import ")):
 							Import(pos, v.substring("import ".length));
 						default:
 							throw unreachable(token);
@@ -255,18 +256,18 @@ class Parser {
 					case "___internal_debugger":
 						Lib.debug();
 						return Comment(pos, "# debugger");
-					case _ if (StringTools.startsWith(v, "function ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "function ")):
 						var name = StringTools.trim(v.substring("function ".length));
 						readFunction(name, reader, pos);
-					case _ if (StringTools.startsWith(v, "clock ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "clock ")):
 						var name = StringTools.trim(v.substring("clock ".length));
 						var content:Array<AstNode> = [];
 						block(reader, () -> {
 							content.push(innerParse(reader));
 						});
 						ClockExpr(pos, name, content);
-					case _ if (StringTools.startsWith(v, "import ")): Import(pos, v.substring("import ".length));
-					case _ if (StringTools.startsWith(v, "dir ") && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen):
+					case _ if (StringUtils.startsWithConstExpr(v, "import ")): Import(pos, v.substring("import ".length));
+					case _ if (StringUtils.startsWithConstExpr(v, "dir ") && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen):
 						var content:Array<AstNode> = [];
 						var data = block(reader, () -> {
 							content.push(parseTLD(reader));
@@ -274,10 +275,10 @@ class Parser {
 						if (data != null)
 							throw unreachable(Literal(v, pos));
 						Directory(pos, v.substring("dir ".length), content);
-					case _ if (StringTools.startsWith(v, "#")): Comment(pos, v);
-					case _ if (StringTools.startsWith(v, "LOOP")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
-					case _ if (StringTools.startsWith(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
-					case _ if (StringTools.startsWith(v, "blocks ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "#")): Comment(pos, v);
+					case _ if (StringUtils.startsWithConstExpr(v, "LOOP")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "blocks ")):
 						var content:Array<AstNode> = [];
 						var data = block(reader, () -> {
 							content.push(innerParse(reader));
@@ -285,7 +286,7 @@ class Parser {
 						if (data != null)
 							throw unreachable(Literal(v, pos));
 						JsonTag(pos, v.substring("blocks ".length), JsonTagType.Blocks, content);
-					case _ if (StringTools.startsWith(v, "loot ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "loot ")):
 						var content = json(reader);
 						JsonFile(pos, v.substring("loot ".length), JsonTagType.Loot, [content]);
 					default:
@@ -316,14 +317,14 @@ class Parser {
 							content.push(reader.next());
 						}
 						return MultiLineScript(pos, content);
-					case _ if (StringTools.startsWith(v, "IF")): return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
-					case _ if (StringTools.startsWith(v, "function ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "IF")): return parseCompileTimeIf(v, pos, reader, () -> innerParse(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "function ")):
 						var target = v.substring("function ".length);
 						var end = target.indexOf(" ");
 						var name = target.substring(0, end == -1 ? target.length : end);
 						var data = target.substring(name.length + 1);
 						return FunctionCall(pos, name, data);
-					case _ if (StringTools.startsWith(v, "execute ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {
@@ -346,7 +347,7 @@ class Parser {
 											elseContent.push(innerParse(reader));
 										});
 										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData));
-									case Literal(v, pos) if (StringTools.startsWith(v, "else ")):
+									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else ")):
 										reader.skip();
 										var executeCommand = StringTools.trim(v.substring("else ".length));
 										var elseContent:Array<AstNode> = [];
@@ -368,9 +369,9 @@ class Parser {
 							reader.insert(continuationToken);
 							return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
 						}
-					case _ if (StringTools.startsWith(v, "LOOP")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
-					case _ if (StringTools.startsWith(v, "#")): return Comment(pos, v);
-					case _ if (v == "block" || StringTools.startsWith(v, "block ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "LOOP")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "#")): return Comment(pos, v);
+					case _ if (v == "block" || StringUtils.startsWithConstExpr(v, "block ")):
 						var name = StringTools.trim(v.substring("block ".length));
 						var content:Array<AstNode> = [];
 						var data = block(reader, () -> {
@@ -436,10 +437,10 @@ class Parser {
 
 		while (true) {
 			switch (reader.peek()) {
-				case Literal(v, pos) if (v == "ELSE" || StringTools.startsWith(v, "ELSE ")):
+				case Literal(v, pos) if (v == "ELSE" || StringUtils.startsWithConstExpr(v, "ELSE ")):
 					reader.skip();
 					var condition = v == "ELSE" ? null : StringTools.trim(v.substring("ELSE ".length));
-					condition = condition != null ? StringTools.startsWith(condition,
+					condition = condition != null ? StringUtils.startsWithConstExpr(condition,
 						"IF") ? StringTools.trim(condition.substring("IF".length)) : condition : null;
 					var elseContent:Array<AstNode> = [];
 					block(reader, () -> {

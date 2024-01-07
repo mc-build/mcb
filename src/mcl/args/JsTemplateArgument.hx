@@ -1,5 +1,6 @@
 package mcl.args;
 
+import strutils.StringUtils;
 import mcl.Compiler.CompilerContext;
 import mcl.Tokenizer.PosInfo;
 import mcl.args.TemplateArgument.TemplateParseResult;
@@ -15,7 +16,7 @@ class JsTemplateArgument extends TemplateArgument {
 	}
 
 	public override function parseValue(value:String, pos:PosInfo, ctx:CompilerContext):TemplateParseResult {
-		if (StringTools.startsWith(value, "<%")) {
+		if (StringUtils.startsWithConstExpr(value, "<%")) {
 			var end = value.indexOf("%>");
 			if (end == -1)
 				return {success: false};
