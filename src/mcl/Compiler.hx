@@ -557,7 +557,7 @@ class McFile {
 									resolved.push(node);
 							}
 						}
-						context.append(injectValues('function ${context.namespace}:${resolved.join("/")} ${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(injectValues('function ${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context, pos));
 					default:
 						context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 				}
