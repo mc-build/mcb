@@ -43,6 +43,16 @@ class LibMain {
 		compiler.addFile(path, ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens));
 	}
 
+	public static function compileFromFsLikeMap(baseDir:String, files:js.lib.Map<String, String>, io:Io):Void {
+		var compiler = createCompiler(baseDir);
+		for (path in files.keyValueIterator()) {
+			var tokens = Tokenizer.tokenize(path.value, path.key);
+			compiler.addFile(path.key, Path.extension(path.key) == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens));
+		}
+		compiler.io = io;
+		compiler.compile(new VariableMap(null));
+	}
+
 	public static function createIoProvider(threadCount:Int):Io {
 		switch (threadCount) {
 			case 0:

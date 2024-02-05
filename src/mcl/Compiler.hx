@@ -405,7 +405,6 @@ class McFile {
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
 		var id = name == null ? 'zzz/${uid}' : name;
 		var callSig = context.namespace + ":" + context.path.concat(name == null ? ['zzz', uid] : [name]).join("/");
-		Lib.debug();
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
 		},

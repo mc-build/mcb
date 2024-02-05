@@ -30,7 +30,6 @@ enum Brackets {
 @:expose
 class Tokenizer {
 	public static function tokenize(code:String, file:String):Array<Token> {
-		js.Lib.debug();
 		var isInMultilineComment = false;
 		var indents:Array<Int> = [];
 		var lines:Array<String> = [
