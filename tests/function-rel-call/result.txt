@@ -1,8 +1,8 @@
 data/main/functions/zzz/0.mcfunction:
 function main:zzz/0
 function main:test
-function main:dummy 
-function main:folder/dummy2 
+function main:dummy
+function main:folder/dummy2
 ----------------
 data/main/functions/test.mcfunction:
 function main:zzz/0
@@ -11,6 +11,6 @@ data/main/functions/dummy.mcfunction:
 
 ----------------
 data/main/functions/folder/dummy2.mcfunction:
-function main:dummy 
+function main:dummy
 function main:dummy
 ----------------

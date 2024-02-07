@@ -278,22 +278,54 @@ class Parser {
 					case _ if (StringUtils.startsWithConstExpr(v, "#")): Comment(pos, v);
 					case _ if (StringUtils.startsWithConstExpr(v, "LOOP")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
-					case _ if (StringUtils.startsWithConstExpr(v, "blocks ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "tag ")):
+						var sections = StringTools.trim(v.substring("tag ".length)).split(" ");
+						var type = sections.shift();
+						var name = sections.shift();
+						var replace = sections.shift() == "replace";
 						var content:Array<AstNode> = [];
-						var data = block(reader, () -> {
+						block(reader, () -> {
 							content.push(innerParse(reader));
 						});
-						if (data != null)
-							throw unreachable(Literal(v, pos));
-						JsonTag(pos, v.substring("blocks ".length), JsonTagType.Blocks, content);
-					case _ if (StringUtils.startsWithConstExpr(v, "loot ")):
-						var content = json(reader);
-						JsonFile(pos, v.substring("loot ".length), JsonTagType.Loot, [content]);
+						JsonFile(pos, name, Tag(type, replace, content));
+					case _
+						if (StringUtils.startsWithConstExpr(v, "advancement ")
+							|| StringUtils.startsWithConstExpr(v, "item_modifier ")
+							|| StringUtils.startsWithConstExpr(v, "loot_table ")
+							|| StringUtils.startsWithConstExpr(v, "predicate ")
+							|| StringUtils.startsWithConstExpr(v, "recipe ")
+							|| StringUtils.startsWithConstExpr(v, "chat_type ")
+							|| StringUtils.startsWithConstExpr(v, "damage_type ")
+							|| StringUtils.startsWithConstExpr(v, "dimension ")
+							|| StringUtils.startsWithConstExpr(v, "dimension_type ")): readPlainJsonFile(v, pos, reader);
 					default:
 						throw unreachable(Literal(v, pos));
 				}
 			case var node: throw unreachable(node);
 		}
+	}
+
+	public static function readPlainJsonFile(v:String, pos:PosInfo, reader:TokenInput):AstNode {
+		var bits = v.split(" ").filter(function(x) return x != "");
+		var type = bits.shift();
+		var name = bits.shift();
+		var content:Array<AstNode> = [];
+		block(reader, () -> {
+			content.push(json(reader));
+		});
+		return JsonFile(pos, name, switch (type) {
+			case "advancement": JsonTagType.Advancement(content);
+			case "item_modifier": JsonTagType.ItemModifier(content);
+			case "loot_table": JsonTagType.LootTable(content);
+			case "predicate": JsonTagType.Predicate(content);
+			case "recipe": JsonTagType.Recipe(content);
+			case "chat_type": JsonTagType.ChatType(content);
+			case "damage_type": JsonTagType.DamageType(content);
+			case "dimension": JsonTagType.Dimension(content);
+			case "dimension_type": JsonTagType.DimensionType(content);
+			default:
+				throw unreachable(Literal(v, pos));
+		});
 	}
 
 	public static function innerParse(reader:TokenInput):AstNode {

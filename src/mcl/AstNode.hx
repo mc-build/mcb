@@ -4,8 +4,17 @@ import mcl.Tokenizer.Token;
 import mcl.Tokenizer.PosInfo;
 
 enum JsonTagType {
-	Blocks;
-	Loot;
+	Tag(subType:String, replace:Bool, entries:Array<AstNode>);
+	Advancement(entries:Array<AstNode>);
+	ItemModifier(entries:Array<AstNode>);
+	LootTable(entries:Array<AstNode>);
+	Predicate(entries:Array<AstNode>);
+	Recipe(entries:Array<AstNode>);
+	ChatType(entries:Array<AstNode>);
+	DamageType(entries:Array<AstNode>);
+	Dimension(entries:Array<AstNode>);
+	DimensionType(entries:Array<AstNode>);
+	WorldGen(subType:String, name:String, entries:Array<AstNode>);
 }
 
 typedef CompileTimeIfElseExpressions = Array<{condition:Null<String>, node:Array<AstNode>}>;
@@ -39,9 +48,7 @@ enum AstNode {
 	Comment(pos:PosInfo, value:String);
 
 	// json tags
-	JsonFile(pos:PosInfo, name:String, type:JsonTagType, body:Array<AstNode>);
-	JsonTag(pos:PosInfo, name:String, type:JsonTagType, value:Array<AstNode>);
-
+	JsonFile(pos:PosInfo, name:String, info:JsonTagType);
 	// template expressions
 	TemplateOverload(pos:PosInfo, args:String, body:Array<AstNode>);
 
@@ -88,7 +95,6 @@ enum abstract AstNodeIds(Int) from Int {
 
 	// json tags
 	var JsonFile = 17;
-	var JsonTag = 18;
 
 	// clock
 	var ClockExpr = 19;

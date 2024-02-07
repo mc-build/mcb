@@ -1,0 +1,9 @@
+tag functions test replace {
+    a:b
+}
+dir dir {
+    tag blocks test{
+        minecraft:stone replace
+        minecraft:dirt
+    }
+}

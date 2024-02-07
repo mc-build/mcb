@@ -1,5 +1,6 @@
 package mcl;
 
+import haxe.Json;
 import strutils.StringUtils;
 import ext.Module;
 import mcl.Parser.TokenInput;
@@ -723,11 +724,8 @@ class McFile {
 				compileFunction(pos, name, body, appendTo, context);
 			case Directory(pos, name, body):
 				compileDirectory(pos, name, body, context);
-			// void
-			case JsonTag(pos, name, type, value):
-				compileJsonTag(pos, name, type, value, context);
-			case JsonFile(pos, name, type, value):
-				compileJsonFile(pos, name, type, value, context);
+			case JsonFile(pos, name, info):
+				compileJsonFile(pos, name, info, context);
 			case CompileTimeLoop(pos, expression, as, body):
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileTld(v, context);
@@ -758,25 +756,62 @@ class McFile {
 		}
 	}
 
-	function compileJsonTag(pos:PosInfo, name:String, type:JsonTagType, value:Array<AstNode>, context:CompilerContext) {
-		name = injectValues(name, context, pos);
-		var filePath = switch (type) {
-			case Blocks:
-				['data', context.namespace, 'tags', 'blocks'];
-			default: throw "Internal error: unexpected json tag type:" + Std.string(type);
+	function compileJsonFile(pos:PosInfo, name:String, info:JsonTagType, context:CompilerContext) {
+		switch (info) {
+			case Tag(subType, replace, entries):
+				var data = Json.stringify({
+					replace: replace,
+					values: [
+						for (e in entries) {
+							switch (e) {
+								case Raw(pos, value, []):
+									if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
+										cast {
+											id: value.substring(0, value.length - 8),
+											replace: true
+										}
+									} else if (value.indexOf(" ") != -1) {
+										throw ErrorUtil.formatContext("Malformed tag entry", pos, context);
+									} else {
+										cast value;
+									}
+								default:
+									throw ErrorUtil.formatContext("Unexpected node type in json tag", pos, context);
+							}
+						}
+					]
+				});
+				saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
+			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
+				LootTable(entries) | Predicate(entries) | Recipe(entries):
+				var values = stringifyJsonTag(pos, name, entries, context);
+				var type = switch (info) {
+					case Advancement(_):
+						"advancements";
+					case ChatType(_):
+						"chat";
+					case DamageType(_):
+						"damage";
+					case Dimension(_):
+						"dimension";
+					case DimensionType(_):
+						"dimension_type";
+					case ItemModifier(_):
+						"item_modifiers";
+					case LootTable(_):
+						"loot_tables";
+					case Predicate(_):
+						"predicates";
+					case Recipe(_):
+						"recipes";
+					case _:
+						throw "Internal error: unexpected json tag type:" + Std.string(info);
+				};
+				saveContent(context, Path.join(['data', context.namespace, type].concat(context.path.concat([name + ".json"]))), values);
+			case WorldGen(subType, name, entries):
+				var values = stringifyJsonTag(pos, name, entries, context);
+				saveContent(context, Path.join(['data', context.namespace, 'worldgen', subType].concat(context.path.concat([name + ".json"]))), values);
 		}
-		var path = Path.join(context.path.concat(filePath.concat([name + ".json"])));
-		saveContent(context, path, stringifyJsonTag(pos, name, value, context));
-	}
-
-	function compileJsonFile(pos:PosInfo, name:String, type:JsonTagType, value:Array<AstNode>, context:CompilerContext) {
-		var filePath = switch (type) {
-			case Loot:
-				['data', context.namespace, 'loot_tables'];
-			default: throw "Internal error: unexpected json tag type:" + Std.string(type);
-		}
-		var path = Path.join(context.path.concat(filePath.concat([name + ".json"])));
-		saveContent(context, path, stringifyJsonTag(pos, name, value, context));
 	}
 
 	function processCompilerLoop(expression:String, as:Null<String>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
