@@ -1,6 +1,0 @@
-hxml/header.hxml
--m Main
-
---js ./bin/mcb-debug.js
---cmd yarn ts-node ./scripts/compile-output.ts bin/mcb-debug.js
---next

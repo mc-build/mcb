@@ -1,5 +1,7 @@
 package;
 
+import mcl.LibStore;
+import mcl.Config.UserConfig;
 import mcl.TemplateRegisterer;
 import mcl.args.TemplateArgument;
 import mcl.AstNode;
@@ -22,8 +24,8 @@ class LibMain {
 		TemplateRegisterer.register();
 	}
 
-	public static function createCompiler(baseDir:String) {
-		return new Compiler(baseDir);
+	public static function createCompiler(baseDir:String, config:UserConfig, ?libStore:LibStore) {
+		return new Compiler(baseDir, config, libStore);
 	}
 
 	public static function parseFile(path:String, content:String):Array<AstNode> {
@@ -44,7 +46,7 @@ class LibMain {
 	}
 
 	public static function compileFromFsLikeMap(baseDir:String, files:js.lib.Map<String, String>, io:Io):Void {
-		var compiler = createCompiler(baseDir);
+		var compiler = createCompiler(baseDir, cast {}, null);
 		for (path in files.keyValueIterator()) {
 			var tokens = Tokenizer.tokenize(path.value, path.key);
 			compiler.addFile(path.key, Path.extension(path.key) == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens));

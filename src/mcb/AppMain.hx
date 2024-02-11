@@ -1,5 +1,7 @@
 package mcb;
 
+import haxe.macro.Expr.Catch;
+import mcl.Config.UserConfig;
 import js.lib.Set;
 import mcl.TemplateRegisterer;
 import mcl.LibStore;
@@ -77,23 +79,35 @@ class AppMain {
 
 	public static function compile(opts:BuildOpts) {
 		var srcDir = Path.join([opts.baseDir, 'src']);
-		var compiler = new Compiler(srcDir, new LibStore(opts.libDir));
 		var configPath = discoverConfigFile(opts.configPath);
 		var config = Syntax.code('require({0})', configPath);
-		var sourceFiles = getFilesInDirectory(srcDir);
+		var compiler = new Compiler(srcDir, config, new LibStore(opts.libDir));
+		var didFail = true;
 		var observableSourceFiles:Array<String> = [];
-		for (f in sourceFiles) {
-			var ext = Path.extension(f);
-			if (ext != "mcb" && ext != "mcbt")
-				continue;
-			var tokens = Tokenizer.tokenize(File.getContent(f), f);
-			var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
-			compiler.addFile(f, ast);
-			observableSourceFiles.push(f);
+		try {
+			compiler.config.events.onPreBuild.dispatch({});
+			var sourceFiles = getFilesInDirectory(srcDir);
+			for (f in sourceFiles) {
+				var ext = Path.extension(f);
+				if (ext != "mcb" && ext != "mcbt")
+					continue;
+				var tokens = Tokenizer.tokenize(File.getContent(f), f);
+				var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
+				compiler.addFile(f, ast);
+				observableSourceFiles.push(f);
+			}
+
+			compiler.compile(new VariableMap(null, ["config" => config]));
+			didFail = false;
+		} catch (e:Dynamic) {
+			didFail = true;
+			Sys.println('Build failed: ${e}');
 		}
-		compiler.compile(new VariableMap(null, ["config" => config]));
-		var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
-		return observableSourceFiles.concat(npmCacheFiles);
+		compiler.config.events.onPostBuild.dispatch({
+			success: !didFail
+		});
+		// var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
+		return observableSourceFiles; // .concat(npmCacheFiles);
 	}
 
 	public static var watch:Bool = false;
@@ -104,11 +118,11 @@ class AppMain {
 		var files = compile(opts);
 		Sys.println('Processed ${files.length} files.');
 		if (opts.watch) {
-			var watcher = Chokidar.watch(files, {ignoreInitial: true});
+			var watcher = Chokidar.watch(files.concat(["src/**"]), {ignoreInitial: true});
 			watcher.on("change", () -> {
-				untyped {
-					require.cache = {};
-				}
+				// untyped {
+				// 	require.cache = {};
+				// }
 				var newFiles = compile(opts);
 				var oldFileSet = new Set(files);
 				var newFileSet = new Set(newFiles);
@@ -118,14 +132,14 @@ class AppMain {
 				for (file in files) {
 					newFileSet.delete(file);
 				}
-				if (oldFileSet.size > 0) {
-					watcher.unwatch([for (f in oldFileSet) f]);
-					Sys.println('Removed ${oldFileSet.size} files from the watch list.');
-				}
-				if (newFileSet.size > 0) {
-					watcher.add([for (f in newFileSet) f]);
-					Sys.println('Added ${newFileSet.size} files to the watch list.');
-				}
+				// if (oldFileSet.size > 0) {
+				// 	watcher.unwatch([for (f in oldFileSet) f]);
+				// 	Sys.println('Removed ${oldFileSet.size} files from the watch list.');
+				// }
+				// if (newFileSet.size > 0) {
+				// 	watcher.add([for (f in newFileSet) f]);
+				// 	Sys.println('Added ${newFileSet.size} files to the watch list.');
+				// }
 				files = newFiles;
 			});
 		}

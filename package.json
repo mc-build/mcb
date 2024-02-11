@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.0.3-alpha.0",
+  "version": "3.0.3-alpha.2",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
@@ -22,8 +22,9 @@
     "build:haxe": "haxe build.hxml",
     "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
-    "setup": "dts2hx chokidar",
-    "dist": "yarn build"
+    "dist": "yarn build",
+    "setup-deps": "dts2hx chokidar",
+    "setup": "yarn && yarn setup-deps && haxelib install lib.hxml"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",

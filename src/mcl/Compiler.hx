@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.Config.UserConfig;
 import haxe.Json;
 import strutils.StringUtils;
 import ext.Module;
@@ -398,20 +399,23 @@ class McFile {
 	}
 
 	private inline function saveContent(context:CompilerContext, path:String, content:String) {
+		if (context.compiler.config.header.length > 0 && StringTools.endsWith(path, ".mcfunction")) {
+			content = context.compiler.config.header + "\n" + content;
+		}
 		context.compiler.io.write(path, content);
 	}
 
 	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
 		var commands:Array<String> = [];
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
-		var id = name == null ? 'zzz/${uid}' : name;
-		var callSig = context.namespace + ":" + context.path.concat(name == null ? ['zzz', uid] : [name]).join("/");
+		var id = name == null ? '${context.compiler.config.generatedDirName}/${uid}' : name;
+		var callSig = context.namespace + ":" + context.path.concat(name == null ? [context.compiler.config.generatedDirName, uid] : [name]).join("/");
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
 		},
-			context.variables.fork(), context.path.concat(['zzz']), context.uidIndex, context.stack, context.variables, context.templates,
-			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]), context.baseNamespaceInfo,
-			context.currentFunction);
+			context.variables.fork(), context.path.concat([context.compiler.config.generatedDirName]), context.uidIndex, context.stack, context.variables,
+			context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]),
+			context.baseNamespaceInfo, context.currentFunction);
 		for (node in body) {
 			compileCommand(node, newContext);
 		}
@@ -482,7 +486,7 @@ class McFile {
 			this.compileInline(context, code);
 		}
 		function emitBlock(commands:Array<String>, ?data:String) {
-			var id = 'zzz/${Std.string(context.uidIndex.get())}';
+			var id = '${context.compiler.config.generatedDirName}/${Std.string(context.uidIndex.get())}';
 			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
 			context.append('function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
 		}
@@ -564,7 +568,7 @@ class McFile {
 			case Execute(pos, command, value):
 				var commands:Array<String> = [];
 				var uid = Std.string(context.uidIndex.get());
-				var callSignature = '${context.namespace}:${context.path.concat(["zzz", uid]).join("/")}';
+				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				}, context.functions.concat([callSignature]));
@@ -576,9 +580,12 @@ class McFile {
 					context.append(injectValues('$command ${commands[0]}', context, pos));
 				} else {
 					var id = uid;
-					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"])));
+					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
+						+ ".mcfunction"])));
 					saveContent(context, path, commands.join("\n"));
-					context.append(injectValues('$command function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}', context, pos));
+					context.append(injectValues('$command function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}',
+						context,
+						pos));
 				}
 			case ExecuteBlock(pos, execute, data, body, continuations):
 				var commands:Array<String> = [];
@@ -586,22 +593,25 @@ class McFile {
 					commands.push(command);
 				};
 				var uid = Std.string(context.uidIndex.get());
-				var callSignature = '${context.namespace}:${context.path.concat(["zzz", uid]).join("/")}';
+				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
 				var newContext:CompilerContext = forkCompilerContextWithAppend(context, append, context.functions.concat([callSignature]));
 				for (node in body) {
 					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex.get());
-				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+				saveContent(context,
+					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
+					result);
 				if (continuations != null) {
-					context.append('scoreboard players set #ifelse int 0');
-					context.append(injectValues('execute store success score #ifelse int${execute.substring(7)} function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+					context.append('scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 0');
+					context.append(injectValues('execute store success score #ifelse ${context.compiler.config.internalScoreboardName}${execute.substring(7)} function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
 						+ (data == null ? '' : ' $data'),
 						context, pos));
 				} else {
-					context.append(injectValues('$execute function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
-						+ (data == null ? '' : ' $data'), context, pos));
+					context.append(injectValues('$execute function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
+						+ (data == null ? '' : ' $data'),
+						context, pos));
 				}
 				if (continuations != null) {
 					// newContext.append('scoreboard players set %ifelse int 1');
@@ -615,7 +625,7 @@ class McFile {
 									embedCommands.push(command);
 								};
 								var id = Std.string(context.uidIndex.get());
-								var callSignature = '${context.namespace}:${context.path.concat(["zzz", id]).join("/")}';
+								var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}';
 								var embedContext = forkCompilerContextWithAppend(context, embedAppend, context.functions.concat([callSignature]));
 
 								for (node in body) {
@@ -624,10 +634,12 @@ class McFile {
 								var result = commands.join("\n");
 
 								saveContent(context,
-									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
+										+ ".mcfunction"]))),
+									result);
 
 								var executeCommandArgs = StringUtils.startsWithConstExpr(execute, "execute ") ? execute.substring(8) : execute;
-								context.append('execute if score #ifelse int matches 0 ${isDone ? '' : 'store success score #ifelse int '}$executeCommandArgs run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 							case Block(_, _, body, data):
 								var embedCommands:Array<String> = [];
@@ -637,15 +649,17 @@ class McFile {
 									embedCommands.push(command);
 								};
 								var id = Std.string(context.uidIndex.get());
-								var callSignature = '${context.namespace}:${context.path.concat(["zzz", id]).join("/")}';
+								var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}';
 								var embedContext = forkCompilerContextWithAppend(context, appendEmbed, context.functions.concat([callSignature]));
 								for (node in body) {
 									compileCommand(node, embedContext);
 								}
 								var result = embedCommands.join("\n");
 								saveContent(context,
-									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
-								context.append('execute if score #ifelse int matches 0 run function ${context.namespace}:${context.path.concat(['zzz', id]).join("/")}'
+									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
+										+ ".mcfunction"]))),
+									result);
+								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 
 							default: throw ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
@@ -741,13 +755,15 @@ class McFile {
 				}, context.functions);
 
 				var id = Std.string(context.uidIndex.get());
-				var functionId = context.namespace + ":" + context.path.concat(["zzz", '$id']).join("/");
+				var functionId = context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, '$id']).join("/");
 				commands.push('schedule $functionId $time replace');
 				for (node in body) {
 					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
-				saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', id + ".mcfunction"]))), result);
+				saveContent(context,
+					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
+					result);
 				context.compiler.tags.addLoadingCommand(functionId);
 			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output
@@ -959,12 +975,14 @@ class McFile {
 			}
 		}
 		if (loadCommands.length > 0) {
-			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'load.mcfunction']))),
+			saveContent(context,
+				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'load.mcfunction']))),
 				loadCommands.join("\n"));
 			compiler.tags.addLoadingCommand(context.namespace + ":" + context.path.concat(['load']).join("/"));
 		}
 		if (tickCommands.length > 0) {
-			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat(['zzz', 'tick.mcfunction']))),
+			saveContent(context,
+				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'tick.mcfunction']))),
 				tickCommands.join("\n"));
 			compiler.tags.addTickingCommand(context.namespace + ":" + context.path.concat(['tick']).join("/"));
 		}
@@ -982,6 +1000,7 @@ class Compiler {
 	public var baseDir:String;
 	public var tags:TagManager = new TagManager();
 	public var packNamespace:String = 'mcb-${Date.now()}';
+	public var config:Config = Config.create(cast {});
 
 	public function addFile(name:String, ast:Array<AstNode>) {
 		var file = new McFile(name, ast);
@@ -1042,7 +1061,7 @@ class Compiler {
 		tags.writeTagFiles(this);
 	}
 
-	public function new(baseDir:String, ?lib:LibStore) {
+	public function new(baseDir:String, config:UserConfig, ?lib:LibStore) {
 		this.baseDir = baseDir;
 		this.libStore = lib;
 	}

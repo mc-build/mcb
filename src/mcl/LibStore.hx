@@ -49,7 +49,7 @@ class LibStore {
 		if (!FileSystem.exists(baseDir)) {
 			throw 'Library $id does not have a src/mcblib folder';
 		}
-		var c = new Compiler(p);
+		var c = new Compiler(p, cast {});
 		var files = getFilesInDirectory(baseDir);
 		var result = new Map<String, McFile>();
 		for (f in files) {

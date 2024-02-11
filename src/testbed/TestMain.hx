@@ -14,7 +14,7 @@ class TestMain {
 		var tests = TestBuilder.getTests();
 		for (t in tests) {
 			var io = new TestIo();
-			var compiler = new Compiler("");
+			var compiler = new Compiler("", cast {});
 			compiler.io = io;
 			for (f in t.sources) {
 				var ext = Path.extension(f.path);
