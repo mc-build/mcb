@@ -1,5 +1,6 @@
 package;
 
+import haxe.crypto.Sha1;
 import haxe.Resource;
 import js.Syntax;
 import sys.FileSystem;
@@ -10,15 +11,59 @@ interface Io {
 	public function write(path:String, content:String):Void;
 	public function cleanup():Void;
 	public function finished():Bool;
+	#if CLI
+	public function reportFilesRemoved(oldFiles:Map<String, String>):Array<String>;
+	public function reportFilesAdded(oldFiles:Map<String, String>):Array<String>;
+	public function reportFilesChanged(oldFiles:Map<String, String>):Array<String>;
+	public function reportFileMetadata():Map<String, String>;
+	#end
 }
 
 @:expose("io.SyncIo")
 class SyncIo implements Io {
+	#if CLI
+	private var fileData:Map<String, String> = new Map<String, String>();
+
+	public function reportFilesRemoved(oldFiles:Map<String, String>) {
+		return [
+			for (file in oldFiles.keys()) {
+				if (!fileData.exists(file))
+					file;
+			}
+		];
+	}
+
+	public function reportFilesAdded(oldFiles:Map<String, String>) {
+		return [
+			for (file in fileData.keys()) {
+				if (!oldFiles.exists(file))
+					file;
+			}
+		];
+	}
+
+	public function reportFilesChanged(oldFiles:Map<String, String>) {
+		return [
+			for (file in fileData.keys()) {
+				if (oldFiles.exists(file) && oldFiles.get(file) != fileData.get(file))
+					file;
+			}
+		];
+	}
+
+	public function reportFileMetadata():Map<String, String> {
+		return fileData;
+	}
+	#end
+
 	public function new() {}
 
 	private var existingDirectories:Map<String, Bool> = new Map<String, Bool>();
 
 	public function write(path:String, content:String):Void {
+		#if CLI
+		fileData.set(path, Sha1.encode(content));
+		#end
 		var dir = Path.directory(path);
 		if (!existingDirectories.exists(dir)) {
 			FileSystem.createDirectory(dir);
@@ -46,6 +91,29 @@ class ThreadedIo implements Io {
 	var thread:Dynamic;
 
 	var queue:Array<IoEntry> = [];
+
+	#if CLI
+	var fileData:Map<String, String> = new Map<String, String>();
+
+	public function reportFilesRemoved(oldFiles:Map<String, String>) {
+		return [for (file in oldFiles.keys()) if (!fileData.exists(file)) file];
+	}
+
+	public function reportFilesAdded(oldFiles:Map<String, String>) {
+		return [for (file in fileData.keys()) if (!oldFiles.exists(file)) file];
+	}
+
+	public function reportFilesChanged(oldFiles:Map<String, String>) {
+		return [
+			for (file in fileData.keys())
+				if (oldFiles.exists(file) && oldFiles.get(file) != fileData.get(file)) file
+		];
+	}
+
+	public function reportFileMetadata():Map<String, String> {
+		return fileData;
+	}
+	#end
 
 	private function log(msg:String) {
 		if (enableLog)
@@ -96,6 +164,9 @@ class ThreadedIo implements Io {
 	}
 
 	public function write(path:String, content:String):Void {
+		#if CLI
+		fileData.set(path, Sha1.encode(content));
+		#end
 		log('write ${path}');
 		if (done)
 			throw 'Cannot write after cleanup()';
@@ -123,6 +194,54 @@ class MultiThreadIo implements Io {
 	var threads:Array<ThreadedIo> = [];
 	var idx:Int = 0;
 	var mask:Int;
+
+	var fileData:Map<String, String> = new Map<String, String>();
+
+	#if CLI
+	public function reportFilesRemoved(oldFiles:Map<String, String>) {
+		var result:Array<String> = [];
+		var files = reportFileMetadata();
+
+		for (file in oldFiles.keys()) {
+			if (!files.exists(file)) {
+				result.push(file);
+			}
+		}
+
+		return result;
+	}
+
+	public function reportFilesAdded(oldFiles:Map<String, String>) {
+		var files = reportFileMetadata();
+		var result:Array<String> = [];
+		for (file in files.keys()) {
+			if (!oldFiles.exists(file)) {
+				result.push(file);
+			}
+		}
+		return result;
+	}
+
+	public function reportFilesChanged(oldFiles:Map<String, String>) {
+		var data = reportFileMetadata();
+		var result:Array<String> = [];
+		for (file in data.keys()) {
+			if (oldFiles.exists(file) && oldFiles.get(file) != data.get(file)) {
+				result.push(file);
+			}
+		}
+		return result;
+	}
+
+	public function reportFileMetadata():Map<String, String> {
+		for (t in threads) {
+			for (file in t.reportFileMetadata().keys()) {
+				fileData.set(file, t.reportFileMetadata().get(file));
+			}
+		}
+		return fileData;
+	}
+	#end
 
 	private inline static function isPowerOfTwo(x:Int):Bool {
 		return (x & (x - 1)) == 0;

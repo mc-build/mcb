@@ -78,12 +78,13 @@ class AppMain {
 	}
 
 	public static function compile(opts:BuildOpts) {
+		trace('Starting build...');
+		var startTime = Sys.time();
 		var srcDir = Path.join([opts.baseDir, 'src']);
 		var configPath = discoverConfigFile(opts.configPath);
 		var config = Syntax.code('require({0})', configPath);
 		var compiler = new Compiler(srcDir, config, new LibStore(opts.libDir));
 		var didFail = true;
-		var observableSourceFiles:Array<String> = [];
 		try {
 			compiler.config.events.onPreBuild.dispatch({});
 			var sourceFiles = getFilesInDirectory(srcDir);
@@ -94,7 +95,6 @@ class AppMain {
 				var tokens = Tokenizer.tokenize(File.getContent(f), f);
 				var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
 				compiler.addFile(f, ast);
-				observableSourceFiles.push(f);
 			}
 
 			compiler.compile(new VariableMap(null, ["config" => config]));
@@ -106,42 +106,66 @@ class AppMain {
 		compiler.config.events.onPostBuild.dispatch({
 			success: !didFail
 		});
+		var endTime = Sys.time();
+		trace('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
 		// var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
-		return observableSourceFiles; // .concat(npmCacheFiles);
+		return compiler; // .concat(npmCacheFiles);
 	}
 
 	public static var watch:Bool = false;
 
+	static var chars = Figures.default_;
+
 	public static function doBuild(opts:BuildOpts) {
 		TemplateRegisterer.register();
 		watch = opts.watch;
-		var files = compile(opts);
-		Sys.println('Processed ${files.length} files.');
+		var cacheFile = Path.join([opts.baseDir, '.mcb', 'fs-cache.txt']);
+		var cache = FileSystem.exists(cacheFile) ? [
+			for (e in File.getContent(cacheFile).split("\n").map(line -> line.split(":")))
+				if (e[0] != "") e[0] => e[1]
+		] : new Map<String, String>();
+		function writeCache() {
+			FileSystem.createDirectory(Path.directory(cacheFile));
+			File.saveContent(cacheFile, [
+				for (k => v in cache)
+					'$k:$v'
+			].join("\n"));
+		}
+		function handleUpdatingFilesBasedOnCache(io:Io) {
+			var added = io.reportFilesAdded(cache);
+			var removed = io.reportFilesRemoved(cache);
+			var changed = io.reportFilesChanged(cache);
+			var dirsToCheck = new Set<String>();
+			for (f in removed) {
+				FileSystem.deleteFile(f);
+				dirsToCheck.add(Path.directory(f));
+			}
+			var dirList = [for (k in dirsToCheck) k];
+			for (dir in dirList) {
+				if (dir != '' && FileSystem.readDirectory(dir).length == 0) {
+					FileSystem.deleteDirectory(dir);
+					dirList.push(Path.join([dir, '..']));
+				}
+			}
+			Logger.log('${chars.arrowUp} Added: ${added.length}');
+			Logger.log('${chars.arrowDown} Removed: ${removed.length}');
+			Logger.log('${chars.arrowRight} Changed: ${changed.length}');
+			cache = io.reportFileMetadata();
+			writeCache();
+		}
+		handleUpdatingFilesBasedOnCache(compile(opts).io);
 		if (opts.watch) {
-			var watcher = Chokidar.watch(files.concat(["src/**"]), {ignoreInitial: true});
-			watcher.on("change", () -> {
-				// untyped {
-				// 	require.cache = {};
-				// }
-				var newFiles = compile(opts);
-				var oldFileSet = new Set(files);
-				var newFileSet = new Set(newFiles);
-				for (file in newFiles) {
-					oldFileSet.delete(file);
-				}
-				for (file in files) {
-					newFileSet.delete(file);
-				}
-				// if (oldFileSet.size > 0) {
-				// 	watcher.unwatch([for (f in oldFileSet) f]);
-				// 	Sys.println('Removed ${oldFileSet.size} files from the watch list.');
-				// }
-				// if (newFileSet.size > 0) {
-				// 	watcher.add([for (f in newFileSet) f]);
-				// 	Sys.println('Added ${newFileSet.size} files to the watch list.');
-				// }
-				files = newFiles;
-			});
+			Logger.log('Watch mode enabled, Watching for changes...');
+			var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
+			function handleFsEvent() {
+				Logger.log('File change detected, recompiling...');
+				var compiler = compile(opts);
+				handleUpdatingFilesBasedOnCache(compiler.io);
+				Logger.log('Watching for changes...');
+			}
+			watcher.on("change", handleFsEvent);
+			watcher.on("add", handleFsEvent);
+			watcher.on("unlink", handleFsEvent);
 		}
 	}
 }

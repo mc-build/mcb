@@ -1,15 +1,8 @@
 package mcb;
 
 import mcb.venv.Venv;
-import node.fs.WatchOptions;
-import sys.FileSystem;
 import haxe.io.Path;
-import mcl.AstNode;
-import mcl.Tokenizer.Token;
-import sys.io.File;
-import haxe.Unserializer;
 import mcli.CommandLine;
-import Chokidar;
 
 class Cli extends CommandLine {
 	public var libPath:String = Path.join([Path.directory(Sys.programPath()), "./.mcblib"]);

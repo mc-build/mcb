@@ -23,7 +23,7 @@
     "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
     "dist": "yarn build",
-    "setup-deps": "dts2hx chokidar",
+    "setup-deps": "dts2hx chokidar && dts2hx figures",
     "setup": "yarn && yarn setup-deps && haxelib install lib.hxml"
   },
   "devDependencies": {
@@ -34,5 +34,8 @@
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "figures": "^6.0.1"
   }
 }

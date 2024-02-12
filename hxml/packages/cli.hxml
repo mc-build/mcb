@@ -1,5 +1,6 @@
 hxml/header.hxml
 
+-D CLI=1
 -m mcb.Cli
 --js bin/mcb.js
 --cmd yarn ts-node ./scripts/compile-output.ts bin/mcb.js
