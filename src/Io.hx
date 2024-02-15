@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Bytes;
 import haxe.crypto.Sha1;
 import haxe.Resource;
 import js.Syntax;
@@ -19,10 +20,39 @@ interface Io {
 	#end
 }
 
+@:expose("io.RevertTracker")
+class RevertTracker {
+	private var filesTracked:Map<String, Bytes> = new Map();
+
+	public function new() {}
+
+	public function track(path:String) {
+		if (FileSystem.exists(path)) {
+			filesTracked.set(path, File.getBytes(path));
+		} else {
+			filesTracked.set(path, null);
+		}
+	}
+
+	public function revert() {
+		for (k => v in filesTracked) {
+			if (v == null) {
+				FileSystem.deleteFile(k);
+			} else {
+				FileSystem.createDirectory(Path.directory(k));
+				File.saveBytes(k, v);
+			}
+		}
+		filesTracked = new Map();
+	}
+}
+
 @:expose("io.SyncIo")
 class SyncIo implements Io {
 	#if CLI
 	private var fileData:Map<String, String> = new Map<String, String>();
+
+	public var revertMap = new RevertTracker();
 
 	public function reportFilesRemoved(oldFiles:Map<String, String>) {
 		return [
@@ -63,6 +93,7 @@ class SyncIo implements Io {
 	public function write(path:String, content:String):Void {
 		#if CLI
 		fileData.set(path, Sha1.encode(content));
+		revertMap.track(path);
 		#end
 		var dir = Path.directory(path);
 		if (!existingDirectories.exists(dir)) {

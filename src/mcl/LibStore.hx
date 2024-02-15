@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.error.LibraryError;
 import sys.io.File;
 import mcl.Compiler.ErrorUtil;
 import mcl.Parser.Errors;
@@ -25,7 +26,7 @@ class LibStore {
 		if (FileSystem.exists(p)) {
 			return loadLib(id, p, compiler, pos);
 		}
-		throw ErrorUtil.format('Library not found: $id', pos);
+		throw new LibraryError(ErrorUtil.format('Library not found: $id', pos));
 	}
 
 	public function getFilesInDirectory(dir:String):Array<String> {
@@ -47,7 +48,7 @@ class LibStore {
 		var baseDir = Path.join([p, 'src', 'mcblib']);
 		var srcDir = Path.join([p, 'src']);
 		if (!FileSystem.exists(baseDir)) {
-			throw 'Library $id does not have a src/mcblib folder';
+			throw new LibraryError('Library $id does not have a src/mcblib folder');
 		}
 		var c = new Compiler(p, cast {});
 		var files = getFilesInDirectory(baseDir);

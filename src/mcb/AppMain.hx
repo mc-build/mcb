@@ -1,7 +1,7 @@
 package mcb;
 
-import haxe.macro.Expr.Catch;
-import mcl.Config.UserConfig;
+import Io.SyncIo;
+import mcl.error.McbError;
 import js.lib.Set;
 import mcl.TemplateRegisterer;
 import mcl.LibStore;
@@ -78,7 +78,7 @@ class AppMain {
 	}
 
 	public static function compile(opts:BuildOpts) {
-		trace('Starting build...');
+		Logger.log('Started build at ${Date.now().toString()}');
 		var startTime = Sys.time();
 		var srcDir = Path.join([opts.baseDir, 'src']);
 		var configPath = discoverConfigFile(opts.configPath);
@@ -93,21 +93,31 @@ class AppMain {
 				if (ext != "mcb" && ext != "mcbt")
 					continue;
 				var tokens = Tokenizer.tokenize(File.getContent(f), f);
-				var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
-				compiler.addFile(f, ast);
+				try {
+					var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
+					compiler.addFile(f, ast);
+				} catch (e:Dynamic) {
+					compiler.success = false;
+					throw e;
+				}
 			}
 
 			compiler.compile(new VariableMap(null, ["config" => config]));
 			didFail = false;
 		} catch (e:Dynamic) {
 			didFail = true;
-			Sys.println('Build failed: ${e}');
+			if (McbError.isMclError(e)) {
+				var x:McbError = cast e;
+				Logger.error(x.message);
+			} else {
+				throw e;
+			}
 		}
 		compiler.config.events.onPostBuild.dispatch({
 			success: !didFail
 		});
 		var endTime = Sys.time();
-		trace('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
+		Logger.log('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
 		// var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
 		return compiler; // .concat(npmCacheFiles);
 	}
@@ -141,26 +151,45 @@ class AppMain {
 				dirsToCheck.add(Path.directory(f));
 			}
 			var dirList = [for (k in dirsToCheck) k];
+			var deletedDirs = new Set<String>();
 			for (dir in dirList) {
-				if (dir != '' && FileSystem.readDirectory(dir).length == 0) {
+				if (dir != '' && !deletedDirs.has(dir) && FileSystem.readDirectory(dir).length == 0) {
 					FileSystem.deleteDirectory(dir);
 					dirList.push(Path.join([dir, '..']));
+					deletedDirs.add(dir);
 				}
 			}
+			js.Lib.debug();
 			Logger.log('${chars.arrowUp} Added: ${added.length}');
 			Logger.log('${chars.arrowDown} Removed: ${removed.length}');
 			Logger.log('${chars.arrowRight} Changed: ${changed.length}');
 			cache = io.reportFileMetadata();
 			writeCache();
 		}
-		handleUpdatingFilesBasedOnCache(compile(opts).io);
+		var build = compile(opts);
+		if (build.success)
+			handleUpdatingFilesBasedOnCache(build.io);
+		else {
+			if (Syntax.instanceof(build.io, SyncIo)) {
+				var x:SyncIo = cast build.io;
+				Logger.warn("Reverting file changes...");
+				x.revertMap.revert();
+			}
+		}
+
 		if (opts.watch) {
 			Logger.log('Watch mode enabled, Watching for changes...');
 			var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
 			function handleFsEvent() {
 				Logger.log('File change detected, recompiling...');
 				var compiler = compile(opts);
-				handleUpdatingFilesBasedOnCache(compiler.io);
+				if (compiler.success)
+					handleUpdatingFilesBasedOnCache(compiler.io);
+				else if (Syntax.instanceof(compiler.io, SyncIo)) {
+					var x:SyncIo = cast compiler.io;
+					Logger.warn("Reverting file changes...");
+					x.revertMap.revert();
+				}
 				Logger.log('Watching for changes...');
 			}
 			watcher.on("change", handleFsEvent);

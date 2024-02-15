@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.error.CompilerError;
 import js.Syntax;
 import js.lib.Object;
 import Type.ValueType;

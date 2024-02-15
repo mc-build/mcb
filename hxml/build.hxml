@@ -1,3 +1,6 @@
+
+-L figures
+-L chalk
 --each
 
 hxml/packages/cli.hxml

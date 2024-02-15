@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.error.ParserError;
 import strutils.StringUtils;
 import js.Lib;
 import mcl.Tokenizer.PosInfo;
@@ -10,7 +11,16 @@ import mcl.Tokenizer.Token;
 
 class ArrayInput<T> {
 	var array:Array<T>;
-	var index:Int;
+	var _index:Int;
+	var index(get, set):Int;
+
+	function get_index() {
+		return _index;
+	}
+
+	function set_index(i:Int):Int {
+		return _index = i;
+	}
 
 	public function new(array:Array<T>) {
 		this.array = array;
@@ -18,6 +28,9 @@ class ArrayInput<T> {
 	}
 
 	public function next():T {
+		if (_index >= array.length)
+			throw new ParserError('Tried to read past the end of the token list');
+
 		return array[index++];
 	}
 
@@ -46,7 +59,7 @@ enum abstract Errors(String) from String to String {
 	var UnexpectedTokenBracketOpen = "Unexpected '{' with data '{}' at {}:{}:{}";
 	var UnexpectedTokenBracketClose = "Unexpected '}' at {}:{}:{}";
 
-	var ErrorWhilstEvaluatingExpression = "Error whilst evaluating expression: '{}' at {}:{}:{}";
+	var ErrorWhilstEvaluatingExpression = "Encountered an error whilst evaluating expression '{}' at {}:{}:{}";
 }
 
 @:expose
@@ -62,20 +75,20 @@ class Parser {
 	public static function toss(token:Token, error:String) {
 		switch (token) {
 			case Literal(v, pos):
-				throw format(error, v, pos.file, pos.line, pos.col);
+				throw new ParserError(format(error, v, pos.file, pos.line, pos.col));
 			case BracketOpen(pos, data):
-				throw format(error, data, pos.file, pos.line, pos.col);
+				throw new ParserError(format(error, data, pos.file, pos.line, pos.col));
 			case BracketClose(pos):
-				throw format(error, pos.file, pos.line, pos.col);
+				throw new ParserError(format(error, pos.file, pos.line, pos.col));
 		}
 	}
 
 	private static function unreachable(token:Token) {
-		return switch (token) {
+		return new ParserError(switch (token) {
 			case Literal(v, p): format(Errors.UnexpectedTokenLiteral, v, p.file, p.line, p.col);
 			case BracketOpen(p, d): format(Errors.UnexpectedTokenBracketOpen, d, p.file, p.line, p.col);
 			case BracketClose(p): format(Errors.UnexpectedTokenBracketClose, p.file, p.line, p.col);
-		}
+		});
 	}
 
 	private static function expect(reader:TokenInput, match:(v:Token) -> Bool) {

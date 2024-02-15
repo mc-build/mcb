@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.error.CompilerError;
 import mcl.Config.UserConfig;
 import haxe.Json;
 import strutils.StringUtils;
@@ -20,13 +21,13 @@ import mcl.args.TemplateArgument;
 
 class ErrorUtil {
 	public static function format(message:String, pos:PosInfo):String {
-		return '${pos.file}:${pos.line}:${pos.col}: ${message}';
+		return '${pos.file}:${pos.line}:${pos.col + 1}: ${message}';
 	}
 
 	public static function formatWithStack(message:String, stack:Array<PosInfo>):String {
 		var res = message;
 		for (pos in stack) {
-			res += '\n\tat ${pos.file}:${pos.line}:${pos.col}';
+			res += '\n\tat ${pos.file}:${pos.line}:${pos.col + 1}';
 		}
 		return res;
 	}
@@ -95,16 +96,16 @@ class McTemplate {
 					if (loadBlock == null)
 						loadBlock = body;
 					else
-						throw ErrorUtil.format("Templates can only have one top-level load block", pos);
+						throw new CompilerError(ErrorUtil.format("Templates can only have one top-level load block", pos));
 				case TickBlock(pos, body):
 					if (tickBlock == null)
 						tickBlock = body;
 					else
-						throw ErrorUtil.format("Templates can only have one top-level tick block", pos);
+						throw new CompilerError(ErrorUtil.format("Templates can only have one top-level tick block", pos));
 				case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
 				// ignore comments on the top level, they are allowed but have no output
 				default:
-					throw ErrorUtil.format("Unexpected node type: " + Std.string(node), Reflect.field(node, 'pos'));
+					throw new CompilerError(ErrorUtil.format("Unexpected node type: " + Std.string(node), Reflect.field(node, 'pos')));
 			}
 		}
 	}
@@ -125,7 +126,7 @@ class McTemplate {
 			var info = context.compiler.getInitialPathInfo(this.file.name);
 			into.embed({
 				append: function(v) {
-					throw ErrorUtil.formatContext("tried to append to a Void context (template virtual context)", pos, context);
+					throw new CompilerError(ErrorUtil.formatContext("tried to append to a Void context (template virtual context)", pos, context));
 				},
 				namespace: info.namespace,
 				path: info.path,
@@ -183,7 +184,7 @@ class McTemplate {
 					if (s.charAt(0) == "<" && s.charAt(1) == "%" && !arg.expectJsValue) {
 						var end = s.indexOf("%>");
 						if (end == -1)
-							throw ErrorUtil.formatContext("Unexpected end of inline script block", pos, context);
+							throw new CompilerError(ErrorUtil.formatContext("Unexpected end of inline script block", pos, context));
 						var script = s.substring(2, end);
 						jsBlockRaw = script;
 						if (jsValueCache.exists(jsCacheIdx)) {
@@ -241,7 +242,7 @@ class McTemplate {
 			// trace("MATCHED", types, args);
 			return;
 		}
-		throw "Failed to find matching template overload for: " + value;
+		throw new CompilerError("Failed to find matching template overload for: " + value);
 	}
 }
 
@@ -332,7 +333,7 @@ class McFile {
 		if (this.ext == "mcbt") {
 			return exportedTemplates;
 		}
-		throw "Internal error: tried to get templates from non-template file:" + this.name;
+		throw new CompilerError("tried to get templates from non-template file:" + this.name);
 	}
 
 	public function setup(compiler:Compiler) {
@@ -452,7 +453,7 @@ class McFile {
 			}
 		}
 		if (extras != null && extras.length > 0) {
-			throw ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context);
+			throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context));
 		}
 		context.append(injectValues(value, context, pos));
 	}
@@ -504,7 +505,7 @@ class McFile {
 			Module.createRequire(this.name)
 			#else
 			(s) -> {
-				throw "Require not available in this build of mcl.Compiler, please compile without the disableRequire flag set";
+				throw new CompilerError("Require not available in this build of mcl.Compiler, please compile without the disableRequire flag set");
 			}
 			#end
 		];
@@ -541,7 +542,7 @@ class McFile {
 						var levels = Std.parseInt(name.substring(1));
 						var fn = context.functions[context.functions.length - levels - 1];
 						if (fn == null) {
-							throw ErrorUtil.formatContext("Unexpected function call: " + name, pos, context);
+							throw new CompilerError(ErrorUtil.formatContext("Unexpected function call: " + name, pos, context));
 						}
 						context.append(injectValues('function ${fn}${data.length == 0 ? '' : ' $data'}', context, pos));
 					case "*": // root function call
@@ -553,7 +554,7 @@ class McFile {
 							switch (node) {
 								case "..":
 									if (resolved.length == 0)
-										throw ErrorUtil.formatContext("Invalid function call: " + name, pos, context);
+										throw new CompilerError(ErrorUtil.formatContext("Invalid function call: " + name, pos, context));
 									resolved.pop();
 								case "." | "":
 								// ignore
@@ -574,7 +575,7 @@ class McFile {
 				}, context.functions.concat([callSignature]));
 				compileCommand(value, newContext);
 				if (commands.length == 0) {
-					throw ErrorUtil.formatContext("Unexpected empty execute", pos, context);
+					throw new CompilerError(ErrorUtil.formatContext("Unexpected empty execute", pos, context));
 				}
 				if (commands.length == 1 && commands[0].indexOf(callSignature) == -1) {
 					context.append(injectValues('$command ${commands[0]}', context, pos));
@@ -644,7 +645,7 @@ class McFile {
 							case Block(_, _, body, data):
 								var embedCommands:Array<String> = [];
 								if (!isDone)
-									throw "Internal error: block continuation must be the last continuation";
+									throw new CompilerError("block continuation must be the last continuation", true);
 								var appendEmbed = function(command:String) {
 									embedCommands.push(command);
 								};
@@ -662,8 +663,8 @@ class McFile {
 								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 
-							default: throw ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
-									AstNodeUtils.getPos(continuation), newContext);
+							default: throw new CompilerError(ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
+									AstNodeUtils.getPos(continuation), newContext));
 						}
 						idx++;
 					}
@@ -714,7 +715,7 @@ class McFile {
 			} else if (appendTo == "tick") {
 				context.compiler.tags.addTickingCommand(funcId);
 			} else {
-				throw "Internal error: unexpected appendTo value: " + appendTo;
+				throw new CompilerError("unexpected appendTo value: " + appendTo, true);
 			}
 		}
 		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
@@ -723,7 +724,7 @@ class McFile {
 	private function compileDirectory(pos:PosInfo, name:String, body:Array<AstNode>, context:CompilerContext) {
 		name = injectValues(name, context, pos);
 		var newContext = createCompilerContext(context.namespace, v -> {
-			throw "Internal error: append not available for directory context";
+			throw new CompilerError("append not available for directory context", true);
 		},
 			context.variables, context.path.concat([name]), new UidTracker(), context.stack, context.replacements, context.templates,
 			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions, context.baseNamespaceInfo, context.currentFunction);
@@ -768,7 +769,7 @@ class McFile {
 			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output
 			default:
-				throw "Internal error: unexpected node type:" + Std.string(node);
+				throw new CompilerError("unexpected node type:" + Std.string(node), true);
 		}
 	}
 
@@ -787,12 +788,12 @@ class McFile {
 											replace: true
 										}
 									} else if (value.indexOf(" ") != -1) {
-										throw ErrorUtil.formatContext("Malformed tag entry", pos, context);
+										throw new CompilerError(ErrorUtil.formatContext("Malformed tag entry", pos, context));
 									} else {
 										cast value;
 									}
 								default:
-									throw ErrorUtil.formatContext("Unexpected node type in json tag", pos, context);
+									throw new CompilerError(ErrorUtil.formatContext("Unexpected node type in json tag", pos, context));
 							}
 						}
 					]
@@ -821,7 +822,7 @@ class McFile {
 					case Recipe(_):
 						"recipes";
 					case _:
-						throw "Internal error: unexpected json tag type:" + Std.string(info);
+						throw new CompilerError("unexpected json tag type:" + Std.string(info), true);
 				};
 				saveContent(context, Path.join(['data', context.namespace, type].concat(context.path.concat([name + ".json"]))), values);
 			case WorldGen(subType, name, entries):
@@ -857,7 +858,7 @@ class McFile {
 			switch (v) {
 				case Raw(pos, value, extra):
 					if (extra != null || extra.length > 0) {
-						throw ErrorUtil.formatContext("Unexpected extra data in json tag", pos, context);
+						throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in json tag", pos, context));
 					}
 					values.push(injectValues(value, context, pos));
 				case CompileTimeLoop(pos, expression, as, body):
@@ -869,7 +870,7 @@ class McFile {
 						compileCommand(v, context);
 					});
 				default:
-					throw "Internal error: unexpected node type:" + Std.string(v);
+					throw new CompilerError("unexpected node type:" + Std.string(v), true);
 			}
 		}
 
@@ -909,7 +910,7 @@ class McFile {
 		try {
 			return Syntax.code("new Function(...{1},\"$$context\",{0}).apply(null, {2}.concat([{3}]));", code, argList, valueList, values);
 		} catch (e) {
-			throw Parser.format(Errors.ErrorWhilstEvaluatingExpression, e.message, pos.file, pos.line, pos.col);
+			throw new CompilerError(Parser.format(Errors.ErrorWhilstEvaluatingExpression, e.message, pos.file, pos.line, pos.col + 1));
 		}
 	}
 
@@ -925,7 +926,8 @@ class McFile {
 		try {
 			return Syntax.code('new Function(...{1},{0}).apply(null, {2});', code, argList, valueList);
 		} catch (e) {
-			throw Parser.format(Errors.ErrorWhilstEvaluatingExpression, e.message, pos.file, pos.line, pos.col);
+			// TODO: make this more specific to the code being run.
+			throw new CompilerError(Parser.format(Errors.ErrorWhilstEvaluatingExpression, e.message, pos.file, pos.line, pos.col + 1));
 		}
 	}
 
@@ -956,20 +958,20 @@ class McFile {
 				k => Reflect.field(this.fileJs, k)
 		]);
 		var context = createCompilerContext(info.namespace, v -> {
-			throw "Internal error: append not available for top-level context";
+			throw new CompilerError("append not available for top-level context", true);
 		},
 			new VariableMap(thisFileVars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler,
 			thisFileVars, [], info, null);
 		if (context.isTemplate) {
 			if (ast.length > 0) {
-				throw ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
+				throw new CompilerError(ErrorUtil.formatContext("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context));
 			}
 			return;
 		}
 		for (node in ast) {
 			switch (node) {
 				case Import(_, _) | TemplateDef(_, _, _):
-					throw "Internal error: import or template definition found after setup";
+					throw new CompilerError("import or template definition found after setup", true);
 				default:
 					compileTld(node, context);
 			}
@@ -1022,7 +1024,7 @@ class Compiler {
 				}
 				return IMcFile(files.get(resolved));
 			}
-			throw "Failed to resolve import: " + resolved;
+			throw new CompilerError("Failed to resolve import: " + resolved);
 		} else {
 			return IMcFile(this.libStore.lookup(resolutionPath, {
 				file: baseFile,
@@ -1048,17 +1050,26 @@ class Compiler {
 		};
 	}
 
-	public function compile(root:VariableMap) {
-		for (file in files) {
-			if (alreadySetupFiles.exists(file.name))
-				continue;
-			file.setup(this);
-		}
+	public var success:Bool = true;
 
-		for (file in files) {
-			file.compile(root, this);
+	public function compile(root:VariableMap) {
+		success = true;
+		try {
+			for (file in files) {
+				if (alreadySetupFiles.exists(file.name))
+					continue;
+				file.setup(this);
+			}
+
+			for (file in files) {
+				file.compile(root, this);
+			}
+			tags.writeTagFiles(this);
+		} catch (e:Dynamic) {
+			success = false;
+			// pass on error to the wrapping application
+			throw e;
 		}
-		tags.writeTagFiles(this);
 	}
 
 	public function new(baseDir:String, config:UserConfig, ?lib:LibStore) {
