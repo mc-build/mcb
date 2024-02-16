@@ -1,0 +1,9 @@
+function test{
+    load {
+        say this should run on load
+    }
+    tick {
+        say this should run on tick
+    }
+    say this should run when test is called
+}

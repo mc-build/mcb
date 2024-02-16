@@ -982,13 +982,13 @@ class McFile {
 			saveContent(context,
 				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'load.mcfunction']))),
 				loadCommands.join("\n"));
-			compiler.tags.addLoadingCommand(context.namespace + ":" + context.path.concat(['load']).join("/"));
+			compiler.tags.addLoadingCommand(context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'load']).join("/"));
 		}
 		if (tickCommands.length > 0) {
 			saveContent(context,
 				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'tick.mcfunction']))),
 				tickCommands.join("\n"));
-			compiler.tags.addTickingCommand(context.namespace + ":" + context.path.concat(['tick']).join("/"));
+			compiler.tags.addTickingCommand(context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'tick']).join("/"));
 		}
 	}
 }
