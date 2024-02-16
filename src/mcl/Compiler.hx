@@ -489,7 +489,9 @@ class McFile {
 		function emitBlock(commands:Array<String>, ?data:String) {
 			var id = '${context.compiler.config.generatedDirName}/${Std.string(context.uidIndex.get())}';
 			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
-			context.append('function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
+			var signature = '${context.namespace}:${context.path.concat([id]).join("/")}';
+			context.append('function $signature' + (data == null ? '' : ' $data'));
+			return signature;
 		}
 		untyped {
 			emit.mcb = emitMcb;
@@ -1073,6 +1075,7 @@ class Compiler {
 	}
 
 	public function new(baseDir:String, config:UserConfig, ?lib:LibStore) {
+		this.config = Config.create(config);
 		this.baseDir = baseDir;
 		this.libStore = lib;
 	}

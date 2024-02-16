@@ -93,7 +93,7 @@ class Config {
 
 	// public var autoCreateScoreboard:Bool = true;
 	private function new() {
-		this.internalScoreboardName = 'mcb.i.' + this.internalId;
+		this.internalScoreboardName = 'mcb.internal';
 	}
 
 	public static function create(base:UserConfig):Config {

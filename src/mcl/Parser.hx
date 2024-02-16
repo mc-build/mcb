@@ -450,6 +450,8 @@ class Parser {
 	}
 
 	static function readRaw(pos:PosInfo, v:String, reader:TokenInput) {
+		if (!reader.hasNext()) // this function CAN be called with the last token in the reader if parsing a single command via emit.mcb
+			return AstNode.Raw(pos, v, []);
 		var content:Array<AstNode> = [];
 		var line = pos.line;
 		while (true) {
