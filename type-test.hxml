@@ -1,0 +1,13 @@
+
+-L figures
+-L chalk
+--each
+hxml/header.hxml
+
+
+-m LibMain
+-D genes.enum_discriminator=@kind
+--js dist/libmcb.js
+-L codegen
+
+--macro CodeGen.typescriptExtern('types')

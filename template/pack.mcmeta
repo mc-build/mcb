@@ -1,0 +1,6 @@
+{
+	"pack":{
+		"pack_format": ::version::,
+		"description": "::name:: Made with MC-Build!"
+	}
+}

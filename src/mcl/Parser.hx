@@ -266,9 +266,6 @@ class Parser {
 			// 	trace(v);
 			// case Literal(v, _) if (v.charAt(0) == "#"):
 			case Literal(v, pos): switch (v) {
-					case "___internal_debugger":
-						Lib.debug();
-						return Comment(pos, "# debugger");
 					case _ if (StringUtils.startsWithConstExpr(v, "function ")):
 						var name = StringTools.trim(v.substring("function ".length));
 						readFunction(name, reader, pos);
@@ -347,9 +344,6 @@ class Parser {
 			case Literal(v, pos):
 				reader.next();
 				switch (v) {
-					case "___internal_debugger":
-						Lib.debug();
-						return Comment(pos, "# debugger");
 					case "<%%":
 						var content:Array<Token> = [];
 						while (true) {

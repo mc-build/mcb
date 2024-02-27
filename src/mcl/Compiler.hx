@@ -1,5 +1,6 @@
 package mcl;
 
+import mcl.error.McbError;
 import mcl.error.CompilerError;
 import mcl.Config.UserConfig;
 import haxe.Json;
@@ -516,8 +517,16 @@ class McFile {
 			names.push(k);
 			values.push(v);
 		}
-
-		Syntax.code('new Function(...{0},{1})(...{2})', names, str, values);
+		try {
+			Syntax.code('new Function(...{0},{1})(...{2})', names, str, values);
+		} catch (e) {
+			if (Syntax.instanceof(e, McbError)) {
+				throw e;
+			} else {
+				throw new CompilerError(ErrorUtil.formatContext('Error in multi-line script, \'${e.message}\' at ${pos.file}:${pos.line}:${pos.col + 1}', pos,
+					context));
+			}
+		}
 	}
 
 	private function compileCommand(node:AstNode, context:CompilerContext):Void {

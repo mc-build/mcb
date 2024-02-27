@@ -19,4 +19,6 @@ Remove-Item -Recurse -Force bin
 
 Copy-Item -Recurse mcblib-src dist/.mcblib
 
+Copy-Item -Recurse template dist/template
+
 Copy-Item -Recurse venv-scripts dist/.venv/scripts

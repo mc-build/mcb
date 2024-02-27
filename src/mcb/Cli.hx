@@ -16,6 +16,11 @@ class Cli extends CommandLine {
 
 	@:skip private var didRun:Bool = false;
 
+	public function create(packName:String) {
+		didRun = true;
+		mcb.AppMain.create(packName);
+	}
+
 	public function build() {
 		didRun = true;
 		mcb.AppMain.doBuild({
@@ -32,6 +37,7 @@ class Cli extends CommandLine {
 		Sys.println("Usage:");
 		Sys.println("mcb build");
 		Sys.println("mcb watch");
+		Sys.println("mcb create <pack-name>");
 		Sys.println("mcb venv setup <name>");
 		Sys.println("mcb venv activate");
 		Sys.println("");
@@ -55,6 +61,8 @@ class Cli extends CommandLine {
 					case "activate":
 						Venv.activate();
 				}
+			case "create":
+				this.create(venvAction);
 			default:
 				this.help();
 		}

@@ -1,0 +1,3 @@
+function on_load load{
+    say Hello World from ::name::!
+}

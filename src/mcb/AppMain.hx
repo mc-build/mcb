@@ -1,5 +1,8 @@
 package mcb;
 
+import haxe.Template;
+import haxe.Json;
+import haxe.Http;
 import Io.SyncIo;
 import mcl.error.McbError;
 import js.lib.Set;
@@ -75,6 +78,31 @@ class AppMain {
 			}
 		}
 		return result;
+	}
+
+	public static function create(name:String) {
+		var templateDir = Path.join([Path.directory(Sys.programPath()), 'template']);
+		var destDir = Path.join([Sys.getCwd(), name]);
+		FileSystem.createDirectory(destDir);
+		var fetcher = new Http('https://raw.githubusercontent.com/misode/mcmeta/summary/version.json');
+		fetcher.onData = data -> {
+			var version:{data_pack_version:Int} = Json.parse(data);
+			function copyDir(from:String, to:String) {
+				for (f in FileSystem.readDirectory(from)) {
+					var fromPath = Path.join([from, f]);
+					var toPath = Path.join([to, f]);
+					if (FileSystem.isDirectory(fromPath)) {
+						FileSystem.createDirectory(toPath);
+						copyDir(fromPath, toPath);
+					} else {
+						var template = new Template(File.getContent(fromPath));
+						File.saveContent(toPath, template.execute({name: name, version: version.data_pack_version}));
+					}
+				}
+			}
+			copyDir(templateDir, destDir);
+		}
+		fetcher.request();
 	}
 
 	public static function compile(opts:BuildOpts) {
