@@ -7,7 +7,7 @@ import mcli.CommandLine;
 class Cli extends CommandLine {
 	public var libPath:String = Path.join([Path.directory(Sys.programPath()), "./.mcblib"]);
 	public var baseDir:String = Sys.getCwd();
-	public var configPath:String = Path.join([this.baseDir, "./config"]);
+	public var configPath:String = Path.join([this.baseDir, "./mcb.config"]);
 
 	// 	2+ = thread pool (must be a power of 2)
 	// 	0 = synchronous (default)\n

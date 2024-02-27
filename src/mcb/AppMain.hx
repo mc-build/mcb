@@ -51,19 +51,15 @@ class AppMain {
 	}
 
 	private static function discoverConfigFile(p:String):Null<String> {
-		var ext = Path.extension(p);
-		if (ext == null) {
-			if (FileSystem.exists(p + ".cjs")) {
-				return p + ".cjs";
-			} else if (FileSystem.exists(p + ".js")) {
-				return p + ".js";
-			} else if (FileSystem.exists(p + ".json")) {
-				return p + ".json";
-			} else {
-				return null;
-			}
+		if (FileSystem.exists(p + ".cjs")) {
+			return p + ".cjs";
+		} else if (FileSystem.exists(p + ".js")) {
+			return p + ".js";
+		} else if (FileSystem.exists(p + ".json")) {
+			return p + ".json";
+		} else {
+			return p;
 		}
-		return p;
 	}
 
 	public static function getFilesInDirectory(dir:String):Array<String> {
