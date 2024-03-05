@@ -13,6 +13,7 @@ class TestMain {
 		TemplateRegisterer.register();
 		var tests = TestBuilder.getTests();
 		for (t in tests) {
+			trace("Running test: " + t.name);
 			var io = new TestIo();
 			var compiler = new Compiler("", cast {
 				internalScoreboardName: "_internal_scoreboard"

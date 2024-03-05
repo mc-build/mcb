@@ -18,7 +18,7 @@ template without-args {
 
 template arg-js {
     with a:js {
-        LOOP(a) as item{
+        REPEAT(a) as item{
             say item=<%item%> (<%typeof item%>)
         }
     }

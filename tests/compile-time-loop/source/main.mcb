@@ -1,18 +1,18 @@
 dir test{
     function int-int{
-        LOOP(1,10) as i {
+        REPEAT(1,10) as i {
             say <%i%>
         }
     }
     
     function array {
-        LOOP([1,2,7,9]) as i {
+        REPEAT([1,2,7,9]) as i {
             say <%i%>
         }
     }
 
     function iterator-function{
-        LOOP(iteratorFunction) as i{
+        REPEAT(iteratorFunction) as i{
             say <%i%>
         }
     }

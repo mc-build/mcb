@@ -242,7 +242,7 @@ class Parser {
 		return nodes;
 	}
 
-	static var loopRegExp = new EReg("(LOOP\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
+	static var loopRegExp = new EReg("(REPEAT\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
 	static var executeRegExp = new EReg("\\b(run\\s+?)\\b", "");
 
 	public static function parserCompilerLoop(v:String, pos:PosInfo, reader:TokenInput, handler:Void->AstNode):AstNode {
@@ -286,7 +286,7 @@ class Parser {
 							throw unreachable(Literal(v, pos));
 						Directory(pos, v.substring("dir ".length), content);
 					case _ if (StringUtils.startsWithConstExpr(v, "#")): Comment(pos, v);
-					case _ if (StringUtils.startsWithConstExpr(v, "LOOP")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "REPEAT")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "tag ")):
 						var sections = StringTools.trim(v.substring("tag ".length)).split(" ");
@@ -408,7 +408,7 @@ class Parser {
 							reader.insert(continuationToken);
 							return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
 						}
-					case _ if (StringUtils.startsWithConstExpr(v, "LOOP")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
+					case _ if (StringUtils.startsWithConstExpr(v, "REPEAT")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "#")): return Comment(pos, v);
 					case _ if (v == "block" || StringUtils.startsWithConstExpr(v, "block ")):
 						var name = StringTools.trim(v.substring("block ".length));

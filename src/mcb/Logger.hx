@@ -17,22 +17,24 @@ class Logger {
 		};
 	}
 
+	public static var prefix = chalk.gray.call("[") + chalk.green.call("MCB") + chalk.gray.call("] ");
+
 	public static function log(msg:Any) {
 		if (enabled) {
 			// Sys.println('${chalk.lightGray("[")}${chalk.green(Sys.time())}${chalk.gray("]")} ${msg}');
-			Sys.println(chalk.gray.call("[") + chalk.green.call("MCB") + chalk.gray.call("] ") + chalk.white.call(msg));
+			Sys.println(prefix + chalk.white.call(msg));
 		}
 	}
 
 	public static function error(msg) {
 		if (enabled) {
-			Sys.println(chalk.gray.call("[") + chalk.green.call("MCB") + chalk.gray.call("] ") + chalk.redBright.call(msg));
+			Sys.println(prefix + chalk.redBright.call(msg));
 		}
 	}
 
 	public static function warn(msg) {
 		if (enabled) {
-			Sys.println(chalk.gray.call("[") + chalk.green.call("MCB") + chalk.gray.call("] ") + chalk.yellow.call(msg));
+			Sys.println(prefix + chalk.yellow.call(msg));
 		}
 	}
 }

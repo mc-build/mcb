@@ -64,7 +64,7 @@ class Globals {
 	];
 
 	public static final map:Map<String, Any> = [
-		"LOOP" => (args:haxe.Rest<Any>) -> {
+		"REPEAT" => (args:haxe.Rest<Any>) -> {
 			var argCount = args.length;
 			for (overlod => handler in loopVariants) {
 				if (overlod.length == argCount) {
@@ -80,7 +80,7 @@ class Globals {
 					}
 				}
 			}
-			throw "Invalid arguments for LOOP (" + args.toArray().map(v -> Std.string(Type.typeof(v))).join(", ") + ")";
+			throw "Invalid arguments for REPEAT (" + args.toArray().map(v -> Std.string(Type.typeof(v))).join(", ") + ")";
 		},
 	];
 
