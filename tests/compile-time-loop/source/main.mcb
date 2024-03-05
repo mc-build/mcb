@@ -4,6 +4,12 @@ dir test{
             say <%i%>
         }
     }
+
+    function float-float-float{
+        REPEAT(1.0,10.0,0.5) as i {
+            say <%i%>
+        }
+    }
     
     function array {
         REPEAT([1,2,7,9]) as i {

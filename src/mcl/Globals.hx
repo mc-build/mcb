@@ -19,6 +19,40 @@ private class IteratorWrapper<T> {
 }
 
 @:keep
+class McFloatIterator {
+	private var min:Float;
+	private var max:Float;
+	private var current:Float;
+	private var offset:Float;
+
+	public function new(min:Float, max:Float, step:Float) {
+		this.min = min;
+		this.max = max;
+		this.current = min;
+		this.offset = step;
+		if (step < 0 && min < max) {
+			throw "Invalid step for range";
+		}
+		if (step > 0 && min > max) {
+			throw "Invalid step for range";
+		}
+	}
+
+	public function hasNext():Bool {
+		return (this.offset > 0 ? current <= max : current >= max);
+	}
+
+	public function next():Float {
+		var result = current;
+		if (!this.hasNext()) {
+			throw "No such element";
+		}
+		current += offset;
+		return result;
+	}
+}
+
+@:keep
 class McIntIterator {
 	private var min:Int;
 	private var max:Int;
@@ -33,7 +67,7 @@ class McIntIterator {
 	}
 
 	public function hasNext():Bool {
-		return current != (this.offset == 1 ? max : max);
+		return (this.offset == 1 ? current <= max : current >= max);
 	}
 
 	public function next():Int {
@@ -54,6 +88,12 @@ class Globals {
 			var max:Int = cast args[1];
 			return cast new McIntIterator(min, max);
 		},
+		[TFloat, TFloat, TFloat] => (args:Array<Any>) -> {
+			var min:Float = args[0];
+			var max:Float = args[1];
+			var step:Float = args[2];
+			return cast new McFloatIterator(min, max, step);
+		},
 		[TClass(Array)] => (args:Array<Any>) -> {
 			return cast new ArrayIterator(args[0]);
 		},
@@ -70,7 +110,8 @@ class Globals {
 				if (overlod.length == argCount) {
 					var failure = false;
 					for (i in 0...argCount) {
-						if (!Type.enumEq(overlod[i], Type.typeof(args[i]))) {
+						var t = Type.typeof(args[i]);
+						if (!(Type.enumEq(overlod[i], t) || (overlod[i] == TFloat && t == TInt))) {
 							failure = true;
 							break;
 						}
