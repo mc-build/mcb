@@ -101,6 +101,8 @@ class AppMain {
 		fetcher.request();
 	}
 
+	private static var globalJsData = {};
+
 	public static function compile(opts:BuildOpts) {
 		Logger.log('Started build at ${Date.now().toString()}');
 		var startTime = Sys.time();
@@ -126,7 +128,7 @@ class AppMain {
 				}
 			}
 
-			compiler.compile(new VariableMap(null, ["config" => config]));
+			compiler.compile(new VariableMap(null, ["config" => config, "global" => globalJsData, "store" => {}]));
 			didFail = false;
 		} catch (e:Dynamic) {
 			didFail = true;

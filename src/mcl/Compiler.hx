@@ -651,7 +651,7 @@ class McFile {
 									result);
 
 								var executeCommandArgs = StringUtils.startsWithConstExpr(execute, "execute ") ? execute.substring(8) : execute;
-								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
+								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
 									+ (data == null ? '' : ' $data'));
 							case Block(_, _, body, data):
 								var embedCommands:Array<String> = [];

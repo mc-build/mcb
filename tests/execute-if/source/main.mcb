@@ -3,7 +3,7 @@ function test{
         say 1
     } else execute if score a b = 3 run {
         say 2
-    } else {
+    } else run {
         say 3
     }
 }

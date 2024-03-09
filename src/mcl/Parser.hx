@@ -364,6 +364,7 @@ class Parser {
 						var data = target.substring(name.length + 1);
 						return FunctionCall(pos, name, data);
 					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
+						Lib.debug();
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {
@@ -379,14 +380,15 @@ class Parser {
 							var extraBlocks:Array<AstNode> = [];
 							while (true) {
 								switch (reader.peek()) {
-									case Literal("else", pos):
+									case Literal("else run", pos):
 										reader.skip();
 										var elseContent:Array<AstNode> = [];
 										var elseData = block(reader, () -> {
 											elseContent.push(innerParse(reader));
 										});
 										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData));
-									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else ")):
+									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else ")
+										&& StringTools.endsWith(v, "run")):
 										reader.skip();
 										var executeCommand = StringTools.trim(v.substring("else ".length));
 										var elseContent:Array<AstNode> = [];

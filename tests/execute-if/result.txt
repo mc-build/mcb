@@ -18,6 +18,6 @@ data/main/functions/test.mcfunction:
 
 scoreboard players set #ifelse _internal_scoreboard 0
 execute store success score #ifelse _internal_scoreboard if score a b = 2 run function main:zzz/1
-execute if score #ifelse _internal_scoreboard matches 0 store success score #ifelse _internal_scoreboard if score a b = 3 run run function main:zzz/2
+execute if score #ifelse _internal_scoreboard matches 0 store success score #ifelse _internal_scoreboard if score a b = 3 run function main:zzz/2
 execute if score #ifelse _internal_scoreboard matches 0 run function main:zzz/3
 ----------------
