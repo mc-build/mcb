@@ -829,7 +829,7 @@ class McFile {
 				saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
 				LootTable(entries) | Predicate(entries) | Recipe(entries):
-				var values = stringifyJsonTag(pos, name, entries, context);
+				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				var type = switch (info) {
 					case Advancement(_):
 						"advancements";
@@ -854,7 +854,7 @@ class McFile {
 				};
 				saveContent(context, Path.join(['data', context.namespace, type].concat(context.path.concat([name + ".json"]))), values);
 			case WorldGen(subType, name, entries):
-				var values = stringifyJsonTag(pos, name, entries, context);
+				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				saveContent(context, Path.join(['data', context.namespace, 'worldgen', subType].concat(context.path.concat([name + ".json"]))), values);
 		}
 	}
@@ -885,7 +885,7 @@ class McFile {
 		for (v in value) {
 			switch (v) {
 				case Raw(pos, value, extra):
-					if (extra != null || extra.length > 0) {
+					if (extra != null && extra.length > 0) {
 						throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in json tag", pos, context));
 					}
 					values.push(injectValues(value, context, pos));
