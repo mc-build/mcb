@@ -543,6 +543,23 @@ class McFile {
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommand(v, context);
 				});
+			case EqCommand(pos, command):
+				var res = McMath.compile(command, context);
+				context.append(res.commands);
+				var addScoreboardCommand = 'scoreboard objectives add ${context.compiler.config.eqConstScoreboardName} dummy';
+				if (!this.loadCommands.contains(addScoreboardCommand)) {
+					this.loadCommands.push(addScoreboardCommand);
+				}
+				addScoreboardCommand = 'scoreboard objectives add ${context.compiler.config.eqVarScoreboardName} dummy';
+				if (!this.loadCommands.contains(addScoreboardCommand)) {
+					this.loadCommands.push(addScoreboardCommand);
+				}
+				for (k in res.constants) {
+					var cmd = 'scoreboard players set $k ${context.compiler.config.eqConstScoreboardName} $k';
+					if (!this.loadCommands.contains(cmd)) {
+						this.loadCommands.push(cmd);
+					}
+				}
 			case FunctionCall(pos, name, data):
 				name = injectValues(name, context, pos);
 				// sanity check * and . calls

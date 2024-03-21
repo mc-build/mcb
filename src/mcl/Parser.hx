@@ -431,6 +431,8 @@ class Parser {
 							content.push(innerParse(reader));
 						}, false);
 						return LoadBlock(pos, content);
+					case _ if (StringUtils.startsWithConstExpr(v, "eq ")):
+						return EqCommand(pos, v.substring("eq ".length));
 					default:
 						return readRaw(pos, v, reader);
 				}

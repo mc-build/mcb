@@ -57,6 +57,8 @@ enum AstNode {
 	Execute(pos:PosInfo, command:String, value:AstNode);
 
 	FunctionCall(pos:PosInfo, name:String, data:String);
+
+	EqCommand(pos:PosInfo, command:String);
 }
 
 class AstNodeUtils {
@@ -103,4 +105,6 @@ enum abstract AstNodeIds(Int) from Int {
 	var Execute = 20;
 
 	var FunctionCall = 21;
+
+	var EqCommand = 22;
 }

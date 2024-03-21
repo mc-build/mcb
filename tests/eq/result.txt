@@ -1,0 +1,25 @@
+data/main/functions/test.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set a b 1
+scoreboard players operation a b = a d
+scoreboard players operation tmp0 mcb.eq.var = c e
+scoreboard players operation tmp0 mcb.eq.var *= 2 mcb.eq.const
+scoreboard players operation tmp1 mcb.eq.var = f g
+scoreboard players operation tmp1 mcb.eq.var *= 3 mcb.eq.const
+scoreboard players operation tmp0 mcb.eq.var += tmp1 mcb.eq.var
+scoreboard players operation tmp0 mcb.eq.var *= 7 mcb.eq.const
+scoreboard players operation a b += tmp0 mcb.eq.var
+----------------
+data/main/functions/zzz/load.mcfunction:
+# Generated with MC-Build
+
+scoreboard objectives add mcb.eq.const dummy
+scoreboard objectives add mcb.eq.var dummy
+scoreboard players set 2 mcb.eq.const 2
+scoreboard players set 3 mcb.eq.const 3
+scoreboard players set 7 mcb.eq.const 7
+----------------
+data/minecraft/tags/functions/load.json:
+{"values":["main:zzz/load"]}
+----------------
