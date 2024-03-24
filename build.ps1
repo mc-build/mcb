@@ -1,4 +1,5 @@
 $buildType = $args[0]
+
 If (Test-Path bin) {
     Remove-Item -Recurse -Force bin
 }
@@ -15,7 +16,10 @@ If ($buildType -eq "cli") {
 Else {
     haxe hxml/build.hxml
 }
-Remove-Item -Recurse -Force bin
+
+if (Test-Path bin) {
+    Remove-Item -Recurse -Force bin
+}
 
 Copy-Item -Recurse mcblib-src dist/.mcblib
 
