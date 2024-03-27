@@ -270,12 +270,18 @@ class Parser {
 						var name = StringTools.trim(v.substring("function ".length));
 						readFunction(name, reader, pos);
 					case _ if (StringUtils.startsWithConstExpr(v, "clock ")):
-						var name = StringTools.trim(v.substring("clock ".length));
+						var time = StringTools.trim(v.substring("clock ".length));
+						var name = null;
+						if (time.indexOf(" ") != -1) {
+							name = StringTools.trim(time.substring(0, time.indexOf(" ") + 1));
+							time = StringTools.trim(time.substring(time.indexOf(" ")));
+						}
+
 						var content:Array<AstNode> = [];
 						block(reader, () -> {
 							content.push(innerParse(reader));
 						});
-						ClockExpr(pos, name, content);
+						ClockExpr(pos, name, time, content);
 					case _ if (StringUtils.startsWithConstExpr(v, "import ")): Import(pos, v.substring("import ".length));
 					case _ if (StringUtils.startsWithConstExpr(v, "dir ") && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen):
 						var content:Array<AstNode> = [];

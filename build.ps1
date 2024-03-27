@@ -1,5 +1,10 @@
 $buildType = $args[0]
-
+function SetNOPUBLISH {
+    param (
+        [bool]$value
+    )
+    $env:NOPUBLISH = $value
+}
 If (Test-Path bin) {
     Remove-Item -Recurse -Force bin
 }
@@ -11,9 +16,19 @@ If (Test-Path dist) {
 }
 
 If ($buildType -eq "cli") {
-    haxe hxml/build.hxml
+    Write-Output "Building CLI"
+    haxe hxml/only/cli.hxml
+}
+ElseIf ($buildType -eq "testbed") {
+    Write-Output "Building Testbed"
+    haxe hxml/only/testbed.hxml
+}
+ElseIf ($buildType -eq "lib") {
+    Write-Output "Building Lib"
+    haxe hxml/only/lib.hxml
 }
 Else {
+    Write-Output "Building All"
     haxe hxml/build.hxml
 }
 

@@ -1,3 +1,7 @@
 clock 1t {
     say hi
 }
+
+clock test 1s {
+    say hi
+}

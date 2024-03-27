@@ -777,22 +777,21 @@ class McFile {
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileTld(v, context);
 				});
-			case ClockExpr(pos, time, body):
+			case ClockExpr(pos, name, time, body):
 				var commands:Array<String> = [];
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				}, context.functions);
 
 				var id = Std.string(context.uidIndex.get());
-				var functionId = context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, '$id']).join("/");
-				commands.push('schedule $functionId $time replace');
+				var path = (name == null ? context.path.concat([context.compiler.config.generatedDirName, '$id']) : context.path.concat([name])).join("/");
+				var functionId = context.namespace + ":" + path;
+				commands.push('schedule function $functionId $time replace');
 				for (node in body) {
 					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
-				saveContent(context,
-					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
-					result);
+				saveContent(context, Path.join(['data', context.namespace, 'functions', '$path.mcfunction']), result);
 				context.compiler.tags.addLoadingCommand(functionId);
 			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output

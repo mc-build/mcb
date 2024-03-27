@@ -52,7 +52,7 @@ enum AstNode {
 	// template expressions
 	TemplateOverload(pos:PosInfo, args:String, body:Array<AstNode>);
 
-	ClockExpr(pos:PosInfo, time:String, body:Array<AstNode>);
+	ClockExpr(pos:PosInfo, name:String, time:String, body:Array<AstNode>);
 
 	Execute(pos:PosInfo, command:String, value:AstNode);
 
