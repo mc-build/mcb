@@ -660,7 +660,7 @@ class McFile {
 								for (node in body) {
 									compileCommand(node, embedContext);
 								}
-								var result = commands.join("\n");
+								var result = embedCommands.join("\n");
 
 								saveContent(context,
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id

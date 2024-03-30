@@ -6,7 +6,7 @@ say 1
 data/main/functions/zzz/2.mcfunction:
 # Generated with MC-Build
 
-say 1
+say 2
 ----------------
 data/main/functions/zzz/3.mcfunction:
 # Generated with MC-Build
