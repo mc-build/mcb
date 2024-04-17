@@ -1,0 +1,12 @@
+function test{
+    schedule 1t append {
+        say hi
+    }
+    schedule function *demo 1t
+    schedule function ./demo 1t
+    schedule function ^0 1t
+}
+
+function demo{
+
+}

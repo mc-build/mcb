@@ -1,9 +1,3 @@
-data/main/functions/zzz/0.mcfunction:
-# Generated with MC-Build
-
-schedule function main:zzz/0 1t replace
-say hi
-----------------
 data/main/functions/test.mcfunction:
 # Generated with MC-Build
 
@@ -11,5 +5,5 @@ schedule function main:test 1s replace
 say hi
 ----------------
 data/minecraft/tags/functions/load.json:
-{"values":["main:zzz/0","main:test"]}
+{"values":["main:test"]}
 ----------------

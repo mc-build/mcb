@@ -13,7 +13,5 @@ class McbError extends Exception {
 	}
 
 	@:keep
-	private function __init__() {
-		js.Lib.debug();
-	}
+	private function __init__() {}
 }

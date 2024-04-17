@@ -2,5 +2,5 @@ data/main/tags/functions/test.json:
 {"replace":true,"values":["a:b"]}
 ----------------
 data/main/tags/blocks/dir/test.json:
-{"replace":false,"values":[{"id":"minecraft:stone","replace":true},"minecraft:dirt"]}
+{"replace":false,"values":[{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar"]}
 ----------------

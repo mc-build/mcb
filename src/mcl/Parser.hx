@@ -271,11 +271,10 @@ class Parser {
 						readFunction(name, reader, pos);
 					case _ if (StringUtils.startsWithConstExpr(v, "clock ")):
 						var time = StringTools.trim(v.substring("clock ".length));
-						var name = null;
-						if (time.indexOf(" ") != -1) {
-							name = StringTools.trim(time.substring(0, time.indexOf(" ") + 1));
-							time = StringTools.trim(time.substring(time.indexOf(" ")));
-						}
+						if (time.indexOf(" ") == -1)
+							throw new ParserError(format('"Expected a name and a time for the clock command" at {}:{}:{}', pos.file, pos.line, pos.col));
+						var name = StringTools.trim(time.substring(0, time.indexOf(" ") + 1));
+						time = StringTools.trim(time.substring(time.indexOf(" ")));
 
 						var content:Array<AstNode> = [];
 						block(reader, () -> {
@@ -369,8 +368,49 @@ class Parser {
 						var name = target.substring(0, end == -1 ? target.length : end);
 						var data = target.substring(name.length + 1);
 						return FunctionCall(pos, name, data);
+					case _ if (StringUtils.startsWithConstExpr(v, "schedule ")):
+						var name = StringTools.trim(v.substring("schedule ".length));
+						if (StringUtils.startsWithConstExpr(name, "function ")) {
+							var target = name.substring("function ".length);
+							var end = target.indexOf(" ");
+							var funcName = target.substring(0, end == -1 ? target.length : end);
+							var delay = end == -1 ? null : target.substring(funcName.length + 1);
+							var mode = "replace";
+							if (StringTools.endsWith(delay, " append")) {
+								mode = "append";
+								delay = delay.substring(0, delay.length - " append".length);
+							}
+							if (StringTools.endsWith(delay, " replace")) {
+								mode = "replace";
+								delay = delay.substring(0, delay.length - " replace".length);
+							}
+							if (delay == null)
+								throw new ParserError(format('"Expected delay after function name in schedule command" at {}:{}:{}', pos.file, pos.line,
+									pos.col));
+							return ScheduleCall(pos, delay, funcName, mode);
+						}
+						var delayIdx = name.indexOf(" ");
+						if (delayIdx == -1)
+							throw new ParserError(format('"Expected delay after schedule command" at {}:{}:{}', pos.file, pos.line, pos.col));
+						var delay = name.substring(0, delayIdx);
+						var mode = "append";
+						if (StringTools.endsWith(delay, " append")) {
+							mode = "append";
+							delay = delay.substring(0, delay.length - " append".length);
+						}
+						if (StringTools.endsWith(delay, " replace")) {
+							mode = "replace";
+							delay = delay.substring(0, delay.length - " replace".length);
+						}
+						var content:Array<AstNode> = [];
+						if (Type.enumIndex(reader.peek()) != 1 /* BracketOpen */) {
+							throw new ParserError("Expected { after delay in schedule block command");
+						}
+						block(reader, () -> {
+							content.push(innerParse(reader));
+						});
+						return ScheduleBlock(pos, delay, mode, content);
 					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
-						Lib.debug();
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {

@@ -1,8 +1,5 @@
 package mcl;
 
-import haxe.Json;
-import MinificationHelper.Minified;
-
 typedef PosInfo = {
 	line:Int,
 	col:Int,

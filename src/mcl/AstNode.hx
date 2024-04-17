@@ -59,6 +59,8 @@ enum AstNode {
 	FunctionCall(pos:PosInfo, name:String, data:String);
 
 	EqCommand(pos:PosInfo, command:String);
+
+	ScheduleCall(pos:PosInfo, delay:String, target:String, mode:String);
 }
 
 class AstNodeUtils {
@@ -107,4 +109,6 @@ enum abstract AstNodeIds(Int) from Int {
 	var FunctionCall = 21;
 
 	var EqCommand = 22;
+
+	var ScheduleCall = 23;
 }

@@ -275,6 +275,15 @@ class VariableMap {
 			return this;
 		return new VariableMap(this, variables);
 	}
+
+	@:keep
+	public static function fromObject(obj:Any):VariableMap {
+		var res = new Map();
+		for (k in Reflect.fields(obj)) {
+			res.set(k, Reflect.field(obj, k));
+		}
+		return new VariableMap(null, res);
+	}
 }
 
 typedef BaseNameInfo = {
@@ -560,6 +569,58 @@ class McFile {
 						this.loadCommands.push(cmd);
 					}
 				}
+			case ScheduleCall(pos, delay, name, mode):
+				js.Lib.debug();
+				switch (name.charAt(0)) {
+					case "^": // hiarchial function call
+						var levels = Std.parseInt(name.substring(1));
+						var fn = context.functions[context.functions.length - levels - 1];
+						if (fn == null) {
+							throw new CompilerError(ErrorUtil.formatContext("Unexpected schedule call: " + name, pos, context));
+						}
+						context.append(injectValues('schedule function ${fn} ${delay} ${mode}', context, pos));
+					case "*": // root function call
+						context.append(injectValues('schedule function ${context.namespace}:${name.substring(1)} ${delay} ${mode}', context, pos));
+					case ".":
+						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+							var path = context.currentFunction.concat(name.split("/"));
+							var resolved:Array<String> = [];
+							for (node in path) {
+								switch (node) {
+									case "..":
+										if (resolved.length == 0)
+											throw new CompilerError(ErrorUtil.formatContext("Invalid schedule call: " + name, pos, context));
+										resolved.pop();
+									case "." | "":
+									// ignore
+									default:
+										resolved.push(node);
+								}
+							}
+							context.append(injectValues('schedule function ${context.namespace}:${resolved.join("/")} ${delay} ${mode}', context, pos));
+						} else {
+							context.append(injectValues('schedule function ${name} ${delay} ${mode}', context, pos));
+						}
+					default:
+						context.append(injectValues('schedule function ${name} $delay $mode', context, pos));
+				}
+			case ScheduleBlock(pos, delay, type, body):
+				var commands:Array<String> = [];
+				var append = function(command:String) {
+					commands.push(command);
+				};
+				var uid = Std.string(context.uidIndex.get());
+				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
+				var newContext = forkCompilerContextWithAppend(context, append, context.functions.concat([callSignature]));
+				for (node in body) {
+					compileCommand(node, newContext);
+				}
+				var result = commands.join("\n");
+				var id = Std.string(context.uidIndex.get());
+				saveContent(context,
+					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
+					result);
+				context.append('schedule function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")} $delay $type');
 			case FunctionCall(pos, name, data):
 				name = injectValues(name, context, pos);
 				// sanity check * and . calls
@@ -576,21 +637,26 @@ class McFile {
 					case "*": // root function call
 						context.append(injectValues('function ${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}', context, pos));
 					case ".":
-						var path = context.currentFunction.concat(name.split("/"));
-						var resolved:Array<String> = [];
-						for (node in path) {
-							switch (node) {
-								case "..":
-									if (resolved.length == 0)
-										throw new CompilerError(ErrorUtil.formatContext("Invalid function call: " + name, pos, context));
-									resolved.pop();
-								case "." | "":
-								// ignore
-								default:
-									resolved.push(node);
+						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+							var path = context.currentFunction.concat(name.split("/"));
+							var resolved:Array<String> = [];
+							for (node in path) {
+								switch (node) {
+									case "..":
+										if (resolved.length == 0)
+											throw new CompilerError(ErrorUtil.formatContext("Invalid function call: " + name, pos, context));
+										resolved.pop();
+									case "." | "":
+									// ignore
+									default:
+										resolved.push(node);
+								}
 							}
+							context.append(injectValues('function ${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context,
+								pos));
+						} else {
+							context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 						}
-						context.append(injectValues('function ${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context, pos));
 					default:
 						context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 				}
@@ -808,7 +874,7 @@ class McFile {
 					values: [
 						for (e in entries) {
 							switch (e) {
-								case Raw(pos, value, []):
+								case Raw(pos, value, []) | Comment(pos, value):
 									if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
 										cast {
 											id: value.substring(0, value.length - 8),

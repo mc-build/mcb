@@ -33,6 +33,7 @@ typedef BuildOpts = {
 	var configPath:String;
 }
 
+@:expose
 class AppMain {
 	public static function loadDebugProject(file:String, outdir:String) {
 		var reader = new Unserializer(File.getContent(file));
@@ -149,8 +150,9 @@ class AppMain {
 	}
 
 	public static var watch:Bool = false;
-
+	#if !lib
 	static var chars = Figures.default_;
+	#end
 
 	public static function doBuild(opts:BuildOpts) {
 		TemplateRegisterer.register();
@@ -185,10 +187,11 @@ class AppMain {
 					deletedDirs.add(dir);
 				}
 			}
-			js.Lib.debug();
+			#if !lib
 			Logger.log('${chars.arrowUp} Added: ${added.length}');
 			Logger.log('${chars.arrowDown} Removed: ${removed.length}');
 			Logger.log('${chars.arrowRight} Changed: ${changed.length}');
+			#end
 			cache = io.reportFileMetadata();
 			writeCache();
 		}
@@ -202,7 +205,7 @@ class AppMain {
 				x.revertMap.revert();
 			}
 		}
-
+		#if !lib
 		if (opts.watch) {
 			Logger.log('Watch mode enabled, Watching for changes...');
 			var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
@@ -222,5 +225,6 @@ class AppMain {
 			watcher.on("add", handleFsEvent);
 			watcher.on("unlink", handleFsEvent);
 		}
+		#end
 	}
 }

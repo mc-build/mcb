@@ -28,4 +28,20 @@ class TestIo implements Io {
 		}
 		return result;
 	}
+
+	public function reportFilesRemoved(oldFiles:Map<String, String>):Array<String> {
+		return [];
+	}
+
+	public function reportFilesAdded(oldFiles:Map<String, String>):Array<String> {
+		return [];
+	}
+
+	public function reportFilesChanged(oldFiles:Map<String, String>):Array<String> {
+		return [];
+	}
+
+	public function reportFileMetadata():Map<String, String> {
+		return [];
+	}
 }

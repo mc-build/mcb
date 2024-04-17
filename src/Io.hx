@@ -12,12 +12,12 @@ interface Io {
 	public function write(path:String, content:String):Void;
 	public function cleanup():Void;
 	public function finished():Bool;
-	#if CLI
+	// #if CLI
 	public function reportFilesRemoved(oldFiles:Map<String, String>):Array<String>;
 	public function reportFilesAdded(oldFiles:Map<String, String>):Array<String>;
 	public function reportFilesChanged(oldFiles:Map<String, String>):Array<String>;
 	public function reportFileMetadata():Map<String, String>;
-	#end
+	// #end
 }
 
 @:expose("io.RevertTracker")
@@ -49,7 +49,7 @@ class RevertTracker {
 
 @:expose("io.SyncIo")
 class SyncIo implements Io {
-	#if CLI
+	// #if CLI
 	private var fileData:Map<String, String> = new Map<String, String>();
 
 	public var revertMap = new RevertTracker();
@@ -84,17 +84,18 @@ class SyncIo implements Io {
 	public function reportFileMetadata():Map<String, String> {
 		return fileData;
 	}
-	#end
+
+	// #end
 
 	public function new() {}
 
 	private var existingDirectories:Map<String, Bool> = new Map<String, Bool>();
 
 	public function write(path:String, content:String):Void {
-		#if CLI
+		// #if CLI
 		fileData.set(path, Sha1.encode(content));
 		revertMap.track(path);
-		#end
+		// #end
 		var dir = Path.directory(path);
 		if (!existingDirectories.exists(dir)) {
 			FileSystem.createDirectory(dir);
@@ -123,7 +124,7 @@ class ThreadedIo implements Io {
 
 	var queue:Array<IoEntry> = [];
 
-	#if CLI
+	// #if CLI
 	var fileData:Map<String, String> = new Map<String, String>();
 
 	public function reportFilesRemoved(oldFiles:Map<String, String>) {
@@ -144,7 +145,8 @@ class ThreadedIo implements Io {
 	public function reportFileMetadata():Map<String, String> {
 		return fileData;
 	}
-	#end
+
+	// #end
 
 	private function log(msg:String) {
 		if (enableLog)
@@ -195,9 +197,9 @@ class ThreadedIo implements Io {
 	}
 
 	public function write(path:String, content:String):Void {
-		#if CLI
+		// #if CLI
 		fileData.set(path, Sha1.encode(content));
-		#end
+		// #end
 		log('write ${path}');
 		if (done)
 			throw 'Cannot write after cleanup()';
@@ -228,7 +230,7 @@ class MultiThreadIo implements Io {
 
 	var fileData:Map<String, String> = new Map<String, String>();
 
-	#if CLI
+	// #if CLI
 	public function reportFilesRemoved(oldFiles:Map<String, String>) {
 		var result:Array<String> = [];
 		var files = reportFileMetadata();
@@ -272,7 +274,8 @@ class MultiThreadIo implements Io {
 		}
 		return fileData;
 	}
-	#end
+
+	// #end
 
 	private inline static function isPowerOfTwo(x:Int):Bool {
 		return (x & (x - 1)) == 0;
