@@ -4,6 +4,11 @@ function test{
         function ^1
         function ./dummy
         function ./folder/dummy2
+
+        function #^0
+        function #^1
+        function #./dummy
+        function #./folder/dummy2
     }
 }
 function dummy{
@@ -11,8 +16,27 @@ function dummy{
 }
 
 dir folder{
-    function dummy2{
+    function dummy2 {
         function ../dummy
         function *dummy
+
+        function #../dummy
+        function #*dummy
+
+        {
+            function #*<%export_namespace%>/as_root/on_summon
+        }
+
+        function #*<%export_namespace%>/as_root/on_summon
+
+        execute run {
+            function #*<%export_namespace%>/as_root/on_summon
+        }
+
+        execute if function {
+            function #*<%export_namespace%>/as_root/on_summon
+        } run {
+            function #*<%export_namespace%>/as_root/on_summon
+        }
     }
 }
