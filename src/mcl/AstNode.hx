@@ -34,13 +34,13 @@ enum AstNode {
 	MultiLineScript(pos:PosInfo, value:Array<Token>);
 
 	// block
-	Block(pos:PosInfo, name:Null<String>, body:Array<AstNode>, data:Null<String>);
+	Block(pos:PosInfo, name:Null<String>, body:Array<AstNode>, data:Null<String>, isMacro:Bool);
 	TickBlock(pos:PosInfo, body:Array<AstNode>);
 	LoadBlock(pos:PosInfo, body:Array<AstNode>);
 
 	// syntax sugar
-	ExecuteBlock(pos:PosInfo, execute:String, data:Null<String>, body:Array<AstNode>, ?continuations:Null<Array<AstNode>>);
-	ScheduleBlock(pos:PosInfo, delay:String, type:String, body:Array<AstNode>);
+	ExecuteBlock(pos:PosInfo, execute:String, data:Null<String>, body:Array<AstNode>, ?continuations:Null<Array<AstNode>>, isMacro:Bool);
+	ScheduleBlock(pos:PosInfo, delay:String, type:String, body:Array<AstNode>, isMacro:Bool);
 	SequenceBlock(pos:PosInfo, body:Array<AstNode>);
 
 	// runtime expressions
@@ -54,13 +54,13 @@ enum AstNode {
 
 	ClockExpr(pos:PosInfo, name:String, time:String, body:Array<AstNode>);
 
-	Execute(pos:PosInfo, command:String, value:AstNode);
+	Execute(pos:PosInfo, command:String, value:AstNode, isMacro:Bool);
 
-	FunctionCall(pos:PosInfo, name:String, data:String);
+	FunctionCall(pos:PosInfo, name:String, data:String, isMacro:Bool);
 
 	EqCommand(pos:PosInfo, command:String);
 
-	ScheduleCall(pos:PosInfo, delay:String, target:String, mode:String);
+	ScheduleCall(pos:PosInfo, delay:String, target:String, mode:String, isMacro:Bool);
 }
 
 class AstNodeUtils {

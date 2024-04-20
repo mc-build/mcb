@@ -416,7 +416,8 @@ class McFile {
 		context.compiler.io.write(path, content);
 	}
 
-	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null):String {
+	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null,
+			isMacro):String {
 		var commands:Array<String> = [];
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
 		var id = name == null ? '${context.compiler.config.generatedDirName}/${uid}' : name;
@@ -434,7 +435,11 @@ class McFile {
 		if (name != null)
 			name = injectValues(name, context, pos);
 		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
-		return 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data');
+		return makeMacro(isMacro, 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
+	}
+
+	public inline function makeMacro(cond:Bool, cmd:String):String {
+		return '${cond ? '$' : ''}${cmd}';
 	}
 
 	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {
@@ -546,8 +551,8 @@ class McFile {
 				processTemplate(context, pos, value, extras);
 			case Comment(_, value):
 				context.append(value);
-			case AstNode.Block(pos, null, body, data) | AstNode.Block(pos, "", body, data):
-				context.append(createAnonymousFunction(pos, body, data, context));
+			case AstNode.Block(pos, null, body, data, isMacro) | AstNode.Block(pos, "", body, data, isMacro):
+				context.append(createAnonymousFunction(pos, body, data, context, null, isMacro));
 			case CompileTimeIf(pos, expression, body, elseExpressions):
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommand(v, context);
@@ -569,8 +574,11 @@ class McFile {
 						this.loadCommands.push(cmd);
 					}
 				}
-			case ScheduleCall(pos, delay, name, mode):
-				js.Lib.debug();
+			case ScheduleCall(pos, delay, name, mode, isMacro):
+				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+				if (tagPrefix != "") {
+					name = name.substring(1);
+				}
 				switch (name.charAt(0)) {
 					case "^": // hiarchial function call
 						var levels = Std.parseInt(name.substring(1));
@@ -578,9 +586,10 @@ class McFile {
 						if (fn == null) {
 							throw new CompilerError(ErrorUtil.formatContext("Unexpected schedule call: " + name, pos, context));
 						}
-						context.append(injectValues('schedule function ${fn} ${delay} ${mode}', context, pos));
+						context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${fn} ${delay} ${mode}'), context, pos));
 					case "*": // root function call
-						context.append(injectValues('schedule function ${context.namespace}:${name.substring(1)} ${delay} ${mode}', context, pos));
+						context.append(injectValues(makeMacro(isMacro,
+							'schedule function ${tagPrefix}${context.namespace}:${name.substring(1)} ${delay} ${mode}'), context, pos));
 					case ".":
 						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
 							var path = context.currentFunction.concat(name.split("/"));
@@ -597,14 +606,15 @@ class McFile {
 										resolved.push(node);
 								}
 							}
-							context.append(injectValues('schedule function ${context.namespace}:${resolved.join("/")} ${delay} ${mode}', context, pos));
+							context.append(injectValues(makeMacro(isMacro,
+								'schedule function ${tagPrefix}${context.namespace}:${resolved.join("/")} ${delay} ${mode}'), context, pos));
 						} else {
-							context.append(injectValues('schedule function ${name} ${delay} ${mode}', context, pos));
+							context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} ${delay} ${mode}'), context, pos));
 						}
 					default:
-						context.append(injectValues('schedule function ${name} $delay $mode', context, pos));
+						context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} $delay $mode'), context, pos));
 				}
-			case ScheduleBlock(pos, delay, type, body):
+			case ScheduleBlock(pos, delay, type, body, isMacro):
 				var commands:Array<String> = [];
 				var append = function(command:String) {
 					commands.push(command);
@@ -620,12 +630,17 @@ class McFile {
 				saveContent(context,
 					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
 					result);
-				context.append('schedule function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")} $delay $type');
-			case FunctionCall(pos, name, data):
+				context.append(makeMacro(isMacro,
+					'schedule function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")} $delay $type'));
+			case FunctionCall(pos, name, data, isMacro):
 				name = injectValues(name, context, pos);
 				// sanity check * and . calls
 				// support scripting
 				// testcases
+				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+				if (tagPrefix != "") {
+					name = name.substring(1);
+				}
 				switch (name.charAt(0)) {
 					case "^": // hiarchial function call
 						var levels = Std.parseInt(name.substring(1));
@@ -633,9 +648,11 @@ class McFile {
 						if (fn == null) {
 							throw new CompilerError(ErrorUtil.formatContext("Unexpected function call: " + name, pos, context));
 						}
-						context.append(injectValues('function ${fn}${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(injectValues(makeMacro(isMacro, 'function ${tagPrefix}${fn}${data.length == 0 ? '' : ' $data'}'), context, pos));
 					case "*": // root function call
-						context.append(injectValues('function ${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(injectValues(makeMacro(isMacro,
+							'function ${tagPrefix}${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}'), context,
+							pos));
 					case ".":
 						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
 							var path = context.currentFunction.concat(name.split("/"));
@@ -652,15 +669,15 @@ class McFile {
 										resolved.push(node);
 								}
 							}
-							context.append(injectValues('function ${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context,
-								pos));
+							context.append(injectValues('function ${tagPrefix}${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}',
+								context, pos));
 						} else {
-							context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+							context.append(injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 						}
 					default:
-						context.append(injectValues('function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(injectValues('${tagPrefix}function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 				}
-			case Execute(pos, command, value):
+			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
 				var uid = Std.string(context.uidIndex.get());
 				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
@@ -672,17 +689,17 @@ class McFile {
 					throw new CompilerError(ErrorUtil.formatContext("Unexpected empty execute", pos, context));
 				}
 				if (commands.length == 1 && commands[0].indexOf(callSignature) == -1) {
-					context.append(injectValues('$command ${commands[0]}', context, pos));
+					context.append(injectValues(makeMacro(isMacro, '$command ${commands[0]}'), context, pos));
 				} else {
 					var id = uid;
 					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
 						+ ".mcfunction"])));
 					saveContent(context, path, commands.join("\n"));
-					context.append(injectValues('$command function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}',
-						context,
-						pos));
+					context.append(injectValues(makeMacro(isMacro,
+						'$command function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'),
+						context, pos));
 				}
-			case ExecuteBlock(pos, execute, data, body, continuations):
+			case ExecuteBlock(pos, execute, data, body, continuations, isMacro):
 				var commands:Array<String> = [];
 				var append = function(command:String) {
 					commands.push(command);
@@ -700,12 +717,14 @@ class McFile {
 					result);
 				if (continuations != null) {
 					context.append('scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 0');
-					context.append(injectValues('execute store success score #ifelse ${context.compiler.config.internalScoreboardName}${execute.substring(7)} function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
-						+ (data == null ? '' : ' $data'),
+					context.append(injectValues(makeMacro(isMacro,
+						'execute store success score #ifelse ${context.compiler.config.internalScoreboardName}${execute.substring(7)} function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
+						(data == null ? '' : ' $data')),
 						context, pos));
 				} else {
-					context.append(injectValues('$execute function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
-						+ (data == null ? '' : ' $data'),
+					context.append(injectValues(makeMacro(isMacro,
+						'$execute function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
+						(data == null ? '' : ' $data')),
 						context, pos));
 				}
 				if (continuations != null) {
@@ -714,7 +733,7 @@ class McFile {
 					for (continuation in continuations) {
 						var isDone = idx == continuations.length - 1;
 						switch (continuation) {
-							case ExecuteBlock(pos, execute, data, body, _):
+							case ExecuteBlock(pos, execute, data, body, _, isMacro2):
 								var embedCommands:Array<String> = [];
 								var embedAppend = function(command:String) {
 									embedCommands.push(command);
@@ -734,9 +753,10 @@ class McFile {
 									result);
 
 								var executeCommandArgs = StringUtils.startsWithConstExpr(execute, "execute ") ? execute.substring(8) : execute;
-								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
-									+ (data == null ? '' : ' $data'));
-							case Block(_, _, body, data):
+								context.append(makeMacro(isMacro2,
+									'execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
+									(data == null ? '' : ' $data')));
+							case Block(_, _, body, data, isMacro2):
 								var embedCommands:Array<String> = [];
 								if (!isDone)
 									throw new CompilerError("block continuation must be the last continuation", true);
@@ -754,8 +774,9 @@ class McFile {
 									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
 										+ ".mcfunction"]))),
 									result);
-								context.append('execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'
-									+ (data == null ? '' : ' $data'));
+								context.append(makeMacro(isMacro2,
+									'execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 run function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
+									(data == null ? '' : ' $data')));
 
 							default: throw new CompilerError(ErrorUtil.formatContext("Unexpected continuation type: " + Std.string(continuation),
 									AstNodeUtils.getPos(continuation), newContext));
@@ -768,8 +789,8 @@ class McFile {
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileCommand(v, context);
 				});
-			case Block(pos, name, body, data):
-				context.append(createAnonymousFunction(pos, body, data, context, name));
+			case Block(pos, name, body, data, isMacro):
+				context.append(createAnonymousFunction(pos, body, data, context, name, isMacro));
 			case LoadBlock(pos, body):
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					loadCommands.push(v);

@@ -348,6 +348,9 @@ class Parser {
 		switch (token) {
 			case Literal(v, pos):
 				reader.next();
+				final isMacroArg = v.charAt(0) == '$';
+				if (isMacroArg)
+					v = v.substring(1);
 				switch (v) {
 					case "<%%":
 						var content:Array<Token> = [];
@@ -367,7 +370,7 @@ class Parser {
 						var end = target.indexOf(" ");
 						var name = target.substring(0, end == -1 ? target.length : end);
 						var data = target.substring(name.length + 1);
-						return FunctionCall(pos, name, data);
+						return FunctionCall(pos, name, data, isMacroArg);
 					case _ if (StringUtils.startsWithConstExpr(v, "schedule ")):
 						var name = StringTools.trim(v.substring("schedule ".length));
 						if (StringUtils.startsWithConstExpr(name, "function ")) {
@@ -387,12 +390,10 @@ class Parser {
 							if (delay == null)
 								throw new ParserError(format('"Expected delay after function name in schedule command" at {}:{}:{}', pos.file, pos.line,
 									pos.col));
-							return ScheduleCall(pos, delay, funcName, mode);
+							return ScheduleCall(pos, delay, funcName, mode, isMacroArg);
 						}
 						var delayIdx = name.indexOf(" ");
-						if (delayIdx == -1)
-							throw new ParserError(format('"Expected delay after schedule command" at {}:{}:{}', pos.file, pos.line, pos.col));
-						var delay = name.substring(0, delayIdx);
+						var delay = delayIdx == -1 ? name : name.substring(0, delayIdx);
 						var mode = "append";
 						if (StringTools.endsWith(delay, " append")) {
 							mode = "append";
@@ -409,7 +410,7 @@ class Parser {
 						block(reader, () -> {
 							content.push(innerParse(reader));
 						});
-						return ScheduleBlock(pos, delay, mode, content);
+						return ScheduleBlock(pos, delay, mode, content, isMacroArg);
 					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
 						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
@@ -418,7 +419,7 @@ class Parser {
 								var subPos:PosInfo = {file: pos.file, line: pos.line, col: pos.col + p.pos + p.len};
 								var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)), subPos);
 								reader.insert(continuationToken);
-								return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
+								return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader), isMacroArg);
 							}
 							var data = block(reader, () -> {
 								content.push(innerParse(reader));
@@ -426,13 +427,30 @@ class Parser {
 							var extraBlocks:Array<AstNode> = [];
 							while (true) {
 								switch (reader.peek()) {
+									case Literal("else $run", pos):
+										reader.skip();
+										var elseContent:Array<AstNode> = [];
+										var elseData = block(reader, () -> {
+											elseContent.push(innerParse(reader));
+										});
+										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, true));
 									case Literal("else run", pos):
 										reader.skip();
 										var elseContent:Array<AstNode> = [];
 										var elseData = block(reader, () -> {
 											elseContent.push(innerParse(reader));
 										});
-										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData));
+										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, false));
+									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else $")
+										&& StringTools.endsWith(v, "run")):
+										reader.skip();
+										var executeCommand = StringTools.trim(v.substring("else $".length));
+										var elseContent:Array<AstNode> = [];
+										var elseData = block(reader, () -> {
+											elseContent.push(innerParse(reader));
+										});
+										pos.col += 5;
+										extraBlocks.push(AstNode.ExecuteBlock(pos, executeCommand, elseData, elseContent, true));
 									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else ")
 										&& StringTools.endsWith(v, "run")):
 										reader.skip();
@@ -442,11 +460,11 @@ class Parser {
 											elseContent.push(innerParse(reader));
 										});
 										pos.col += 5;
-										extraBlocks.push(AstNode.ExecuteBlock(pos, executeCommand, elseData, elseContent));
+										extraBlocks.push(AstNode.ExecuteBlock(pos, executeCommand, elseData, elseContent, false));
 									default: break;
 								}
 							}
-							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null);
+							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null, isMacroArg);
 						} else {
 							if (!executeRegExp.match(v))
 								return readRaw(pos, v, reader);
@@ -454,7 +472,7 @@ class Parser {
 							var subPos:PosInfo = {file: pos.file, line: pos.line, col: pos.col + p.pos + p.len};
 							var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)), subPos);
 							reader.insert(continuationToken);
-							return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader));
+							return Execute(pos, StringTools.rtrim(v.substring(0, p.pos + 3)), innerParse(reader), isMacroArg);
 						}
 					case _ if (StringUtils.startsWithConstExpr(v, "REPEAT")): return parserCompilerLoop(v, pos, reader, () -> innerParse(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "#")): return Comment(pos, v);
@@ -464,7 +482,7 @@ class Parser {
 						var data = block(reader, () -> {
 							content.push(innerParse(reader));
 						});
-						return Block(pos, name, content, data);
+						return Block(pos, name, content, data, isMacroArg);
 					case _ if (v == "tick"):
 						var content:Array<AstNode> = [];
 						block(reader, () -> {
@@ -487,7 +505,7 @@ class Parser {
 				var data = block(reader, () -> {
 					content.push(innerParse(reader));
 				});
-				return Block(pos, null, content, data);
+				return Block(pos, null, content, data, false);
 			default:
 				throw unreachable(token);
 		}
@@ -508,7 +526,7 @@ class Parser {
 					var blockData = block(reader, () -> {
 						blockContent.push(innerParse(reader));
 					});
-					content.push(Block(pos, null, blockContent, blockData));
+					content.push(Block(pos, null, blockContent, blockData, false));
 				case BracketClose(pos) if (pos.line == line):
 					throw unreachable(Literal(v, pos));
 				default:

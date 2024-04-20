@@ -24,19 +24,23 @@ dir folder{
         function #*dummy
 
         {
-            function #*<%export_namespace%>/as_root/on_summon
+            function #*dummy/as_root/on_summon
         }
 
-        function #*<%export_namespace%>/as_root/on_summon
+        function #*dummy/as_root/on_summon
 
         execute run {
-            function #*<%export_namespace%>/as_root/on_summon
+            function #*dummy/as_root/on_summon
         }
 
-        execute if function {
-            function #*<%export_namespace%>/as_root/on_summon
-        } run {
-            function #*<%export_namespace%>/as_root/on_summon
-        }
+        ###
+        FUTURE
+        ###
+
+        # execute if function {
+        #     function #*dummy/as_root/on_summon
+        # } run {
+        #     function #*dummy/as_root/on_summon
+        # }
     }
 }
