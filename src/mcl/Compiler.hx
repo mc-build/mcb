@@ -553,8 +553,18 @@ class McFile {
 				processTemplate(context, pos, value, extras);
 			case Comment(_, value):
 				context.append(value);
-			case AstNode.Block(pos, null, body, data, isMacro) | AstNode.Block(pos, "", body, data, isMacro):
-				context.append(createAnonymousFunction(pos, body, data, context, null, isMacro));
+			case AstNode.Block(pos, null, body, data, isMacro, isInline) | AstNode.Block(pos, "", body, data, isMacro, isInline):
+				if (isInline) {
+					if (data != null) {
+						throw new CompilerError(ErrorUtil.formatContext("Inline block cannot have data", pos, context));
+					} else {
+						for (node in body) {
+							compileCommand(node, context);
+						}
+					}
+				} else {
+					context.append(createAnonymousFunction(pos, body, data, context, null, isMacro));
+				}
 			case CompileTimeIf(pos, expression, body, elseExpressions):
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommand(v, context);
@@ -685,7 +695,7 @@ class McFile {
 				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
-				}, context.functions.concat([callSignature]));
+				}, context.functions);
 				compileCommand(value, newContext);
 				if (commands.length == 0) {
 					throw new CompilerError(ErrorUtil.formatContext("Unexpected empty execute", pos, context));
@@ -758,7 +768,7 @@ class McFile {
 								context.append(makeMacro(isMacro2,
 									'execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
 									(data == null ? '' : ' $data')));
-							case Block(_, _, body, data, isMacro2):
+							case Block(_, _, body, data, isMacro2, _):
 								var embedCommands:Array<String> = [];
 								if (!isDone)
 									throw new CompilerError("block continuation must be the last continuation", true);
@@ -791,8 +801,18 @@ class McFile {
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
 					return compileCommand(v, context);
 				});
-			case Block(pos, name, body, data, isMacro):
-				context.append(createAnonymousFunction(pos, body, data, context, name, isMacro));
+			case Block(pos, name, body, data, isMacro, isInline):
+				if (isInline) {
+					if (data != null) {
+						throw new CompilerError(ErrorUtil.formatContext("Inline block cannot have data", pos, context));
+					} else {
+						for (node in body) {
+							compileCommand(node, context);
+						}
+					}
+				} else {
+					context.append(createAnonymousFunction(pos, body, data, context, name, isMacro));
+				}
 			case LoadBlock(pos, body):
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					loadCommands.push(v);
@@ -898,6 +918,7 @@ class McFile {
 						for (e in entries) {
 							switch (e) {
 								case Raw(pos, value, []) | Comment(pos, value):
+									value = injectValues(value, context, pos);
 									if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
 										cast {
 											id: value.substring(0, value.length - 8),

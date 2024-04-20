@@ -34,7 +34,7 @@ enum AstNode {
 	MultiLineScript(pos:PosInfo, value:Array<Token>);
 
 	// block
-	Block(pos:PosInfo, name:Null<String>, body:Array<AstNode>, data:Null<String>, isMacro:Bool);
+	Block(pos:PosInfo, name:Null<String>, body:Array<AstNode>, data:Null<String>, isMacro:Bool, isInline:Bool);
 	TickBlock(pos:PosInfo, body:Array<AstNode>);
 	LoadBlock(pos:PosInfo, body:Array<AstNode>);
 

@@ -412,7 +412,7 @@ class Parser {
 						});
 						return ScheduleBlock(pos, delay, mode, content, isMacroArg);
 					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
-						if (Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
+						if (reader.hasNext() && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {
 								var p = executeRegExp.matchedPos();
@@ -433,14 +433,14 @@ class Parser {
 										var elseData = block(reader, () -> {
 											elseContent.push(innerParse(reader));
 										});
-										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, true));
+										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, true, false));
 									case Literal("else run", pos):
 										reader.skip();
 										var elseContent:Array<AstNode> = [];
 										var elseData = block(reader, () -> {
 											elseContent.push(innerParse(reader));
 										});
-										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, false));
+										extraBlocks.push(AstNode.Block(pos, null, elseContent, elseData, false, false));
 									case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "else $")
 										&& StringTools.endsWith(v, "run")):
 										reader.skip();
@@ -482,7 +482,7 @@ class Parser {
 						var data = block(reader, () -> {
 							content.push(innerParse(reader));
 						});
-						return Block(pos, name, content, data, isMacroArg);
+						return Block(pos, name, content, data, isMacroArg, false);
 					case _ if (v == "tick"):
 						var content:Array<AstNode> = [];
 						block(reader, () -> {
@@ -505,7 +505,7 @@ class Parser {
 				var data = block(reader, () -> {
 					content.push(innerParse(reader));
 				});
-				return Block(pos, null, content, data, false);
+				return Block(pos, null, content, data, false, false);
 			default:
 				throw unreachable(token);
 		}
@@ -526,7 +526,7 @@ class Parser {
 					var blockData = block(reader, () -> {
 						blockContent.push(innerParse(reader));
 					});
-					content.push(Block(pos, null, blockContent, blockData, false));
+					content.push(Block(pos, null, blockContent, blockData, false, false));
 				case BracketClose(pos) if (pos.line == line):
 					throw unreachable(Literal(v, pos));
 				default:

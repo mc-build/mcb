@@ -6,5 +6,6 @@ dir dir {
         minecraft:stone replace
         minecraft:dirt
         #foo:bar
+        <%"#foo:bar/baz"%>
     }
 }
