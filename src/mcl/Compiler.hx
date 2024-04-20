@@ -519,7 +519,9 @@ class McFile {
 				return v.embedTo(context, pos, this);
 			},
 			#if !disableRequire
-			Module.createRequire(this.name)
+			context.compiler.disableRequire ?(s) -> {
+				throw new CompilerError("Require not available as it has been disabled, please disable compiler.disableRequire");
+			} : Module.createRequire(this.name)
 			#else
 			(s) -> {
 				throw new CompilerError("Require not available in this build of mcl.Compiler, please compile without the disableRequire flag set");
@@ -675,7 +677,7 @@ class McFile {
 							context.append(injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 						}
 					default:
-						context.append(injectValues('${tagPrefix}function ${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos));
 				}
 			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
@@ -1117,6 +1119,7 @@ class Compiler {
 	public var tags:TagManager = new TagManager();
 	public var packNamespace:String = 'mcb-${Date.now()}';
 	public var config:Config = Config.create(cast {});
+	public var disableRequire:Bool = false;
 
 	public function addFile(name:String, ast:Array<AstNode>) {
 		var file = new McFile(name, ast);

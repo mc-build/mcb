@@ -39,6 +39,7 @@ function #main:dummy
 function #main:dummy
 function main:folder/zzz/0
 function #main:dummy/as_root/on_summon
+function #minecraft:some_function
 execute run function main:folder/zzz/2
 ### FUTURE
 # execute if function {

@@ -29,6 +29,8 @@ dir folder{
 
         function #*dummy/as_root/on_summon
 
+        function #minecraft:some_function
+
         execute run {
             function #*dummy/as_root/on_summon
         }
