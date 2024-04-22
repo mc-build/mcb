@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.0.16",
+  "version": "3.0.17",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "yarn build:io-worker && powershell ./build.ps1",
-    "build:io-worker": "ts-node ./scripts/compileIoThread.ts",
+    "build:io-worker": "tsx ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
     "test": "node ./dist/testbed",
     "dev": "nodemon --config nodemon.json",
@@ -34,7 +34,9 @@
     "esbuild": "^0.19.4",
     "figures": "^6.0.1",
     "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "tsx": "^4.7.2"
   }
 }

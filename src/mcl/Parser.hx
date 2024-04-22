@@ -205,7 +205,7 @@ class Parser {
 					result += v;
 			}
 		} while (depth > 0);
-		return Raw(pos, result, []);
+		return Raw(pos, result, [], false);
 	}
 
 	public static function parseMcbFile(tokens:Array<Token>):Array<AstNode> {
@@ -467,7 +467,7 @@ class Parser {
 							return AstNode.ExecuteBlock(pos, v, data, content, extraBlocks.length > 0 ? extraBlocks : null, isMacroArg);
 						} else {
 							if (!executeRegExp.match(v))
-								return readRaw(pos, v, reader);
+								return readRaw(pos, v, reader, isMacroArg);
 							var p = executeRegExp.matchedPos();
 							var subPos:PosInfo = {file: pos.file, line: pos.line, col: pos.col + p.pos + p.len};
 							var continuationToken = Token.Literal(StringTools.ltrim(v.substring(p.pos + p.len)), subPos);
@@ -498,7 +498,7 @@ class Parser {
 					case _ if (StringUtils.startsWithConstExpr(v, "eq ")):
 						return EqCommand(pos, v.substring("eq ".length));
 					default:
-						return readRaw(pos, v, reader);
+						return readRaw(pos, v, reader, isMacroArg);
 				}
 			case BracketOpen(pos, _):
 				var content:Array<AstNode> = [];
@@ -511,16 +511,16 @@ class Parser {
 		}
 	}
 
-	static function readRaw(pos:PosInfo, v:String, reader:TokenInput) {
+	static function readRaw(pos:PosInfo, v:String, reader:TokenInput, isMacro:Bool) {
 		if (!reader.hasNext()) // this function CAN be called with the last token in the reader if parsing a single command via emit.mcb
-			return AstNode.Raw(pos, v, []);
+			return AstNode.Raw(pos, v, [], isMacro);
 		var content:Array<AstNode> = [];
 		var line = pos.line;
 		while (true) {
 			switch (reader.peek()) {
 				case Literal(v, pos) if (pos.line == line):
 					reader.skip();
-					content.push(Raw(pos, v, []));
+					content.push(Raw(pos, v, [], false));
 				case BracketOpen(pos, data) if (pos.line == line):
 					var blockContent:Array<AstNode> = [];
 					var blockData = block(reader, () -> {
@@ -533,7 +533,7 @@ class Parser {
 					break;
 			}
 		}
-		return AstNode.Raw(pos, v, content);
+		return AstNode.Raw(pos, v, content, isMacro);
 	}
 
 	static function parseCompileTimeIf(v:String, pos:PosInfo, reader:TokenInput, arg:() -> AstNode) {

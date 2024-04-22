@@ -456,7 +456,7 @@ class McFile {
 		}
 	}
 
-	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
+	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>, isMacro:Bool) {
 		if (StringUtils.startsWithConstExpr(value, "template ")) {
 			value = value.substring(9);
 		}
@@ -470,7 +470,7 @@ class McFile {
 		if (extras != null && extras.length > 0) {
 			throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context));
 		}
-		context.append(injectValues(value, context, pos));
+		context.append(makeMacro(isMacro, injectValues(value, context, pos)));
 	}
 
 	private function compileInline(context:CompilerContext, code:String) {
@@ -549,8 +549,8 @@ class McFile {
 		switch (node) {
 			case MultiLineScript(pos, value):
 				processMlScript(context, pos, value);
-			case Raw(pos, value, extras):
-				processTemplate(context, pos, value, extras);
+			case Raw(pos, value, extras, isMacro):
+				processTemplate(context, pos, value, extras, isMacro);
 			case Comment(_, value):
 				context.append(value);
 			case AstNode.Block(pos, null, body, data, isMacro, isInline) | AstNode.Block(pos, "", body, data, isMacro, isInline):
@@ -681,13 +681,14 @@ class McFile {
 										resolved.push(node);
 								}
 							}
-							context.append(injectValues('function ${tagPrefix}${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}',
-								context, pos));
+							context.append(makeMacro(isMacro,
+								injectValues('function ${tagPrefix}${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context,
+									pos)));
 						} else {
-							context.append(injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+							context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
 						}
 					default:
-						context.append(injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos));
+						context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
 				}
 			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
@@ -917,7 +918,7 @@ class McFile {
 					values: [
 						for (e in entries) {
 							switch (e) {
-								case Raw(pos, value, []) | Comment(pos, value):
+								case Raw(pos, value, [], false) | Comment(pos, value):
 									value = injectValues(value, context, pos);
 									if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
 										cast {
@@ -993,7 +994,7 @@ class McFile {
 		var newContext = forkCompilerContextWithAppend(context, v -> values.push(v), context.functions);
 		for (v in value) {
 			switch (v) {
-				case Raw(pos, value, extra):
+				case Raw(pos, value, extra, false):
 					if (extra != null && extra.length > 0) {
 						throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in json tag", pos, context));
 					}

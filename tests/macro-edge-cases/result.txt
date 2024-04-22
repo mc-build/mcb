@@ -21,7 +21,7 @@ say hi
 data/main/functions/zzz/5.mcfunction:
 # Generated with MC-Build
 
-say $(asd)
+$say $(asd)
 ----------------
 data/main/functions/zzz/7.mcfunction:
 # Generated with MC-Build
