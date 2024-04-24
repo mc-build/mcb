@@ -1,0 +1,7 @@
+function test{
+    return run say hi
+    return run execute run say hi
+    return run { {a:1}
+        say $(a)
+    }
+}

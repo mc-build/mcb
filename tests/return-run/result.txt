@@ -1,0 +1,12 @@
+data/main/functions/zzz/1.mcfunction:
+# Generated with MC-Build
+
+say $(a)
+----------------
+data/main/functions/test.mcfunction:
+# Generated with MC-Build
+
+return run say hi
+return run execute run say hi
+return run function main:zzz/1 {a:1}
+----------------

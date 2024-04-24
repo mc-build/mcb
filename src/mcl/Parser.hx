@@ -493,15 +493,23 @@ class Parser {
 						return Block(pos, name, content, data, isMacroArg, false);
 					case _ if (StringUtils.startsWithConstExpr(v, "return run")):
 						var subCommand = StringTools.trim(v.substring("return run ".length));
-						reader.back();
 						var pos:PosInfo = {
 							file: pos.file,
 							line: pos.line,
 							col: pos.col + "return run ".length
 						};
-						var data = StringTools.ltrim(subCommand.substring(1));
-						reader.update(subCommand.charAt(0) == "{" ? Token.BracketOpen(pos, data) : Literal(subCommand, pos));
-						return ReturnRun(pos, innerParse(reader));
+						switch (reader.peek()) {
+							case BracketOpen(pos, data):
+								var content:Array<AstNode> = [];
+								var data = block(reader, () -> {
+									content.push(innerParse(reader));
+								});
+								return ReturnRun(pos, Block(pos, null, content, data, false, false), isMacroArg);
+							default:
+								reader.back();
+								reader.update(Literal(subCommand, pos));
+								return ReturnRun(pos, innerParse(reader), isMacroArg);
+						}
 					case _ if (v == "tick"):
 						var content:Array<AstNode> = [];
 						block(reader, () -> {

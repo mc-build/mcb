@@ -565,7 +565,7 @@ class McFile {
 				} else {
 					context.append(createAnonymousFunction(pos, body, data, context, null, isMacro));
 				}
-			case ReturnRun(pos, value):
+			case ReturnRun(pos, value, isMacro):
 				var content:Array<String> = [];
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					content.push(v);
@@ -574,7 +574,7 @@ class McFile {
 				if (content.length != 1) {
 					throw new CompilerError(ErrorUtil.formatContext('Expected exactly 1 command after return run, got ${content.length}', pos, context));
 				}
-				context.append('return run ${content[0]}');
+				context.append(makeMacro(isMacro, 'return run ${content[0]}'));
 			case CompileTimeIf(pos, expression, body, elseExpressions):
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommand(v, context);
