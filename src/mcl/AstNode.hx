@@ -61,6 +61,8 @@ enum AstNode {
 	EqCommand(pos:PosInfo, command:String);
 
 	ScheduleCall(pos:PosInfo, delay:String, target:String, mode:String, isMacro:Bool);
+
+	ReturnRun(pos:PosInfo, value:AstNode);
 }
 
 class AstNodeUtils {
@@ -111,4 +113,6 @@ enum abstract AstNodeIds(Int) from Int {
 	var EqCommand = 22;
 
 	var ScheduleCall = 23;
+
+	var ReturnRun = 24;
 }

@@ -565,6 +565,16 @@ class McFile {
 				} else {
 					context.append(createAnonymousFunction(pos, body, data, context, null, isMacro));
 				}
+			case ReturnRun(pos, value):
+				var content:Array<String> = [];
+				var newContext = forkCompilerContextWithAppend(context, v -> {
+					content.push(v);
+				}, context.functions);
+				compileCommand(value, newContext);
+				if (content.length != 1) {
+					throw new CompilerError(ErrorUtil.formatContext('Expected exactly 1 command after return run, got ${content.length}', pos, context));
+				}
+				context.append('return run ${content[0]}');
 			case CompileTimeIf(pos, expression, body, elseExpressions):
 				compileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
 					compileCommand(v, context);
@@ -693,25 +703,14 @@ class McFile {
 			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
 				var uid = Std.string(context.uidIndex.get());
-				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				}, context.functions);
 				compileCommand(value, newContext);
-				if (commands.length == 0) {
-					throw new CompilerError(ErrorUtil.formatContext("Unexpected empty execute", pos, context));
+				if (commands.length != 1) {
+					throw new CompilerError(ErrorUtil.formatContext('Expected exactly 1 command after execute, got ${commands.length}', pos, context));
 				}
-				if (commands.length == 1 && commands[0].indexOf(callSignature) == -1) {
-					context.append(injectValues(makeMacro(isMacro, '$command ${commands[0]}'), context, pos));
-				} else {
-					var id = uid;
-					var path = Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
-						+ ".mcfunction"])));
-					saveContent(context, path, commands.join("\n"));
-					context.append(injectValues(makeMacro(isMacro,
-						'$command function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}'),
-						context, pos));
-				}
+				context.append(injectValues(makeMacro(isMacro, '$command ${commands[0]}'), context, pos));
 			case ExecuteBlock(pos, execute, data, body, continuations, isMacro):
 				var commands:Array<String> = [];
 				var append = function(command:String) {

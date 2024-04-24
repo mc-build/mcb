@@ -50,6 +50,14 @@ class ArrayInput<T> {
 	public function insert(token:T):Void {
 		array.insert(index, token);
 	}
+
+	public function back():Void {
+		index--;
+	}
+
+	public function update(token:T):Void {
+		array[index] = token;
+	}
 }
 
 typedef TokenInput = ArrayInput<Token>;
@@ -483,6 +491,17 @@ class Parser {
 							content.push(innerParse(reader));
 						});
 						return Block(pos, name, content, data, isMacroArg, false);
+					case _ if (StringUtils.startsWithConstExpr(v, "return run")):
+						var subCommand = StringTools.trim(v.substring("return run ".length));
+						reader.back();
+						var pos:PosInfo = {
+							file: pos.file,
+							line: pos.line,
+							col: pos.col + "return run ".length
+						};
+						var data = StringTools.ltrim(subCommand.substring(1));
+						reader.update(subCommand.charAt(0) == "{" ? Token.BracketOpen(pos, data) : Literal(subCommand, pos));
+						return ReturnRun(pos, innerParse(reader));
 					case _ if (v == "tick"):
 						var content:Array<AstNode> = [];
 						block(reader, () -> {

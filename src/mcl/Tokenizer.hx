@@ -58,8 +58,9 @@ class Tokenizer {
 				while (line.charAt(line.length - 1) == "\n" || line.charAt(line.length - 1) == "\r") {
 					line = line.substring(0, line.length - 1);
 				}
-				if (StringTools.endsWith(line, "\\")) {
-					line += "\n\t" + lines[++lineIdx];
+				if (StringTools.endsWith(line, " \\")) {
+					line = StringTools.rtrim(line.substring(0, line.length - 2));
+					line += " " + StringTools.trim(lines[++lineIdx]);
 					lineNum++;
 				} else {
 					break;

@@ -1,6 +1,5 @@
 data/main/functions/foobarbazboo.mcfunction:
 # Generated with MC-Build
 
-say \
-	hi
+say hi
 ----------------
