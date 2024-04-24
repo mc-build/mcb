@@ -1,4 +1,4 @@
-data/main/functions/zzz/1.mcfunction:
+data/main/functions/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say $(a)
@@ -8,5 +8,5 @@ data/main/functions/test.mcfunction:
 
 return run say hi
 return run execute run say hi
-return run function main:zzz/1 {a:1}
+return run function main:zzz/0 {a:1}
 ----------------

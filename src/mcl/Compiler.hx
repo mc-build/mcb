@@ -702,7 +702,6 @@ class McFile {
 				}
 			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
-				var uid = Std.string(context.uidIndex.get());
 				var newContext = forkCompilerContextWithAppend(context, v -> {
 					commands.push(v);
 				}, context.functions);
@@ -719,26 +718,19 @@ class McFile {
 				var uid = Std.string(context.uidIndex.get());
 				var callSignature = '${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, uid]).join("/")}';
 				var newContext:CompilerContext = forkCompilerContextWithAppend(context, append, context.functions.concat([callSignature]));
+				if (continuations != null) {
+					context.append('scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 0');
+					newContext.append('scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 1');
+				}
 				for (node in body) {
 					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
-				var id = Std.string(context.uidIndex.get());
 				saveContent(context,
-					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
+					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, uid
+						+ ".mcfunction"]))),
 					result);
-				if (continuations != null) {
-					context.append('scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 0');
-					context.append(injectValues(makeMacro(isMacro,
-						'execute store success score #ifelse ${context.compiler.config.internalScoreboardName}${execute.substring(7)} function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
-						(data == null ? '' : ' $data')),
-						context, pos));
-				} else {
-					context.append(injectValues(makeMacro(isMacro,
-						'$execute function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
-						(data == null ? '' : ' $data')),
-						context, pos));
-				}
+				context.append(injectValues(makeMacro(isMacro, '$execute function ${callSignature}' + (data == null ? '' : ' $data')), context, pos));
 				if (continuations != null) {
 					// newContext.append('scoreboard players set %ifelse int 1');
 					var idx = 0;
@@ -746,7 +738,9 @@ class McFile {
 						var isDone = idx == continuations.length - 1;
 						switch (continuation) {
 							case ExecuteBlock(pos, execute, data, body, _, isMacro2):
-								var embedCommands:Array<String> = [];
+								var embedCommands:Array<String> = [
+									'scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 1'
+								];
 								var embedAppend = function(command:String) {
 									embedCommands.push(command);
 								};
@@ -766,10 +760,12 @@ class McFile {
 
 								var executeCommandArgs = StringUtils.startsWithConstExpr(execute, "execute ") ? execute.substring(8) : execute;
 								context.append(makeMacro(isMacro2,
-									'execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 ${isDone ? '' : 'store success score #ifelse ${context.compiler.config.internalScoreboardName} '}$executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
+									'execute if score #ifelse ${context.compiler.config.internalScoreboardName} matches 0 $executeCommandArgs function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")}' +
 									(data == null ? '' : ' $data')));
 							case Block(_, _, body, data, isMacro2, _):
-								var embedCommands:Array<String> = [];
+								var embedCommands:Array<String> = [
+									'scoreboard players set #ifelse ${context.compiler.config.internalScoreboardName} 1'
+								];
 								if (!isDone)
 									throw new CompilerError("block continuation must be the last continuation", true);
 								var appendEmbed = function(command:String) {

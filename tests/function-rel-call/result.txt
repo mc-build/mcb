@@ -25,7 +25,7 @@ data/main/functions/folder/zzz/0.mcfunction:
 
 function #main:dummy/as_root/on_summon
 ----------------
-data/main/functions/folder/zzz/2.mcfunction:
+data/main/functions/folder/zzz/1.mcfunction:
 # Generated with MC-Build
 
 function #main:dummy/as_root/on_summon
@@ -40,7 +40,7 @@ function #main:dummy
 function main:folder/zzz/0
 function #main:dummy/as_root/on_summon
 function #minecraft:some_function
-execute run function main:folder/zzz/2
+execute run function main:folder/zzz/1
 ### FUTURE
 # execute if function {
 #     function #*dummy/as_root/on_summon
