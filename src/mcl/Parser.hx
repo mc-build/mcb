@@ -400,6 +400,9 @@ class Parser {
 									pos.col));
 							return ScheduleCall(pos, delay, funcName, mode, isMacroArg);
 						}
+						if (StringUtils.startsWithConstExpr(name, "clear ")) {
+							return ScheduleClear(pos, name.substring("clear ".length), isMacroArg);
+						}
 						var delayIdx = name.indexOf(" ");
 						var delay = delayIdx == -1 ? name : name.substring(0, delayIdx);
 						var mode = "append";

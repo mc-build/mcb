@@ -1,0 +1,7 @@
+function test{
+    schedule clear *test
+    schedule clear ^0
+    schedule clear main:test
+    schedule clear #./test
+    schedule clear #main:test
+}

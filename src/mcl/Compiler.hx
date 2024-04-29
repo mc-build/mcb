@@ -457,18 +457,20 @@ class McFile {
 	}
 
 	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>, isMacro:Bool) {
-		if (StringUtils.startsWithConstExpr(value, "template ")) {
-			value = value.substring(9);
-		}
-		for (k => v in context.templates) {
-			if (value == k || StringTools.startsWith(value, k)) {
-				// trace(this, context, pos, value, extras);
-				v.process(this, context, pos, value, extras);
-				return;
+		if (context.compiler.templateParsingEnabled) {
+			if (StringUtils.startsWithConstExpr(value, "template ")) {
+				value = value.substring(9);
 			}
-		}
-		if (extras != null && extras.length > 0) {
-			throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context));
+			for (k => v in context.templates) {
+				if (value == k || StringTools.startsWith(value, k)) {
+					// trace(this, context, pos, value, extras);
+					v.process(this, context, pos, value, extras);
+					return;
+				}
+			}
+			if (extras != null && extras.length > 0) {
+				throw new CompilerError(ErrorUtil.formatContext("Unexpected extra data in non template command", pos, context));
+			}
 		}
 		context.append(makeMacro(isMacro, injectValues(value, context, pos)));
 	}
@@ -595,6 +597,45 @@ class McFile {
 					if (!this.loadCommands.contains(cmd)) {
 						this.loadCommands.push(cmd);
 					}
+				}
+			case ScheduleClear(pos, name, isMacro):
+				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+				if (tagPrefix != "") {
+					name = name.substring(1);
+				}
+				switch (name.charAt(0)) {
+					case "^": // hiarchial function call
+						var levels = Std.parseInt(name.substring(1));
+						var fn = context.functions[context.functions.length - levels - 1];
+						if (fn == null) {
+							throw new CompilerError(ErrorUtil.formatContext("Unexpected schedule call: " + name, pos, context));
+						}
+						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${fn}'), context, pos));
+					case "*": // root function call
+						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${name.substring(1)}'), context, pos));
+					case ".":
+						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+							var path = context.currentFunction.concat(name.split("/"));
+							var resolved:Array<String> = [];
+							for (node in path) {
+								switch (node) {
+									case "..":
+										if (resolved.length == 0)
+											throw new CompilerError(ErrorUtil.formatContext("Invalid schedule call: " + name, pos, context));
+										resolved.pop();
+									case "." | "":
+									// ignore
+									default:
+										resolved.push(node);
+								}
+							}
+							context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${resolved.join("/")}'), context,
+								pos));
+						} else {
+							context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
+						}
+					default:
+						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
 				}
 			case ScheduleCall(pos, delay, name, mode, isMacro):
 				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
@@ -1137,6 +1178,8 @@ class Compiler {
 	public var packNamespace:String = 'mcb-${Date.now()}';
 	public var config:Config = Config.create(cast {});
 	public var disableRequire:Bool = false;
+
+	public var templateParsingEnabled:Bool = true;
 
 	public function addFile(name:String, ast:Array<AstNode>) {
 		var file = new McFile(name, ast);

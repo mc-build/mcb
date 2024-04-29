@@ -41,10 +41,4 @@ function main:folder/zzz/0
 function #main:dummy/as_root/on_summon
 function #minecraft:some_function
 execute run function main:folder/zzz/1
-### FUTURE
-# execute if function {
-#     function #*dummy/as_root/on_summon
-# } run {
-#     function #*dummy/as_root/on_summon
-# }
 ----------------

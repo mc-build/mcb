@@ -34,15 +34,5 @@ dir folder{
         execute run {
             function #*dummy/as_root/on_summon
         }
-
-        ###
-        FUTURE
-        ###
-
-        # execute if function {
-        #     function #*dummy/as_root/on_summon
-        # } run {
-        #     function #*dummy/as_root/on_summon
-        # }
     }
 }

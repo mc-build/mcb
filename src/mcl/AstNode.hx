@@ -63,6 +63,8 @@ enum AstNode {
 	ScheduleCall(pos:PosInfo, delay:String, target:String, mode:String, isMacro:Bool);
 
 	ReturnRun(pos:PosInfo, value:AstNode, isMacro:Bool);
+
+	ScheduleClear(pos:PosInfo, target:String, isMacro:Bool);
 }
 
 class AstNodeUtils {

@@ -8,11 +8,12 @@ import js.lib.Object;
 import haxe.crypto.Sha1;
 import haxe.io.Path;
 
-private class EventDispatcher<T> {
+class EventDispatcher<T> {
 	public function new() {
 		this._subscribers = new Array<T->Void>();
 	}
 
+	@:keep
 	public function subscribe(callback:T->Void) {
 		this._subscribers.push(callback);
 	}
