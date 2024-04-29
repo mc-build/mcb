@@ -137,6 +137,7 @@ class AppMain {
 				var x:McbError = cast e;
 				Logger.error(x.message);
 			} else {
+				Logger.error('A fatal error occurred during compilation. Please report this to the developers.');
 				throw e;
 			}
 		}

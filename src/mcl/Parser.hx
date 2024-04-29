@@ -121,6 +121,8 @@ class Parser {
 	private static function block(reader:TokenInput, sub:Void->Void, allowData:Bool = true, ?onLastToken:Token->Void):Null<String> {
 		var data = expectThenData(reader, allowData);
 		while (true) {
+			if (!reader.hasNext())
+				throw new ParserError("Unexpected end of file!");
 			var token = reader.peek();
 			switch (token) {
 				case BracketClose(_):
@@ -200,6 +202,8 @@ class Parser {
 		var depth = 0;
 		var result = "";
 		do {
+			if (!reader.hasNext())
+				throw new ParserError("Unexpected end of file!");
 			var token = reader.next();
 			switch (token) {
 				case BracketOpen(_, data):
@@ -363,6 +367,8 @@ class Parser {
 					case "<%%":
 						var content:Array<Token> = [];
 						while (true) {
+							if (!reader.hasNext())
+								throw new ParserError("Unexpected end of file!");
 							switch (reader.peek()) {
 								case Literal("%%>", _):
 									reader.skip();
@@ -437,6 +443,8 @@ class Parser {
 							});
 							var extraBlocks:Array<AstNode> = [];
 							while (true) {
+								if (!reader.hasNext())
+									throw new ParserError("Unexpected end of file!");
 								switch (reader.peek()) {
 									case Literal("else $run", pos):
 										reader.skip();
@@ -547,6 +555,8 @@ class Parser {
 		var content:Array<AstNode> = [];
 		var line = pos.line;
 		while (true) {
+			if (!reader.hasNext())
+				throw new ParserError("Unexpected end of file!");
 			switch (reader.peek()) {
 				case Literal(v, pos) if (pos.line == line):
 					reader.skip();
@@ -569,12 +579,14 @@ class Parser {
 	static function parseCompileTimeIf(v:String, pos:PosInfo, reader:TokenInput, arg:() -> AstNode) {
 		var exp = StringTools.trim(v.substring("IF".length));
 		var content:Array<AstNode> = [];
-		var data = block(reader, () -> {
+		block(reader, () -> {
 			content.push(arg());
 		}, false);
 		var elseDatas:Array<{condition:String, node:Array<AstNode>}> = [];
 
 		while (true) {
+			if (!reader.hasNext())
+				throw new ParserError("Unexpected end of file!");
 			switch (reader.peek()) {
 				case Literal(v, pos) if (v == "ELSE" || StringUtils.startsWithConstExpr(v, "ELSE ")):
 					reader.skip();
