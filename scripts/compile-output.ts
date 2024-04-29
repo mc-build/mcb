@@ -12,6 +12,6 @@ build({
   platform: "node",
   minifySyntax: false,
   banner: { js: header },
-  minifyWhitespace: true,
-  minifyIdentifiers: true,
+  // minifyWhitespace: true,
+  // minifyIdentifiers: true,
 });

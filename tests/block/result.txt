@@ -18,6 +18,22 @@ data/main/functions/zzz/1.mcfunction:
 
 say unnamed block2
 ----------------
+data/main/functions/named/with/zzz/3.mcfunction:
+# Generated with MC-Build
+
+say hi2
+----------------
+data/main/functions/named/with/zzz/2.mcfunction:
+# Generated with MC-Build
+
+say hi
+function main:named/with/zzz/3
+----------------
+data/main/functions/named/with/dirs.mcfunction:
+# Generated with MC-Build
+
+function main:named/with/zzz/2
+----------------
 data/main/functions/test.mcfunction:
 # Generated with MC-Build
 
@@ -25,4 +41,5 @@ function main:test_block
 function main:zzz/0
 function main:test2 with some data
 function main:zzz/1 with some data
+function main:named/with/dirs
 ----------------

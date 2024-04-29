@@ -421,13 +421,19 @@ class McFile {
 		var commands:Array<String> = [];
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
 		var id = name == null ? '${context.compiler.config.generatedDirName}/${uid}' : name;
+		var newGeneratedRoot = name == null ? [] : [name];
+		if (name != null && name.indexOf("/") != -1) {
+			var segments = name.split("/");
+			segments.pop();
+			newGeneratedRoot = segments;
+		}
 		var callSig = context.namespace + ":" + context.path.concat(name == null ? [context.compiler.config.generatedDirName, uid] : [name]).join("/");
 		var newContext = createCompilerContext(context.namespace, v -> {
 			commands.push(v);
 		},
-			context.variables.fork(), context.path.concat([context.compiler.config.generatedDirName]), context.uidIndex, context.stack, context.variables,
-			context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]),
-			context.baseNamespaceInfo, context.currentFunction);
+			context.variables.fork(), context.path.concat(newGeneratedRoot), context.uidIndex, context.stack, context.variables, context.templates,
+			context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions.concat([callSig]), context.baseNamespaceInfo,
+			context.currentFunction);
 		for (node in body) {
 			compileCommand(node, newContext);
 		}

@@ -14,4 +14,13 @@ function test{
     block { with some data
         say unnamed block2
     }
+
+    block named/with/dirs {
+        block {
+            say hi
+            block {
+                say hi2
+            }
+        }
+    }
 }
