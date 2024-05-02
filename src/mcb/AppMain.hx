@@ -109,7 +109,15 @@ class AppMain {
 		var startTime = Sys.time();
 		var srcDir = Path.join([opts.baseDir, 'src']);
 		var configPath = discoverConfigFile(opts.configPath);
-		var config = Syntax.code('require({0})', configPath);
+		var config = if (js.node.Fs.existsSync(configPath)) try {
+			Syntax.code('require({0})', configPath);
+		} catch (e) {
+			Logger.error('Failed to load config file: ${configPath}');
+			throw e;
+		} else {
+			Logger.warn('Config file not found, using default config.');
+			cast {};
+		};
 		var compiler = new Compiler(srcDir, config, new LibStore(opts.libDir));
 		var didFail = true;
 		try {
