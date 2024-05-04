@@ -331,6 +331,7 @@ class Parser {
 						JsonFile(pos, name, Tag(type, replace, content));
 					case _
 						if (StringUtils.startsWithConstExpr(v, "advancement ")
+							|| StringUtils.startsWithConstExpr(v, "enchantment ")
 							|| StringUtils.startsWithConstExpr(v, "item_modifier ")
 							|| StringUtils.startsWithConstExpr(v, "loot_table ")
 							|| StringUtils.startsWithConstExpr(v, "predicate ")
@@ -364,6 +365,7 @@ class Parser {
 			case "damage_type": JsonTagType.DamageType(content);
 			case "dimension": JsonTagType.Dimension(content);
 			case "dimension_type": JsonTagType.DimensionType(content);
+			case "enchantment": JsonTagType.Enchantment(content);
 			default:
 				throw unreachable(Literal(v, pos));
 		});

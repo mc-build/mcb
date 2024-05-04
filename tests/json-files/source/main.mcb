@@ -8,4 +8,8 @@ dir dir {
         #foo:bar
         <%"#foo:bar/baz"%>
     }
+    enchantment test {
+        "a":1,
+        "b":2
+    }
 }

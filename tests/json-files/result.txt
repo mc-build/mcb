@@ -4,3 +4,6 @@ data/main/tags/functions/test.json:
 data/main/tags/blocks/dir/test.json:
 {"replace":false,"values":[{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar","#foo:bar/baz"]}
 ----------------
+data/main/enchantment/dir/test.json:
+{"a":1,"b":2}
+----------------

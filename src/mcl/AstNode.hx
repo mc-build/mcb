@@ -14,6 +14,7 @@ enum JsonTagType {
 	DamageType(entries:Array<AstNode>);
 	Dimension(entries:Array<AstNode>);
 	DimensionType(entries:Array<AstNode>);
+	Enchantment(entries:Array<AstNode>);
 	WorldGen(subType:String, name:String, entries:Array<AstNode>);
 }
 

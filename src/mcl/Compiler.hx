@@ -995,7 +995,7 @@ class McFile {
 				});
 				saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
-				LootTable(entries) | Predicate(entries) | Recipe(entries):
+				LootTable(entries) | Predicate(entries) | Recipe(entries) | Enchantment(entries):
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				var type = switch (info) {
 					case Advancement(_):
@@ -1016,6 +1016,8 @@ class McFile {
 						"predicates";
 					case Recipe(_):
 						"recipes";
+					case Enchantment(_):
+						"enchantment";
 					case _:
 						throw CompilerError.createInternal("unexpected json tag type:" + Std.string(info), pos, context);
 				};
