@@ -53,7 +53,6 @@ class Tokenizer {
 		while (lineIdx < lines.length) {
 			var line = lines[lineIdx];
 			var indent = indents[lineNum];
-			var internalLineNum = 0;
 			while (true) {
 				while (line.charAt(line.length - 1) == "\n" || line.charAt(line.length - 1) == "\r") {
 					line = line.substring(0, line.length - 1);

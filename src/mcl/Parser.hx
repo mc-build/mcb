@@ -302,6 +302,20 @@ class Parser {
 						if (data != null)
 							throw unreachable(Literal(v, pos));
 						Directory(pos, v.substring("dir ".length), content);
+					case _ if (StringUtils.startsWithConstExpr(v, "<%%")):
+						var content:Array<Token> = [];
+						while (true) {
+							if (!reader.hasNext())
+								throw new ParserError("Unexpected end of file!");
+							switch (reader.peek()) {
+								case Literal("%%>", _):
+									reader.skip();
+									break;
+								default:
+							}
+							content.push(reader.next());
+						}
+						MultiLineScript(pos, content);
 					case _ if (StringUtils.startsWithConstExpr(v, "#")): Comment(pos, v);
 					case _ if (StringUtils.startsWithConstExpr(v, "REPEAT")): parserCompilerLoop(v, pos, reader, () -> parseTLD(reader));
 					case _ if (StringUtils.startsWithConstExpr(v, "IF")): parseCompileTimeIf(v, pos, reader, () -> parseTLD(reader));

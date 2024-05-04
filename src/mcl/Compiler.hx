@@ -481,18 +481,27 @@ class McFile {
 		context.append(makeMacro(isMacro, injectValues(value, context, pos)));
 	}
 
-	private function compileInline(context:CompilerContext, code:String) {
+	private function compileInline(context:CompilerContext, code:String, isTLD:Bool = false) {
 		var tokens = Tokenizer.tokenize(code, '<inline ${this.name}>');
 		var tokenInput = new TokenInput(tokens);
 		var astNodes:Array<AstNode> = [];
 		while (tokenInput.hasNext()) {
-			astNodes.push(Parser.innerParse(tokenInput));
+			if (isTLD) {
+				astNodes.push(Parser.parseTLD(tokenInput));
+			} else {
+				astNodes.push(Parser.innerParse(tokenInput));
+			}
 		}
-		for (node in astNodes)
-			this.compileCommand(node, context);
+		if (isTLD) {
+			for (node in astNodes)
+				this.compileTld(node, context);
+		} else {
+			for (node in astNodes)
+				this.compileCommand(node, context);
+		}
 	}
 
-	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>) {
+	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>, isTLD = false) {
 		var str = "";
 		for (t in tokens) {
 			switch (t) {
@@ -507,7 +516,7 @@ class McFile {
 		var names:Array<String> = ['emit', 'context', "embed", "require"];
 		var emit = (c:String) -> context.append(c);
 		function emitMcb(code:String) {
-			this.compileInline(context, code);
+			this.compileInline(context, code, isTLD);
 		}
 		function emitBlock(commands:Array<String>, ?data:String) {
 			var id = '${context.compiler.config.generatedDirName}/${Std.string(context.uidIndex.get())}';
@@ -518,12 +527,15 @@ class McFile {
 		}
 		untyped {
 			emit.mcb = emitMcb;
-			emit.block = emitBlock;
+			if (!isTLD)
+				emit.block = emitBlock;
 		}
 		var values:Array<Any> = [
 			emit,
 			context,
 			function(v) {
+				if (isTLD)
+					throw CompilerError.create("embed not available in toplevel script blocks", pos, context);
 				return v.embedTo(context, pos, this);
 			},
 			#if !disableRequire
@@ -560,7 +572,8 @@ class McFile {
 			case Raw(pos, value, extras, isMacro):
 				processTemplate(context, pos, value, extras, isMacro);
 			case Comment(_, value):
-				context.append(value);
+				if (!context.compiler.config.dontEmitComments)
+					context.append(value);
 			case AstNode.Block(pos, null, body, data, isMacro, isInline) | AstNode.Block(pos, "", body, data, isMacro, isInline):
 				if (isInline) {
 					if (data != null) {
@@ -945,6 +958,8 @@ class McFile {
 				var result = commands.join("\n");
 				saveContent(context, Path.join(['data', context.namespace, 'functions', '$path.mcfunction']), result);
 				context.compiler.tags.addLoadingCommand(functionId);
+			case MultiLineScript(pos, value):
+				processMlScript(context, pos, value, true);
 			case Comment(_, _):
 			// ignore comments on the top level, they are allowed but have no output
 			default:

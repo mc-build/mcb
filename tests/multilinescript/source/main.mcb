@@ -3,3 +3,6 @@ function test{
         emit("say hello world");
     %%>
 }
+<%%
+    emit.mcb(`function test2{\nsay hi\n}`);
+%%>

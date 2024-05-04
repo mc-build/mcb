@@ -79,6 +79,7 @@ class Config {
 
 	public var eqVarScoreboardName:String = 'mcb.eq.var';
 	public var eqConstScoreboardName:String = 'mcb.eq.const';
+	public var dontEmitComments:Bool = false;
 
 	/**
 	 * 
@@ -119,6 +120,8 @@ class Config {
 			c.eqVarScoreboardName = base.eqVarScoreboardName;
 		if (base.header != null)
 			c.header = base.header;
+		if (base.dontEmitComments != null)
+			c.dontEmitComments = base.dontEmitComments;
 		if (base.setup != null)
 			base.setup(c);
 
@@ -158,4 +161,9 @@ interface UserConfig {
 	 * allows for binding of compiler events.
 	 */
 	public var setup:Null<Config->Void>;
+
+	/**
+	 * 
+	 */
+	public var dontEmitComments:Null<Bool>;
 }

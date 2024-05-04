@@ -1,3 +1,6 @@
 function on_load load{
+    # you can use MC-Build without its internal scoreboard but this will limit the available features
+    scoreboard objectives add mcb.internal dummy
+
     say Hello World from ::name::!
 }

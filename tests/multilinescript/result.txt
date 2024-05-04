@@ -3,3 +3,8 @@ data/main/functions/test.mcfunction:
 
 say hello world
 ----------------
+data/main/functions/test2.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------
