@@ -184,7 +184,8 @@ class AppMain {
 			var changed = io.reportFilesChanged(cache);
 			var dirsToCheck = new Set<String>();
 			for (f in removed) {
-				FileSystem.deleteFile(f);
+				if (FileSystem.exists(f))
+					FileSystem.deleteFile(f);
 				dirsToCheck.add(Path.directory(f));
 			}
 			var dirList = [for (k in dirsToCheck) k];
