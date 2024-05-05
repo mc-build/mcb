@@ -15,6 +15,9 @@ function test{
         say unnamed block2
     }
 
+    block named/<%"with"%>/script {
+        say named block3
+    }
     block named/with/dirs {
         block {
             say hi

@@ -418,6 +418,7 @@ class McFile {
 
 	public function createAnonymousFunction(pos:PosInfo, body:Array<AstNode>, data:Null<String>, context:CompilerContext, name:Null<String> = null,
 			isMacro):String {
+		name = name != null ? injectValues(name, context, pos) : null;
 		var commands:Array<String> = [];
 		var uid = name == null ? Std.string(context.uidIndex.get()) : "";
 		var id = name == null ? '${context.compiler.config.generatedDirName}/${uid}' : name;
