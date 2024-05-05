@@ -4,4 +4,8 @@ function test{
 		say test
 	}
 	execute run test
+
+	execute<%' if score a b matches 1'%> run {
+		say test
+	}
 }

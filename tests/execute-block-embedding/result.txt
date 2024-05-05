@@ -3,9 +3,15 @@ data/test/functions/test_block.mcfunction:
 
 say test
 ----------------
+data/test/functions/zzz/0.mcfunction:
+# Generated with MC-Build
+
+say test
+----------------
 data/test/functions/test.mcfunction:
 # Generated with MC-Build
 
 execute run function test:test_block
 execute run say hi
+execute if score a b matches 1 run function test:zzz/0
 ----------------

@@ -444,7 +444,8 @@ class Parser {
 							content.push(innerParse(reader));
 						});
 						return ScheduleBlock(pos, delay, mode, content, isMacroArg);
-					case _ if (StringUtils.startsWithConstExpr(v, "execute ")):
+					case _ if (StringUtils.startsWithConstExpr(v, "execute")
+						&& (v.charAt("execute".length) == " " || v.charAt("execute".length) == "<")):
 						if (reader.hasNext() && Type.enumIndex(reader.peek()) == TokenIds.BracketOpen) {
 							var content:Array<AstNode> = [];
 							if (!StringTools.endsWith(v, "run") && executeRegExp.match(v)) {
