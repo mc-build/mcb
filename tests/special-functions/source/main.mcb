@@ -1,8 +1,14 @@
 dir test{
-    function onload load{
+    function onload minecraft:load{
         say this will run on load
     }
-    function ontick tick{
+    function ontick minecraft:tick{
         say this will run every tick
     }
+    function magic tag {
+        say hi
+    }
+}
+tag function tag replace{
+    a:b
 }

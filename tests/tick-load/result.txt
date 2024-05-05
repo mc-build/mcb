@@ -13,9 +13,9 @@ data/main/functions/zzz/tick.mcfunction:
 
 say this should run on tick
 ----------------
-data/minecraft/tags/functions/tick.json:
-{"values":["main:zzz/tick"]}
-----------------
 data/minecraft/tags/functions/load.json:
 {"values":["main:zzz/load"]}
+----------------
+data/minecraft/tags/functions/tick.json:
+{"values":["main:zzz/tick"]}
 ----------------

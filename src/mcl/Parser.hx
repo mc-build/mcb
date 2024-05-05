@@ -141,12 +141,12 @@ class Parser {
 		// expect(reader, function(token) return Type.enumIndex(token) == TokenIds.BracketOpen);
 		var commands:Array<AstNode> = [];
 		var appendTo:Null<String> = null;
-		if (StringTools.endsWith(name, " load")) {
-			appendTo = "load";
-			name = StringTools.trim(name.substring(0, name.length - " load".length));
-		} else if (StringTools.endsWith(name, " tick")) {
-			appendTo = "tick";
-			name = StringTools.trim(name.substring(0, name.length - " tick".length));
+		var segments = name.split(" ");
+		if (segments.length == 2) {
+			name = segments[0];
+			appendTo = segments[1];
+		} else if (segments.length == 1) {
+			name = segments[0];
 		}
 		block(reader, () -> {
 			commands.push(innerParse(reader));

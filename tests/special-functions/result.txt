@@ -8,9 +8,17 @@ data/main/functions/test/ontick.mcfunction:
 
 say this will run every tick
 ----------------
-data/minecraft/tags/functions/tick.json:
-{"values":["main:test/ontick"]}
+data/main/functions/test/magic.mcfunction:
+# Generated with MC-Build
+
+say hi
 ----------------
 data/minecraft/tags/functions/load.json:
 {"values":["main:test/onload"]}
+----------------
+data/minecraft/tags/functions/tick.json:
+{"values":["main:test/ontick"]}
+----------------
+data/main/tags/functions/tag.json:
+{"values":["main:test/magic","a:b"],"replace":true}
 ----------------

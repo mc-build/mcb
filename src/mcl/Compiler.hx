@@ -116,11 +116,11 @@ class McTemplate {
 		var defs:Array<AstNode> = [];
 		if (loadBlock != null && loadBlock.length > 0) {
 			var pos = AstNodeUtils.getPos(loadBlock[0]);
-			defs.push(AstNode.FunctionDef(pos, "load", cast loadBlock, "load"));
+			defs.push(AstNode.FunctionDef(pos, "load", cast loadBlock, "minecraft:load"));
 		}
 		if (tickBlock != null && tickBlock.length > 0) {
 			var pos = AstNodeUtils.getPos(tickBlock[0]);
-			defs.push(AstNode.FunctionDef(pos, "tick", cast tickBlock, "tick"));
+			defs.push(AstNode.FunctionDef(pos, "tick", cast tickBlock, "minecraft:tick"));
 		}
 		if (defs.length > 0) {
 			var pos = AstNodeUtils.getPos(defs[0]);
@@ -903,13 +903,7 @@ class McFile {
 		}
 
 		if (appendTo != null) {
-			if (appendTo == "load") {
-				context.compiler.tags.addLoadingCommand(funcId);
-			} else if (appendTo == "tick") {
-				context.compiler.tags.addTickingCommand(funcId);
-			} else {
-				throw new CompilerError("unexpected appendTo value: " + appendTo, true);
-			}
+			context.compiler.tags.addTagEntry(appendTo, funcId, context);
 		}
 		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
 	}
@@ -957,7 +951,7 @@ class McFile {
 				}
 				var result = commands.join("\n");
 				saveContent(context, Path.join(['data', context.namespace, 'functions', '$path.mcfunction']), result);
-				context.compiler.tags.addLoadingCommand(functionId);
+				context.compiler.tags.addTagEntry('minecraft:load', functionId, context);
 			case MultiLineScript(pos, value):
 				processMlScript(context, pos, value, true);
 			case Comment(_, _):
@@ -970,30 +964,52 @@ class McFile {
 	function compileJsonFile(pos:PosInfo, name:String, info:JsonTagType, context:CompilerContext) {
 		switch (info) {
 			case Tag(subType, replace, entries):
-				var data = Json.stringify({
-					replace: replace,
-					values: [
-						for (e in entries) {
-							switch (e) {
-								case Raw(pos, value, [], false) | Comment(pos, value):
-									value = injectValues(value, context, pos);
-									if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
-										cast {
-											id: value.substring(0, value.length - 8),
-											replace: true
-										}
-									} else if (value.indexOf(" ") != -1) {
-										throw CompilerError.create("Malformed tag entry", pos, context);
-									} else {
-										cast value;
-									}
-								default:
-									throw CompilerError.create("Unexpected node type in json tag", pos, context);
-							}
+				if (subType == "function") {
+					name = context.namespace + ":" + name;
+					for (e in entries) {
+						switch (e) {
+							case Raw(pos, value, [], false) | Comment(pos, value):
+								value = injectValues(value, context, pos);
+								if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
+									context.compiler.tags.addTagEntry(name, value.substring(0, value.length - 8), context, true);
+								} else if (value.indexOf(" ") != -1) {
+									throw CompilerError.create("Malformed tag entry", pos, context);
+								} else {
+									context.compiler.tags.addTagEntry(name, value, context, false);
+								}
+							default:
+								throw CompilerError.create("Unexpected node type in json tag", pos, context);
 						}
-					]
-				});
-				saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
+					}
+					if (replace) {
+						context.compiler.tags.setTagReplace(name, true);
+					}
+				} else {
+					var data = Json.stringify({
+						replace: replace,
+						values: [
+							for (e in entries) {
+								switch (e) {
+									case Raw(pos, value, [], false) | Comment(pos, value):
+										value = injectValues(value, context, pos);
+										if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
+											cast {
+												id: value.substring(0, value.length - 8),
+												replace: true
+											}
+										} else if (value.indexOf(" ") != -1) {
+											throw CompilerError.create("Malformed tag entry", pos, context);
+										} else {
+											cast value;
+										}
+									default:
+										throw CompilerError.create("Unexpected node type in json tag", pos, context);
+								}
+							}
+						]
+					});
+					saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
+				}
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
 				LootTable(entries) | Predicate(entries) | Recipe(entries) | Enchantment(entries):
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
@@ -1177,13 +1193,15 @@ class McFile {
 			saveContent(context,
 				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'load.mcfunction']))),
 				loadCommands.join("\n"));
-			compiler.tags.addLoadingCommand(context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'load']).join("/"));
+			compiler.tags.addTagEntry('minecraft:load',
+				context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'load']).join("/"), context);
 		}
 		if (tickCommands.length > 0) {
 			saveContent(context,
 				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'tick.mcfunction']))),
 				tickCommands.join("\n"));
-			compiler.tags.addTickingCommand(context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'tick']).join("/"));
+			compiler.tags.addTagEntry('minecraft:tick',
+				context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'tick']).join("/"), context);
 		}
 	}
 }
