@@ -25,9 +25,9 @@ data/main/functions/main.mcfunction:
 
 say hi
 ----------------
-data/minecraft/tags/functions/load.json:
+data/minecraft/tags/function/load.json:
 {"values":["test:test/load"]}
 ----------------
-data/minecraft/tags/functions/tick.json:
+data/minecraft/tags/function/tick.json:
 {"values":["test:test/tick"]}
 ----------------

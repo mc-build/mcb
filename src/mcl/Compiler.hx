@@ -1016,7 +1016,7 @@ class McFile {
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				var type = switch (info) {
 					case Advancement(_):
-						"advancements";
+						context.compiler.config.features.useOldTagFolderNames ? "advancements" : "advancement";
 					case ChatType(_):
 						"chat";
 					case DamageType(_):
@@ -1026,13 +1026,13 @@ class McFile {
 					case DimensionType(_):
 						"dimension_type";
 					case ItemModifier(_):
-						"item_modifiers";
+						context.compiler.config.features.useOldTagFolderNames ? "item_modifiers" : "item_modifier";
 					case LootTable(_):
-						"loot_tables";
+						context.compiler.config.features.useOldTagFolderNames ? "loot_tables" : "loot_table";
 					case Predicate(_):
-						"predicates";
+						context.compiler.config.features.useOldTagFolderNames ? "predicates" : "predicate";
 					case Recipe(_):
-						"recipes";
+						context.compiler.config.features.useOldTagFolderNames ? "recipes" : "recipe";
 					case Enchantment(_):
 						"enchantment";
 					case _:
@@ -1218,7 +1218,7 @@ class Compiler {
 	public var baseDir:String;
 	public var tags:TagManager = new TagManager();
 	public var packNamespace:String = 'mcb-${Date.now()}';
-	public var config:Config = Config.create(cast {});
+	public var config:Config;
 	public var disableRequire:Bool = false;
 
 	public var templateParsingEnabled:Bool = true;

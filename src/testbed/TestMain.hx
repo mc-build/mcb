@@ -16,7 +16,8 @@ class TestMain {
 			trace("Running test: " + t.name);
 			var io = new TestIo();
 			var compiler = new Compiler("", cast {
-				internalScoreboardName: "_internal_scoreboard"
+				internalScoreboardName: "_internal_scoreboard",
+				formatVersion: 45,
 			});
 			compiler.io = io;
 			for (f in t.sources) {

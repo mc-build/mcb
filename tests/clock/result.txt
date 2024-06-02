@@ -4,6 +4,6 @@ data/main/functions/test.mcfunction:
 schedule function main:test 1s replace
 say hi
 ----------------
-data/minecraft/tags/functions/load.json:
+data/minecraft/tags/function/load.json:
 {"values":["main:test"]}
 ----------------

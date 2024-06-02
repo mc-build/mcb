@@ -45,7 +45,13 @@ class TagManager {
 			if (segments.length != 2) {}
 			var namespace = segments[0];
 			var tag = segments[1];
-			var tagPath = Path.join(['data', namespace, 'tags', 'functions', tag + '.json']);
+			var tagPath = Path.join([
+				'data',
+				namespace,
+				'tags',
+				compiler.config.features.useOldTagFolderNames ? 'functions' : "function",
+				tag + '.json'
+			]);
 			compiler.io.write(tagPath, Json.stringify({
 				values: [
 					for (entry in v.entries) {
