@@ -11,3 +11,5 @@ dist/
 types/
 test/
 test-pack/
+
+scale/

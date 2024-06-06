@@ -1,14 +1,14 @@
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 say this should run when test is called
 ----------------
-data/main/functions/zzz/load.mcfunction:
+data/main/function/zzz/load.mcfunction:
 # Generated with MC-Build
 
 say this should run on load
 ----------------
-data/main/functions/zzz/tick.mcfunction:
+data/main/function/zzz/tick.mcfunction:
 # Generated with MC-Build
 
 say this should run on tick

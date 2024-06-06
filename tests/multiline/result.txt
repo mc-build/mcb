@@ -1,4 +1,4 @@
-data/main/functions/foobarbazboo.mcfunction:
+data/main/function/foobarbazboo.mcfunction:
 # Generated with MC-Build
 
 say hi

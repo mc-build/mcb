@@ -340,6 +340,15 @@ class Parser {
 							|| StringUtils.startsWithConstExpr(v, "damage_type ")
 							|| StringUtils.startsWithConstExpr(v, "dimension ")
 							|| StringUtils.startsWithConstExpr(v, "dimension_type ")): readPlainJsonFile(v, pos, reader);
+					case _ if (StringUtils.startsWithConstExpr(v, "worldgen ")):
+						var name = StringTools.trim(v.substring("worldgen ".length));
+						var subtype = name.substring(0, name.indexOf(" "));
+						name = name.substring(name.indexOf(" ") + 1);
+						var content:Array<AstNode> = [];
+						block(reader, () -> {
+							content.push(innerParse(reader));
+						});
+						JsonFile(pos, name, WorldGen(subtype, name, content));
 					default:
 						throw unreachable(Literal(v, pos));
 				}

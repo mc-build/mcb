@@ -1,14 +1,14 @@
-data/main/functions/test/onload.mcfunction:
+data/main/function/test/onload.mcfunction:
 # Generated with MC-Build
 
 say this will run on load
 ----------------
-data/main/functions/test/ontick.mcfunction:
+data/main/function/test/ontick.mcfunction:
 # Generated with MC-Build
 
 say this will run every tick
 ----------------
-data/main/functions/test/magic.mcfunction:
+data/main/function/test/magic.mcfunction:
 # Generated with MC-Build
 
 say hi

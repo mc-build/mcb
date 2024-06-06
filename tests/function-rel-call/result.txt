@@ -1,4 +1,4 @@
-data/main/functions/zzz/0.mcfunction:
+data/main/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 function main:zzz/0
@@ -10,27 +10,27 @@ function #main:test
 function #main:dummy
 function #main:folder/dummy2
 ----------------
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 function main:zzz/0
 ----------------
-data/main/functions/dummy.mcfunction:
+data/main/function/dummy.mcfunction:
 # Generated with MC-Build
 
 
 ----------------
-data/main/functions/folder/zzz/0.mcfunction:
-# Generated with MC-Build
-
-function #main:dummy/as_root/on_summon
-----------------
-data/main/functions/folder/zzz/1.mcfunction:
+data/main/function/folder/zzz/0.mcfunction:
 # Generated with MC-Build
 
 function #main:dummy/as_root/on_summon
 ----------------
-data/main/functions/folder/dummy2.mcfunction:
+data/main/function/folder/zzz/1.mcfunction:
+# Generated with MC-Build
+
+function #main:dummy/as_root/on_summon
+----------------
+data/main/function/folder/dummy2.mcfunction:
 # Generated with MC-Build
 
 function main:dummy

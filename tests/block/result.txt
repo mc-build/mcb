@@ -1,45 +1,45 @@
-data/main/functions/test_block.mcfunction:
+data/main/function/test_block.mcfunction:
 # Generated with MC-Build
 
 say named block
 ----------------
-data/main/functions/zzz/0.mcfunction:
+data/main/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say unnamed block
 ----------------
-data/main/functions/test2.mcfunction:
+data/main/function/test2.mcfunction:
 # Generated with MC-Build
 
 say named block2
 ----------------
-data/main/functions/zzz/1.mcfunction:
+data/main/function/zzz/1.mcfunction:
 # Generated with MC-Build
 
 say unnamed block2
 ----------------
-data/main/functions/named/with/script.mcfunction:
+data/main/function/named/with/script.mcfunction:
 # Generated with MC-Build
 
 say named block3
 ----------------
-data/main/functions/named/with/zzz/3.mcfunction:
+data/main/function/named/with/zzz/3.mcfunction:
 # Generated with MC-Build
 
 say hi2
 ----------------
-data/main/functions/named/with/zzz/2.mcfunction:
+data/main/function/named/with/zzz/2.mcfunction:
 # Generated with MC-Build
 
 say hi
 function main:named/with/zzz/3
 ----------------
-data/main/functions/named/with/dirs.mcfunction:
+data/main/function/named/with/dirs.mcfunction:
 # Generated with MC-Build
 
 function main:named/with/zzz/2
 ----------------
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 function main:test_block

@@ -8,8 +8,73 @@ dir dir {
         #foo:bar
         <%"#foo:bar/baz"%>
     }
-    enchantment test {
-        "a":1,
-        "b":2
+    worldgen biome worldgen_biome {
+        "a":1
+    }
+    worldgen configured_carver worldgen_configured_carver {
+        "a":1
+    }
+    worldgen configured_feature worldgen_configured_feature {
+        "a":1
+    }
+    worldgen density_function worldgen_density_function {
+        "a":1
+    }
+    worldgen noise worldgen_noise {
+        "a":1
+    }
+    worldgen noise_settings worldgen_noise_settings {
+        "a":1
+    }
+    worldgen placed_feature worldgen_placed_feature {
+        "a":1
+    }
+    worldgen processor_list worldgen_processor_list {
+        "a":1
+    }
+    worldgen structure worldgen_structure {
+        "a":1
+    }
+    worldgen structure_set worldgen_structure_set {
+        "a":1
+    }
+    worldgen template_pool worldgen_template_pool {
+        "a":1
+    }
+    worldgen world_preset worldgen_world_preset {
+        "a":1
+    }
+    worldgen flat_level_generator_preset worldgen_flat_level_generator_preset {
+        "a":1
+    }
+    dimension_type dimension_type {
+        "test":1
+    }
+    dimension dimension {
+        "test":1
+    }
+    damage_type damage_type {
+        "test":1
+    }
+    chat_type chat_type {
+        "test":1
+    }
+    recipe recipe {
+        "test":1
+    }
+    predicate predicate {
+        "test":1
+    }
+    loot_table loot_table {
+        "test":1
+    }
+    item_modifier item_modifier {
+        "test":1
+    }
+    enchantment enchantment {
+        "test":1
+    }
+    advancement advancement {
+        "test":1
     }
 }

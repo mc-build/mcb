@@ -1,4 +1,4 @@
-data/main/functions/test/int-int.mcfunction:
+data/main/function/test/int-int.mcfunction:
 # Generated with MC-Build
 
 say 1
@@ -12,7 +12,7 @@ say 8
 say 9
 say 10
 ----------------
-data/main/functions/test/float-float-float.mcfunction:
+data/main/function/test/float-float-float.mcfunction:
 # Generated with MC-Build
 
 say 1
@@ -35,7 +35,7 @@ say 9
 say 9.5
 say 10
 ----------------
-data/main/functions/test/array.mcfunction:
+data/main/function/test/array.mcfunction:
 # Generated with MC-Build
 
 say 1
@@ -43,7 +43,7 @@ say 2
 say 7
 say 9
 ----------------
-data/main/functions/test/iterator-function.mcfunction:
+data/main/function/test/iterator-function.mcfunction:
 # Generated with MC-Build
 
 say 1

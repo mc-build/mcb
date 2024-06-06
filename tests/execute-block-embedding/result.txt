@@ -1,14 +1,14 @@
-data/test/functions/test_block.mcfunction:
+data/test/function/test_block.mcfunction:
 # Generated with MC-Build
 
 say test
 ----------------
-data/test/functions/zzz/0.mcfunction:
+data/test/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say test
 ----------------
-data/test/functions/test.mcfunction:
+data/test/function/test.mcfunction:
 # Generated with MC-Build
 
 execute run function test:test_block

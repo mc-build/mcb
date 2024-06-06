@@ -93,6 +93,8 @@ class AppMain {
 						copyDir(fromPath, toPath);
 					} else {
 						var template = new Template(File.getContent(fromPath));
+						if (name == null)
+							name + "MC-Build";
 						File.saveContent(toPath, template.execute({name: name, version: version.data_pack_version}));
 					}
 				}

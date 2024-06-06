@@ -1,4 +1,4 @@
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 schedule clear main:test

@@ -1,26 +1,26 @@
-data/test/functions/test/zzz/0.mcfunction:
+data/test/function/test/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say blocks should not conflict (0)
 ----------------
-data/test/functions/test/load.mcfunction:
+data/test/function/test/load.mcfunction:
 # Generated with MC-Build
 
 say load
 function test:test/zzz/0
 ----------------
-data/test/functions/test/zzz/1.mcfunction:
+data/test/function/test/zzz/1.mcfunction:
 # Generated with MC-Build
 
 say blocks should not conflict (1)
 ----------------
-data/test/functions/test/tick.mcfunction:
+data/test/function/test/tick.mcfunction:
 # Generated with MC-Build
 
 say tick
 function test:test/zzz/1
 ----------------
-data/main/functions/main.mcfunction:
+data/main/function/main.mcfunction:
 # Generated with MC-Build
 
 say hi

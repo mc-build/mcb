@@ -1,9 +1,9 @@
-data/main/functions/zzz/1.mcfunction:
+data/main/function/zzz/1.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 schedule function main:zzz/1 1t append
@@ -11,7 +11,7 @@ schedule function main:demo 1t replace
 schedule function main:demo 1t replace
 schedule function main:test 1t replace
 ----------------
-data/main/functions/demo.mcfunction:
+data/main/function/demo.mcfunction:
 # Generated with MC-Build
 
 

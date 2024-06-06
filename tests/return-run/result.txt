@@ -1,9 +1,9 @@
-data/main/functions/zzz/0.mcfunction:
+data/main/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say $(a)
 ----------------
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 return run say hi

@@ -1,9 +1,9 @@
-data/test/functions/zzz/0.mcfunction:
+data/test/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/test/functions/test.mcfunction:
+data/test/function/test.mcfunction:
 # Generated with MC-Build
 
 function test:zzz/0

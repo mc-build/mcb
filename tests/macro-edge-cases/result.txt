@@ -1,52 +1,52 @@
-data/main/functions/zzz/0.mcfunction:
+data/main/function/zzz/0.mcfunction:
 # Generated with MC-Build
 
 scoreboard players set #ifelse _internal_scoreboard 1
 say 1
 ----------------
-data/main/functions/zzz/1.mcfunction:
+data/main/function/zzz/1.mcfunction:
 # Generated with MC-Build
 
 scoreboard players set #ifelse _internal_scoreboard 1
 say 2
 ----------------
-data/main/functions/zzz/2.mcfunction:
+data/main/function/zzz/2.mcfunction:
 # Generated with MC-Build
 
 scoreboard players set #ifelse _internal_scoreboard 1
 say 3
 ----------------
-data/main/functions/zzz/3.mcfunction:
+data/main/function/zzz/3.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/zzz/4.mcfunction:
+data/main/function/zzz/4.mcfunction:
 # Generated with MC-Build
 
 $say $(asd)
 ----------------
-data/main/functions/zzz/6.mcfunction:
+data/main/function/zzz/6.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/zzz/8.mcfunction:
+data/main/function/zzz/8.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/zzz/10.mcfunction:
+data/main/function/zzz/10.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/zzz/12.mcfunction:
+data/main/function/zzz/12.mcfunction:
 # Generated with MC-Build
 
 say hi
 ----------------
-data/main/functions/test.mcfunction:
+data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 scoreboard players set #ifelse _internal_scoreboard 0

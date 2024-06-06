@@ -1,5 +1,6 @@
 package mcl;
 
+import js.html.SubtleCrypto;
 import mcl.error.McbError;
 import mcl.error.CompilerError;
 import mcl.Config.UserConfig;
@@ -333,6 +334,9 @@ class McFile {
 	private var tickCommands:Array<String> = [];
 	private var fileJs:Any = {};
 
+	private var functionsDir = "functions";
+	private var tagsDir = "tags";
+
 	public function new(name:String, ast:Array<AstNode>) {
 		this.name = name;
 		this.ast = ast;
@@ -347,6 +351,9 @@ class McFile {
 	}
 
 	public function setup(compiler:Compiler) {
+		if (compiler.config.features.useFolderRenames45) {
+			functionsDir = "function";
+		}
 		var ast = this.ast;
 		this.ast = [];
 		for (node in ast) {
@@ -441,7 +448,7 @@ class McFile {
 		var result = commands.join("\n");
 		if (name != null)
 			name = injectValues(name, context, pos);
-		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), result);
+		saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([id + ".mcfunction"]))), result);
 		return makeMacro(isMacro, 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
 	}
 
@@ -521,7 +528,7 @@ class McFile {
 		}
 		function emitBlock(commands:Array<String>, ?data:String) {
 			var id = '${context.compiler.config.generatedDirName}/${Std.string(context.uidIndex.get())}';
-			saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
+			saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
 			var signature = '${context.namespace}:${context.path.concat([id]).join("/")}';
 			context.append('function $signature' + (data == null ? '' : ' $data'));
 			return signature;
@@ -711,7 +718,8 @@ class McFile {
 				var result = commands.join("\n");
 				var id = Std.string(context.uidIndex.get());
 				saveContent(context,
-					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id + ".mcfunction"]))),
+					Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, id
+						+ ".mcfunction"]))),
 					result);
 				context.append(makeMacro(isMacro,
 					'schedule function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")} $delay $type'));
@@ -788,7 +796,7 @@ class McFile {
 				}
 				var result = commands.join("\n");
 				saveContent(context,
-					Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, uid
+					Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, uid
 						+ ".mcfunction"]))),
 					result);
 				context.append(injectValues(makeMacro(isMacro, '$execute function ${callSignature}' + (data == null ? '' : ' $data')), context, pos));
@@ -815,7 +823,7 @@ class McFile {
 								var result = embedCommands.join("\n");
 
 								saveContent(context,
-									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
+									Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, id
 										+ ".mcfunction"]))),
 									result);
 
@@ -840,7 +848,7 @@ class McFile {
 								}
 								var result = embedCommands.join("\n");
 								saveContent(context,
-									Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, id
+									Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, id
 										+ ".mcfunction"]))),
 									result);
 								context.append(makeMacro(isMacro2,
@@ -906,7 +914,7 @@ class McFile {
 		if (appendTo != null) {
 			context.compiler.tags.addTagEntry(appendTo, funcId, context);
 		}
-		saveContent(context, Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
+		saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
 	}
 
 	private function compileDirectory(pos:PosInfo, name:String, body:Array<AstNode>, context:CompilerContext) {
@@ -951,7 +959,7 @@ class McFile {
 					compileCommand(node, newContext);
 				}
 				var result = commands.join("\n");
-				saveContent(context, Path.join(['data', context.namespace, 'functions', '$path.mcfunction']), result);
+				saveContent(context, Path.join(['data', context.namespace, functionsDir, '$path.mcfunction']), result);
 				context.compiler.tags.addTagEntry('minecraft:load', functionId, context);
 			case MultiLineScript(pos, value):
 				processMlScript(context, pos, value, true);
@@ -1009,14 +1017,22 @@ class McFile {
 							}
 						]
 					});
-					saveContent(context, Path.join(['data', context.namespace, 'tags', subType].concat(context.path.concat([name + ".json"]))), data);
+					var writePath = context.compiler.config.features.useFolderRenames43 ? switch (subType) {
+						case "items": "item";
+						case "blocks": "block";
+						case "entity_types": "entity_type";
+						case "fluids": "fluid";
+						case "game_events": "game_event";
+						default: subType;
+					} : subType;
+					saveContent(context, Path.join(['data', context.namespace, tagsDir, writePath].concat(context.path.concat([name + ".json"]))), data);
 				}
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
 				LootTable(entries) | Predicate(entries) | Recipe(entries) | Enchantment(entries):
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				var type = switch (info) {
 					case Advancement(_):
-						context.compiler.config.features.useOldTagFolderNames ? "advancements" : "advancement";
+						context.compiler.config.features.useFolderRenames45 ? "advancement" : "advancements";
 					case ChatType(_):
 						"chat";
 					case DamageType(_):
@@ -1026,13 +1042,13 @@ class McFile {
 					case DimensionType(_):
 						"dimension_type";
 					case ItemModifier(_):
-						context.compiler.config.features.useOldTagFolderNames ? "item_modifiers" : "item_modifier";
+						context.compiler.config.features.useFolderRenames45 ? "item_modifier" : "item_modifiers";
 					case LootTable(_):
-						context.compiler.config.features.useOldTagFolderNames ? "loot_tables" : "loot_table";
+						context.compiler.config.features.useFolderRenames45 ? "loot_table" : "loot_tables";
 					case Predicate(_):
-						context.compiler.config.features.useOldTagFolderNames ? "predicates" : "predicate";
+						context.compiler.config.features.useFolderRenames45 ? "predicate" : "predicates";
 					case Recipe(_):
-						context.compiler.config.features.useOldTagFolderNames ? "recipes" : "recipe";
+						context.compiler.config.features.useFolderRenames45 ? "recipe" : "recipes";
 					case Enchantment(_):
 						"enchantment";
 					case _:
@@ -1192,14 +1208,14 @@ class McFile {
 		}
 		if (loadCommands.length > 0) {
 			saveContent(context,
-				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'load.mcfunction']))),
+				Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, 'load.mcfunction']))),
 				loadCommands.join("\n"));
 			compiler.tags.addTagEntry('minecraft:load',
 				context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'load']).join("/"), context);
 		}
 		if (tickCommands.length > 0) {
 			saveContent(context,
-				Path.join(['data', context.namespace, 'functions'].concat(context.path.concat([context.compiler.config.generatedDirName, 'tick.mcfunction']))),
+				Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([context.compiler.config.generatedDirName, 'tick.mcfunction']))),
 				tickCommands.join("\n"));
 			compiler.tags.addTagEntry('minecraft:tick',
 				context.namespace + ":" + context.path.concat([context.compiler.config.generatedDirName, 'tick']).join("/"), context);
