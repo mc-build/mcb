@@ -1,6 +1,8 @@
 package mcl;
 
+#if !macro
 import js.lib.Object;
+#end
 
 typedef FeatureFlagOverrides = Null<{
 	?useFolderRenames45:Null<Bool>,
@@ -10,7 +12,7 @@ typedef FeatureFlagOverrides = Null<{
 class FeatureFlags {
 	public function new() {}
 
-	static final flags:Map<Int, FeatureFlagOverrides> = [
+	public static final flags:Map<Int, FeatureFlagOverrides> = [
 		45 => {
 			useFolderRenames45: true
 		},
@@ -45,6 +47,8 @@ class FeatureFlags {
 			if (overrides.useFolderRenames45 != null)
 				useFolderRenames45 = overrides.useFolderRenames45;
 		}
+		#if !macro
 		Object.freeze(this);
+		#end
 	}
 }

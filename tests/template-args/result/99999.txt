@@ -1,0 +1,45 @@
+data/main/function/test/with-args.mcfunction:
+# Generated with MC-Build
+
+say a=1 (number)
+say b=2 (string)
+#---------
+say a=1
+say b=2
+say c=3
+----------------
+data/main/function/test/without-args.mcfunction:
+# Generated with MC-Build
+
+say this has no arguments
+----------------
+data/main/function/test/js-args.mcfunction:
+# Generated with MC-Build
+
+say item=1 (number)
+say item=2 (bigint)
+say item=3 (string)
+say item=true (boolean)
+----------------
+data/main/function/test/zzz/0.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------
+data/main/function/test/block-args.mcfunction:
+# Generated with MC-Build
+
+function main:test/zzz/0
+----------------
+data/main/function/test/literal-args.mcfunction:
+# Generated with MC-Build
+
+say test
+say bar
+----------------
+data/main/function/test/js-cache.mcfunction:
+# Generated with MC-Build
+
+say [1,2,"3",true]
+say no
+----------------

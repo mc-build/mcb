@@ -1,0 +1,5 @@
+data/main/functions/test.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------

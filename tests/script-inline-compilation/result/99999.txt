@@ -1,0 +1,10 @@
+data/test/function/zzz/0.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------
+data/test/function/test.mcfunction:
+# Generated with MC-Build
+
+function test:zzz/0
+----------------

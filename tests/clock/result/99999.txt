@@ -1,0 +1,9 @@
+data/main/function/test.mcfunction:
+# Generated with MC-Build
+
+schedule function main:test 1s replace
+say hi
+----------------
+data/minecraft/tags/function/load.json:
+{"values":["main:test"]}
+----------------

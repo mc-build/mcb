@@ -1,0 +1,18 @@
+data/test/function/zzz/0.mcfunction:
+# Generated with MC-Build
+
+say 1
+say 2
+----------------
+data/test/function/zzz/1.mcfunction:
+# Generated with MC-Build
+
+say 3
+say 4
+----------------
+data/test/function/test.mcfunction:
+# Generated with MC-Build
+
+function test:zzz/0
+function test:zzz/1 with storage a:b test
+----------------

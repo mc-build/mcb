@@ -1,0 +1,24 @@
+data/main/function/test/onload.mcfunction:
+# Generated with MC-Build
+
+say this will run on load
+----------------
+data/main/function/test/ontick.mcfunction:
+# Generated with MC-Build
+
+say this will run every tick
+----------------
+data/main/function/test/magic.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------
+data/minecraft/tags/function/load.json:
+{"values":["main:test/onload"]}
+----------------
+data/minecraft/tags/function/tick.json:
+{"values":["main:test/ontick"]}
+----------------
+data/main/tags/function/tag.json:
+{"values":["main:test/magic","a:b"],"replace":true}
+----------------

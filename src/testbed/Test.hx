@@ -8,7 +8,7 @@ typedef SourceFile = {
 typedef Test = {
 	var sources:Array<SourceFile>;
 	var name:String;
-	var expectedResult:Null<String>;
+	var expectedResult:Null<Map<Int, String>>;
 	var resultPath:String;
 	var configPath:Null<String>;
 }

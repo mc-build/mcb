@@ -1,0 +1,26 @@
+data/main/function/zzz/0.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #ifelse _internal_scoreboard 1
+say 1
+----------------
+data/main/function/zzz/1.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #ifelse _internal_scoreboard 1
+say 2
+----------------
+data/main/function/zzz/2.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #ifelse _internal_scoreboard 1
+say 3
+----------------
+data/main/function/test.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #ifelse _internal_scoreboard 0
+execute if score a b = 2 run function main:zzz/0
+execute if score #ifelse _internal_scoreboard matches 0 if score a b = 3 run function main:zzz/1
+execute if score #ifelse _internal_scoreboard matches 0 run function main:zzz/2
+----------------
