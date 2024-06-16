@@ -1,6 +1,3 @@
-data/main/tags/functions/test.json:
-{"replace":true,"values":["a:b"]}
-----------------
 data/main/tags/blocks/dir/test.json:
 {"replace":false,"values":[{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar","#foo:bar/baz"]}
 ----------------
@@ -72,4 +69,7 @@ data/main/enchantment/dir/enchantment.json:
 ----------------
 data/main/advancements/dir/advancement.json:
 {"test":1}
+----------------
+data/main/tags/functions/test.json:
+{"values":["a:b"],"replace":true}
 ----------------

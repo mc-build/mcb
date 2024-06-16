@@ -973,7 +973,7 @@ class McFile {
 	function compileJsonFile(pos:PosInfo, name:String, info:JsonTagType, context:CompilerContext) {
 		switch (info) {
 			case Tag(subType, replace, entries):
-				if (subType == "function") {
+				if (subType == "function" || subType == "functions") {
 					name = context.namespace + ":" + name;
 					for (e in entries) {
 						switch (e) {
