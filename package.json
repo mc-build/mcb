@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.2.3",
+  "version": "3.3.0",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {

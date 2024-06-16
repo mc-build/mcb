@@ -351,7 +351,7 @@ class McFile {
 	}
 
 	public function setup(compiler:Compiler) {
-		if (compiler.config.features.useFolderRenames45) {
+		if (compiler.config.features.useFolderRenames48) {
 			functionsDir = "function";
 		}
 		var ast = this.ast;
@@ -1017,14 +1017,12 @@ class McFile {
 							}
 						]
 					});
-					var writePath = context.compiler.config.features.useFolderRenames43 ? switch (subType) {
-						case "items": "item";
-						case "blocks": "block";
-						case "entity_types": "entity_type";
-						case "fluids": "fluid";
-						case "game_events": "game_event";
-						default: subType;
-					} : subType;
+					var isPlural = subType.charAt(subType.length - 1) == 's';
+					var writePath = if (context.compiler.config.features.useFolderRenames48) {
+						isPlural ? subType.substring(0, subType.length - 1) : subType;
+					} else {
+						isPlural ? subType : subType + "s";
+					}
 					saveContent(context, Path.join(['data', context.namespace, tagsDir, writePath].concat(context.path.concat([name + ".json"]))), data);
 				}
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
@@ -1032,7 +1030,7 @@ class McFile {
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				var type = switch (info) {
 					case Advancement(_):
-						context.compiler.config.features.useFolderRenames45 ? "advancement" : "advancements";
+						context.compiler.config.features.useFolderRenames48 ? "advancement" : "advancements";
 					case ChatType(_):
 						"chat";
 					case DamageType(_):
@@ -1042,13 +1040,13 @@ class McFile {
 					case DimensionType(_):
 						"dimension_type";
 					case ItemModifier(_):
-						context.compiler.config.features.useFolderRenames45 ? "item_modifier" : "item_modifiers";
+						context.compiler.config.features.useFolderRenames48 ? "item_modifier" : "item_modifiers";
 					case LootTable(_):
-						context.compiler.config.features.useFolderRenames45 ? "loot_table" : "loot_tables";
+						context.compiler.config.features.useFolderRenames48 ? "loot_table" : "loot_tables";
 					case Predicate(_):
-						context.compiler.config.features.useFolderRenames45 ? "predicate" : "predicates";
+						context.compiler.config.features.useFolderRenames48 ? "predicate" : "predicates";
 					case Recipe(_):
-						context.compiler.config.features.useFolderRenames45 ? "recipe" : "recipes";
+						context.compiler.config.features.useFolderRenames48 ? "recipe" : "recipes";
 					case Enchantment(_):
 						"enchantment";
 					case _:

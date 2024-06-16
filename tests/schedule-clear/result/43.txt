@@ -1,9 +1,0 @@
-data/main/functions/test.mcfunction:
-# Generated with MC-Build
-
-schedule clear main:test
-schedule clear main:test
-schedule clear main:test
-schedule clear #main:test
-schedule clear #main:test
-----------------

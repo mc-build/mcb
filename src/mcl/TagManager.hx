@@ -49,7 +49,7 @@ class TagManager {
 				'data',
 				namespace,
 				'tags',
-				compiler.config.features.useFolderRenames45 ? 'function' : "functions",
+				compiler.config.features.useFolderRenames48 ? 'function' : "functions",
 				tag + '.json'
 			]);
 			compiler.io.write(tagPath, Json.stringify({
