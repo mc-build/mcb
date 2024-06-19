@@ -73,3 +73,6 @@ data/main/advancement/dir/advancement.json:
 data/main/tags/function/test.json:
 {"values":["a:b"],"replace":true}
 ----------------
+data/main/tags/function/dir/test2.json:
+{"values":["a:b"],"replace":true}
+----------------

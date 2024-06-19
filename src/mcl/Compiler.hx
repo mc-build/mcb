@@ -449,7 +449,8 @@ class McFile {
 		if (name != null)
 			name = injectValues(name, context, pos);
 		saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([id + ".mcfunction"]))), result);
-		return makeMacro(isMacro, 'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' $data'));
+		return makeMacro(isMacro,
+			'function ${context.namespace}:${context.path.concat([id]).join("/")}' + (data == null ? '' : ' ${injectValues(data, context, pos)}'));
 	}
 
 	public inline function makeMacro(cond:Bool, cmd:String):String {
@@ -974,7 +975,7 @@ class McFile {
 		switch (info) {
 			case Tag(subType, replace, entries):
 				if (subType == "function" || subType == "functions") {
-					name = context.namespace + ":" + name;
+					name = context.namespace + ":" + context.path.concat([name]).join("/");
 					for (e in entries) {
 						switch (e) {
 							case Raw(pos, value, [], false) | Comment(pos, value):

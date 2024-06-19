@@ -2,6 +2,9 @@ tag functions test replace {
     a:b
 }
 dir dir {
+    tag functions test2 replace {
+        a:b
+    }
     tag blocks test{
         minecraft:stone replace
         minecraft:dirt
