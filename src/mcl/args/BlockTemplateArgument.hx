@@ -44,7 +44,7 @@ class BoundBlock {
 	}
 
 	@:keep
-	public function embedTo(context:CompilerContext, pos:PosInfo, file:McFile):String {
+	public function embedTo(context:CompilerContext, pos:PosInfo, file:McFile, actuallyEmbed:Bool = true):String {
 		var content:Array<String> = [];
 		var ctx:CompilerContext = {
 			isTemplate: false,
@@ -63,7 +63,10 @@ class BoundBlock {
 			baseNamespaceInfo: context.baseNamespaceInfo,
 			currentFunction: this.ctx.currentFunction
 		};
-		file.embed(ctx, pos, new Map(), [this.node]);
+		if (actuallyEmbed)
+			file.embed(ctx, pos, new Map(), [this.node]);
+		else
+			file.embedTransform(ctx, pos, new Map(), [this.node]);
 		return content.join("\n");
 	}
 }

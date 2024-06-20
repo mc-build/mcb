@@ -1,0 +1,94 @@
+### main.mcb
+tag functions test replace {
+	a:b
+}
+dir dir{
+	tag functions test2 replace {
+		a:b
+	}
+	tag blocks test {
+		minecraft:stone replace
+		minecraft:dirt
+		#foo:bar
+		#foo:bar/baz
+	}
+	worldgen worldgen_biome {
+		"a":1
+	}
+	worldgen worldgen_configured_carver {
+		"a":1
+	}
+	worldgen worldgen_configured_feature {
+		"a":1
+	}
+	worldgen worldgen_density_function {
+		"a":1
+	}
+	worldgen worldgen_noise {
+		"a":1
+	}
+	worldgen worldgen_noise_settings {
+		"a":1
+	}
+	worldgen worldgen_placed_feature {
+		"a":1
+	}
+	worldgen worldgen_processor_list {
+		"a":1
+	}
+	worldgen worldgen_structure {
+		"a":1
+	}
+	worldgen worldgen_structure_set {
+		"a":1
+	}
+	worldgen worldgen_template_pool {
+		"a":1
+	}
+	worldgen worldgen_world_preset {
+		"a":1
+	}
+	worldgen worldgen_flat_level_generator_preset {
+		"a":1
+	}
+	DimensionType([Raw({
+				line : 54, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	Dimension([Raw({
+				line : 57, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	DamageType([Raw({
+				line : 60, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	ChatType([Raw({
+				line : 63, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	Recipe([Raw({
+				line : 66, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	Predicate([Raw({
+				line : 69, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	LootTable([Raw({
+				line : 72, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	ItemModifier([Raw({
+				line : 75, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	Enchantment([Raw({
+				line : 78, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])	Advancement([Raw({
+				line : 81, 
+				col : 8, 
+				file : main.mcb
+			},"test":1,[],false)])}

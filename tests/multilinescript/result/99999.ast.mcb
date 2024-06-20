@@ -1,0 +1,7 @@
+### main.mcb
+function test{
+	say hello world
+}
+function test2{
+	say hi
+}

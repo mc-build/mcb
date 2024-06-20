@@ -1,0 +1,31 @@
+### main.mcb
+function test{
+	block{ 
+		function ^0
+		function ^1
+		function ./dummy
+		function ./folder/dummy2
+		function #^0
+		function #^1
+		function #./dummy
+		function #./folder/dummy2
+	}
+}
+function dummy{
+}
+dir folder{
+	function dummy2{
+		function ../dummy
+		function *dummy
+		function #../dummy
+		function #*dummy
+		block{ 
+			function #*dummy/as_root/on_summon
+		}
+		function #*dummy/as_root/on_summon
+		function #minecraft:some_function
+		execute run { 
+			function #*dummy/as_root/on_summon
+		}
+	}
+}

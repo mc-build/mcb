@@ -1,0 +1,6 @@
+### main.mcb
+function test{
+	block{ with 1234
+		say hi
+	}
+}

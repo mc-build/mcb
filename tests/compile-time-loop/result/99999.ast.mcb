@@ -1,0 +1,49 @@
+### main.mcb
+dir test{
+	function int-int{
+		say 1
+		say 2
+		say 3
+		say 4
+		say 5
+		say 6
+		say 7
+		say 8
+		say 9
+		say 10
+	}
+	function float-float-float{
+		say 1
+		say 1.5
+		say 2
+		say 2.5
+		say 3
+		say 3.5
+		say 4
+		say 4.5
+		say 5
+		say 5.5
+		say 6
+		say 6.5
+		say 7
+		say 7.5
+		say 8
+		say 8.5
+		say 9
+		say 9.5
+		say 10
+	}
+	function array{
+		say 1
+		say 2
+		say 7
+		say 9
+	}
+	function iterator-function{
+		say 1
+		say 3
+		say 5
+		say 7
+		say 9
+	}
+}

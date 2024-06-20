@@ -1,0 +1,33 @@
+### main.mcb
+dir test{
+	function with-args{
+		say a=1 (number)
+		say b=2 (string)
+		# #---------
+		say a=1
+		say b=2
+		say c=3
+	}
+	function without-args{
+		say this has no arguments
+	}
+	function js-args{
+		say item=1 (number)
+		say item=2 (bigint)
+		say item=3 (string)
+		say item=true (boolean)
+	}
+	function block-args{
+		function main:zzz/0
+	}
+	function literal-args{
+		say test
+		say bar
+	}
+	function js-cache{
+		say [1,2,"3",true]
+		say no
+	}
+}
+
+### test.mcbt

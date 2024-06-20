@@ -45,15 +45,18 @@ class TestMain {
 					compiler.compile(jsRoot);
 
 					var res = io.print();
-					// try {
-					// 	File.saveContent(t.resultPath + '/${i}.ast.mcb', {
-					// 		var x:Array<String> = [];
-					// 		for (k => v in compiler.transform(jsRoot)) {
-					// 			x.push('### ${k}\n${AstStringifier.stringify(Group(v))}');
-					// 		}
-					// 		x.join("\n");
-					// 	});
-					// }
+					try {
+						if (i == 99999)
+							File.saveContent(t.resultPath + '/${i}.ast.mcb', {
+								var x:Array<String> = [];
+								for (k => v in compiler.transform(jsRoot)) {
+									x.push('### ${k}\n${AstStringifier.stringify(v)}');
+								}
+								x.join("\n");
+							});
+					} catch (e) {
+						File.saveContent(t.resultPath + '/${i}.ast.mcb', Std.string(e));
+					}
 					if (t.expectedResult.get(i) == null || Sys.args().contains("--write")) {
 						FileSystem.createDirectory(t.resultPath);
 						File.saveContent(t.resultPath + '/${i}.txt', res);

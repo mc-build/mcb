@@ -1,0 +1,5 @@
+### main.mcb
+function test{
+	eq a b = 1
+	eq a b = a d + 7*(2 * c e + 3 * f g)
+}

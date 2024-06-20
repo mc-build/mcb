@@ -23,19 +23,25 @@ class AstStringifier {
 		writer.add(s);
 	}
 
-	function write(node:AstNode) {
+	function write(node:AstNode, indent:Bool = true, hideBlock:Bool = false) {
+		if (!indent && StringTools.endsWith(writer.toString(), "\\")) {
+			literal("\n");
+			indent = true;
+		}
 		switch (node) {
 			default:
 				throw "unknown node type: " + Std.string(node);
 			case Raw(pos, value, continuations, isMacro):
-				tab();
+				if (indent)
+					tab();
 				literal(value);
 				if (continuations.length > 0) {
 					throw "continuations not supported";
 				}
 				literal("\n");
 			case FunctionDef(pos, name, body, appendTo):
-				tab();
+				if (indent)
+					tab();
 				literal("function ");
 				literal(name);
 				literal("{\n");
@@ -49,8 +55,9 @@ class AstStringifier {
 			case TemplateDef(pos, name, body):
 				throw "template def not supported";
 			case Directory(pos, name, body):
-				tab();
-				literal("directory ");
+				if (indent)
+					tab();
+				literal("dir ");
 				literal(name);
 				literal("{\n");
 				inc();
@@ -61,12 +68,14 @@ class AstStringifier {
 				tab();
 				literal("}\n");
 			case Import(pos, name):
-				tab();
+				if (indent)
+					tab();
 				literal("import ");
 				literal(name);
 				literal("\n");
 			case CompileTimeLoop(pos, expression, as, body):
-				tab();
+				if (indent)
+					tab();
 				literal('REPEAT($expression) as ${as} {');
 				inc();
 				for (child in body) {
@@ -75,7 +84,8 @@ class AstStringifier {
 				dec();
 				literal("}\n");
 			case CompileTimeIf(pos, expression, body, elseExpressions):
-				tab();
+				if (indent)
+					tab();
 				literal('IF($expression) {');
 				inc();
 				for (child in body) {
@@ -98,8 +108,10 @@ class AstStringifier {
 			case MultiLineScript(pos, value):
 				throw "multi line script not supported";
 			case Block(pos, name, body, data, isMacro, isInline):
-				tab();
-				literal("block");
+				if (indent)
+					tab();
+				if (!hideBlock)
+					literal("block");
 				if (name != null && name != "") {
 					literal(" ");
 					literal(name);
@@ -112,9 +124,12 @@ class AstStringifier {
 				}
 				dec();
 				tab();
-				literal("}\n");
+				literal("}");
+				if (indent)
+					literal("\n");
 			case TickBlock(pos, body):
-				tab();
+				if (indent)
+					tab();
 				literal("tick {\n");
 				inc();
 				for (child in body) {
@@ -124,7 +139,8 @@ class AstStringifier {
 				tab();
 				literal("}\n");
 			case LoadBlock(pos, body):
-				tab();
+				if (indent)
+					tab();
 				literal("load {\n");
 				inc();
 				for (child in body) {
@@ -134,15 +150,17 @@ class AstStringifier {
 				tab();
 				literal("}\n");
 			case ExecuteBlock(pos, execute, data, body, continuations, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
-				literal("execute");
-				if (execute != null) {
-					literal(" ");
-					literal(execute);
-				}
-				literal('{${data == null ? '' : ' ' + data}\n');
+				// literal("execute");
+				// if (execute != null) {
+				// 	literal(" ");
+				// literal('<b>');
+				literal(execute);
+				// }
+				literal(' {${data == null ? '' : ' ' + data}\n');
 				inc();
 				for (child in body) {
 					write(child);
@@ -150,13 +168,18 @@ class AstStringifier {
 				dec();
 				tab();
 				literal("}");
+				var i = 0;
 				for (continuation in continuations) {
-					literal(" ");
-					write(continuation);
+					literal(" else run ");
+					write(continuation, false, true);
+					i++;
 				}
-				literal("\n");
+				// literal("</b>");
+				if (indent)
+					literal("\n");
 			case ScheduleBlock(pos, delay, type, body, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
 				literal("schedule ");
@@ -172,7 +195,8 @@ class AstStringifier {
 				tab();
 				literal("}\n");
 			case Comment(pos, value):
-				tab();
+				if (indent)
+					tab();
 				literal("# ");
 				literal(value);
 				literal("\n");
@@ -181,6 +205,8 @@ class AstStringifier {
 				switch (info) {
 					case Tag(subType, replace, entries):
 						literal("tag ");
+						literal(subType);
+						literal(" ");
 						literal(name);
 						if (replace)
 							literal(" replace");
@@ -210,7 +236,8 @@ class AstStringifier {
 						literal(Std.string(node));
 				}
 			case ClockExpr(pos, name, time, body):
-				tab();
+				if (indent)
+					tab();
 				literal("clock ");
 				literal(name);
 				literal(" ");
@@ -224,20 +251,24 @@ class AstStringifier {
 				tab();
 				literal("}\n");
 			case Execute(pos, command, value, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
-				literal("execute ");
+				// literal("execute ");
 				literal(command);
-				literal(" \\");
-				inc();
-				write(value);
-				dec();
+				literal(" ");
+				// inc();
+				write(value, false);
+				// dec();
+				// literal('</a>');
 				literal("\n");
 			case FunctionCall(pos, name, data, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
+				literal("function ");
 				literal(name);
 				if (data != null && data != "") {
 					literal(" ");
@@ -245,11 +276,13 @@ class AstStringifier {
 				}
 				literal("\n");
 			case EqCommand(pos, command):
-				tab();
+				if (indent)
+					tab();
 				literal('eq ' + command);
 				literal("\n");
 			case ScheduleCall(pos, delay, target, mode, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
 				literal("schedule function ");
@@ -260,16 +293,18 @@ class AstStringifier {
 				literal(mode);
 				literal("\n");
 			case ReturnRun(pos, value, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
-				literal("return run \\");
+				literal("return run ");
 				inc();
-				write(value);
+				write(value, false, true);
 				dec();
 				literal("\n");
 			case ScheduleClear(pos, target, isMacro):
-				tab();
+				if (indent)
+					tab();
 				if (isMacro)
 					literal("$");
 				literal("schedule clear ");
@@ -277,8 +312,13 @@ class AstStringifier {
 				literal("\n");
 			case Void: // ignore
 			case Group(body):
+				var isInline = indent == false;
 				for (child in body) {
-					write(child);
+					if (!indent && !isInline) {
+						throw "Group should not have multiple children if the location is inline";
+					}
+					write(child, indent);
+					isInline = false;
 				}
 		}
 	}

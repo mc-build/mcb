@@ -1,6 +1,7 @@
 hxml/header.hxml
 
 mcb.AppMain
+mcl.AstStringifier
 -m LibMain
 -D lib
 -D genes.enum_discriminator=@kind

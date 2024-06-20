@@ -1,0 +1,10 @@
+### main.mcb
+dir test{
+	# # a comment in a dir should also be discarded
+	function test{
+		# # a comment in a function should not be discarded
+		block{ 
+			# # a comment in a block should not be discarded
+		}
+	}
+}

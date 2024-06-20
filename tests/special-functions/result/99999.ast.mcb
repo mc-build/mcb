@@ -1,0 +1,15 @@
+### main.mcb
+dir test{
+	function onload{
+		say this will run on load
+	}
+	function ontick{
+		say this will run every tick
+	}
+	function magic{
+		say hi
+	}
+}
+tag function tag replace {
+	a:b
+}

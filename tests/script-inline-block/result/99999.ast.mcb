@@ -1,0 +1,17 @@
+### test.mcb
+function test{
+	function test:mcb_emmited_blocks/block_0
+	function test:mcb_emmited_blocks/block_1 with storage a:b test
+}
+dir mcb_emmited_blocks{
+	function block_0{
+		say 1
+		say 2
+	}
+}
+dir mcb_emmited_blocks{
+	function block_1{
+		say 3
+		say 4
+	}
+}

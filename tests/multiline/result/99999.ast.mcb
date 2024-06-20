@@ -1,0 +1,4 @@
+### main.mcb
+function foobarbazboo{
+	say hi
+}

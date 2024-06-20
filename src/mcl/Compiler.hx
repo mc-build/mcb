@@ -147,6 +147,43 @@ class McTemplate {
 		}
 	}
 
+	private function injectTransform(context:CompilerContext, into:McFile):AstNode {
+		this.hasBeenUsed = true;
+		var defs:Array<AstNode> = [];
+		if (loadBlock != null && loadBlock.length > 0) {
+			var pos = AstNodeUtils.getPos(loadBlock[0]);
+			defs.push(AstNode.FunctionDef(pos, "load", cast loadBlock, "minecraft:load"));
+		}
+		if (tickBlock != null && tickBlock.length > 0) {
+			var pos = AstNodeUtils.getPos(tickBlock[0]);
+			defs.push(AstNode.FunctionDef(pos, "tick", cast tickBlock, "minecraft:tick"));
+		}
+		if (defs.length > 0) {
+			var pos = AstNodeUtils.getPos(defs[0]);
+			var info = context.compiler.getInitialPathInfo(this.file.name);
+			into.embedTransform({
+				append: function(v) {
+					throw CompilerError.create("tried to append to a Void context (template virtual context)", pos, context);
+				},
+				namespace: info.namespace,
+				path: info.path,
+				uidIndex: context.uidIndex,
+				variables: new VariableMap(context.globalVariables),
+				templates: this.file.templates,
+				stack: context.stack,
+				replacements: new VariableMap(null),
+				isTemplate: false,
+				requireTemplateKeyword: true,
+				compiler: context.compiler,
+				globalVariables: context.globalVariables,
+				functions: context.functions,
+				baseNamespaceInfo: context.baseNamespaceInfo,
+				currentFunction: context.currentFunction
+			}, pos, new Map(), [AstNode.Directory(pos, this.name, defs)], true);
+		}
+		return Void;
+	}
+
 	var jsValueCache:IntMap<Any> = new IntMap();
 
 	public function process(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>) {
@@ -242,6 +279,104 @@ class McTemplate {
 			file.embed(newContext, pos, args, overloadBody);
 			// trace("MATCHED", types, args);
 			return;
+		}
+		throw CompilerError.create("Failed to find matching template overload for: " + value, pos, context);
+	}
+
+	public function transform(file:McFile, context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>):AstNode {
+		var argstring = StringTools.ltrim(value.substring(this.name.length));
+		jsValueCache.clear();
+		TemplateArgument.jsCache = jsValueCache;
+		for (types => overloadBody in overloads) {
+			var args:Map<String, Any> = new Map();
+			var successCount = 0;
+			var pidx = 0;
+			var argList:Array<Any> = [argstring].concat(extras == null ? [] : cast extras);
+			var lastEntryWasBlock = false;
+			var jsCacheIdx = 0;
+			for (arg in types) {
+				while (pidx < argList.length && argList[pidx] == "")
+					pidx++;
+				if (pidx >= argList.length)
+					break; // this is a failure case as we are looking for more arguments but have run out
+				if (arg.expectBlock) {
+					if (!Type.enumEq(Type.typeof(argList[pidx]), TEnum(AstNode)))
+						break; // this is a failure case as we are looking for a block but have something else
+					var x = arg.parseValueBlock(argList[pidx], pos, context);
+					if (!x.success) {
+						break;
+					}
+					lastEntryWasBlock = true;
+					args.set(arg.name, x.value);
+					argList[pidx] = x.raw;
+					successCount++;
+					pidx++;
+				} else {
+					if (Syntax.typeof(argList[pidx]) != 'string')
+						break; // this is a failure case as we are looking for a string but have something else
+					var s:String = cast argList[pidx];
+					var jsBlockRaw:String = null;
+					if (s.charAt(0) == "<" && s.charAt(1) == "%" && !arg.expectJsValue) {
+						var end = s.indexOf("%>");
+						if (end == -1)
+							throw CompilerError.create("Unexpected end of inline script block", pos, context);
+						var script = s.substring(2, end);
+						jsBlockRaw = script;
+						if (jsValueCache.exists(jsCacheIdx)) {
+							var jsVal = jsValueCache.get(jsCacheIdx);
+							s = Std.string(jsVal);
+						} else {
+							var jsVal = McFile.invokeExpressionInline(script, context, pos);
+							jsValueCache.set(jsCacheIdx, jsVal);
+							s = Std.string(jsVal);
+						}
+						jsCacheIdx++;
+					} else if (arg.expectJsValue) {
+						TemplateArgument.jsCacheIdx = jsCacheIdx;
+						jsCacheIdx++;
+					}
+
+					var x = arg.parseValue(s, pos, context);
+					if (!x.success)
+						break;
+					if (arg.name != null)
+						args.set(arg.name, x.value);
+					if (jsBlockRaw != null) {
+						argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(jsBlockRaw.length + 4));
+					} else {
+						argList[pidx] = StringTools.ltrim(cast(argList[pidx], String).substring(x.raw.length));
+					}
+					successCount++;
+					lastEntryWasBlock = false;
+				}
+			}
+			while (pidx < argList.length && argList[pidx] == "")
+				pidx++;
+			if (successCount != types.length || pidx != argList.length || (argList[pidx - 1] != "" && !lastEntryWasBlock))
+				continue;
+			var nodes:Array<AstNode> = [];
+			if (!this.hasBeenUsed)
+				nodes.push(this.injectTransform(context, file));
+			var newContext:CompilerContext = {
+				append: context.append,
+				namespace: context.namespace,
+				path: context.path,
+				uidIndex: context.uidIndex,
+				variables: context.variables,
+				templates: this.file.templates,
+				stack: context.stack,
+				replacements: context.replacements,
+				isTemplate: false,
+				requireTemplateKeyword: true,
+				compiler: context.compiler,
+				globalVariables: context.globalVariables,
+				functions: context.functions,
+				baseNamespaceInfo: context.baseNamespaceInfo,
+				currentFunction: context.currentFunction
+			};
+			nodes.push(file.embedTransform(newContext, pos, args, overloadBody, false));
+			// trace("MATCHED", types, args);
+			return Group(nodes);
 		}
 		throw CompilerError.create("Failed to find matching template overload for: " + value, pos, context);
 	}
@@ -456,6 +591,27 @@ class McFile {
 		return '${cond ? '$' : ''}${cmd}';
 	}
 
+	public function embedTransform(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false):AstNode {
+		var newContext = createCompilerContext(context.namespace, context.append,
+			new VariableMap(VariableMap.globals, context.globalVariables.fork(varmap).get()), context.path, context.uidIndex, context.stack,
+			context.replacements, context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables, context.functions,
+			context.baseNamespaceInfo, context.currentFunction);
+		var res:AstNode = Group([
+			for (node in body) {
+				if (useTld) {
+					transformTld(node, newContext);
+				} else {
+					transformCommand(node, newContext);
+				}
+			}
+		]);
+		if (useTld) {
+			context.compiler.addTopLevelAstNode(res);
+		}
+
+		return useTld ? Void : res;
+	}
+
 	public function embed(context:CompilerContext, pos:PosInfo, varmap:Map<String, Any>, body:Array<AstNode>, useTld:Bool = false) {
 		var newContext = createCompilerContext(context.namespace, context.append,
 			new VariableMap(VariableMap.globals, context.globalVariables.fork(varmap).get()), context.path, context.uidIndex, context.stack,
@@ -477,7 +633,7 @@ class McFile {
 			}
 			for (k => v in context.templates) {
 				if (value == k || StringTools.startsWith(value, k)) {
-					throw CompilerError.createInternal("Template processing not implemented", pos, context);
+					return v.transform(this, context, pos, value, extras);
 				}
 			}
 			if (extras != null && extras.length > 0) {
@@ -524,6 +680,30 @@ class McFile {
 			for (node in astNodes)
 				this.compileCommand(node, context);
 		}
+	}
+
+	private function transformInline(context:CompilerContext, code:String, isTLD:Bool = false):AstNode {
+		var tokens = Tokenizer.tokenize(code, '<inline ${this.name}>');
+		var tokenInput = new TokenInput(tokens);
+		var astNodes:Array<AstNode> = [];
+		while (tokenInput.hasNext()) {
+			if (isTLD) {
+				astNodes.push(Parser.parseTLD(tokenInput));
+			} else {
+				astNodes.push(Parser.innerParse(tokenInput));
+			}
+		}
+		return Group(if (isTLD) {
+			[
+				for (node in astNodes)
+					this.transformTld(node, context)
+			];
+		} else {
+			[
+				for (node in astNodes)
+					this.transformCommand(node, context)
+			];
+		});
 	}
 
 	private function processMlScript(context:CompilerContext, pos:PosInfo, tokens:Array<Token>, isTLD = false) {
@@ -590,11 +770,85 @@ class McFile {
 		}
 	}
 
+	private function processMlScriptTransform(context:CompilerContext, pos:PosInfo, tokens:Array<Token>, isTLD = false):AstNode {
+		var str = "";
+		for (t in tokens) {
+			switch (t) {
+				case Literal(v, pos):
+					str += v + "\n";
+				case BracketOpen(pos, data):
+					str += '{${data}';
+				case BracketClose(pos):
+					str += '}';
+			}
+		}
+		var names:Array<String> = ['emit', 'context', "embed", "require"];
+		var results:Array<AstNode> = [];
+		var emit = (c:String) -> results.push(Raw(pos, c, [], null));
+		function emitMcb(code:String) {
+			results.push(this.transformInline(context, code, isTLD));
+		}
+		function emitBlock(commands:Array<String>, ?data:String) {
+			var id = context.uidIndex.get();
+			context.compiler.addTopLevelAstNode(Directory(pos, "mcb_emmited_blocks", [
+				FunctionDef(pos, 'block_${id}', [
+					for (c in commands)
+						Raw(pos, c, [], false)
+				], null)
+			]));
+			// var id = '${context.compiler.config.generatedDirName}/${Std.string(context.uidIndex.get())}';
+			// saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([id + ".mcfunction"]))), commands.join("\n"));
+			// var signature = '${context.namespace}:${context.path.concat([id]).join("/")}';
+			// context.append('function $signature' + (data == null ? '' : ' $data'));
+			results.push(FunctionCall(pos, context.namespace + ":" + context.baseNamespaceInfo.path.concat(["mcb_emmited_blocks", 'block_${id}']).join("/"),
+				data == null ? null : injectValues(data, context, pos), false));
+			return context.namespace + ":" + context.baseNamespaceInfo.path.concat(["mcb_emmited_blocks", 'block_${id}']).join("/");
+		}
+		untyped {
+			emit.mcb = emitMcb;
+			if (!isTLD)
+				emit.block = emitBlock;
+		}
+		var values:Array<Any> = [
+			emit,
+			context,
+			function(v) {
+				if (isTLD)
+					throw CompilerError.create("embed not available in toplevel script blocks", pos, context);
+				return v.embedTo(context, pos, this, false);
+			},
+			#if !disableRequire
+			context.compiler.disableRequire ?(s) -> {
+				throw CompilerError.create("Require not available as it has been disabled, please disable compiler.disableRequire", pos, context);
+			} : Module.createRequire(this.name)
+			#else
+			(s) -> {
+				throw CompilerError.createInternal("Require not available in this build of mcl.Compiler, please compile without the disableRequire flag set",
+					pos, context);
+			}
+			#end
+		];
+		var jsEnv = context.variables.get();
+		for (k => v in jsEnv) {
+			names.push(k);
+			values.push(v);
+		}
+		try {
+			Syntax.code('new Function(...{0},{1})(...{2})', names, str, values);
+		} catch (e) {
+			if (Syntax.instanceof(e, McbError)) {
+				throw e;
+			} else {
+				throw CompilerError.create('Error in multi-line script, \'${e.message}\' at ${pos.file}:${pos.line}:${pos.col + 1}', pos, context);
+			}
+		}
+		return Group(results);
+	}
+
 	private function transformCommand(node:AstNode, context:CompilerContext):AstNode {
 		return switch (node) {
 			case MultiLineScript(pos, value):
-				processMlScript(context, pos, value);
-				Void;
+				processMlScriptTransform(context, pos, value);
 			case Raw(pos, value, extras, isMacro):
 				transformTemplate(context, pos, value, extras, isMacro);
 			case Comment(pos, value):
@@ -623,7 +877,7 @@ class McFile {
 				Execute(pos, injectValues(command, context, pos), transformCommand(value, context), isMacro);
 			case ExecuteBlock(pos, execute, data, body, continuations, isMacro):
 				ExecuteBlock(pos, injectValues(execute, context, pos), injectValues(data, context, pos), [for (node in body) transformCommand(node, context)],
-					[for (node in continuations) transformCommand(node, context)], isMacro);
+					continuations == null ? [] : [for (node in continuations) transformCommand(node, context)], isMacro);
 			case CompileTimeLoop(pos, expression, as, body):
 				var nodes:Array<AstNode> = [];
 				processCompilerLoop(expression, as, context, body, pos, (ctx, v) -> {
@@ -1020,7 +1274,19 @@ class McFile {
 			case Directory(pos, name, body):
 				Directory(pos, injectValues(name, context, pos), [for (node in body) this.transformTld(node, context)]);
 			case JsonFile(pos, name, info):
-				JsonFile(pos, name, info);
+				switch (info) {
+					case Tag(subType, replace, entries):
+						JsonFile(pos, name, Tag(subType, replace, [
+							for (e in entries)
+								Raw(pos, injectValues(switch (e) {
+									case Raw(pos, value, [], false) | Comment(pos, value):
+										injectValues(value, context, pos);
+									default:
+										throw CompilerError.create("Unexpected node type in json tag", pos, context);
+								}, context, pos), [], false)
+						]));
+					default: JsonFile(pos, injectValues(name, context, pos), info);
+				}
 			case CompileTimeLoop(pos, expression, as, body):
 				var results:Array<AstNode> = [];
 				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
@@ -1034,8 +1300,7 @@ class McFile {
 			case ClockExpr(pos, name, time, body):
 				ClockExpr(pos, name, time, [for (node in body) this.transformCommand(node, context)]);
 			case MultiLineScript(pos, value):
-				processMlScript(context, pos, value, true);
-				Void;
+				processMlScriptTransform(context, pos, value, true);
 			case Comment(_, _):
 				node;
 			default:
@@ -1469,16 +1734,16 @@ class Compiler {
 		}
 	}
 
-	public function transform(root:VariableMap):Map<String, Array<AstNode>> {
-		var result = new Map<String, Array<AstNode>>();
+	public function transform(root:VariableMap):js.lib.Map<String, AstNode> {
+		var result = new js.lib.Map<String, AstNode>();
 		for (file in files) {
 			if (alreadySetupFiles.exists(file.name))
 				continue;
 			file.setup(this);
 		}
-
 		for (file in files) {
-			result.set(file.name, file.transform(root, this));
+			topLevelAstNodes = [];
+			result.set(file.name, AstNode.Group(file.transform(root, this).concat(topLevelAstNodes)));
 		}
 		return result;
 	}
@@ -1487,5 +1752,11 @@ class Compiler {
 		this.config = Config.create(config);
 		this.baseDir = baseDir;
 		this.libStore = lib;
+	}
+
+	var topLevelAstNodes = new Array<AstNode>();
+
+	public function addTopLevelAstNode(node:AstNode) {
+		topLevelAstNodes.push(node);
 	}
 }

@@ -1,0 +1,6 @@
+### test.mcb
+function test{
+	block{ 
+		say hi
+	}
+}

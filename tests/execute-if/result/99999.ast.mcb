@@ -1,0 +1,10 @@
+### main.mcb
+function test{
+	execute if score a b = 2 run { 
+		say 1
+	} else run execute if score a b = 3 run { 
+		say 2
+	} else run { 
+		say 3
+	}
+}
