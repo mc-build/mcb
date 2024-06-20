@@ -1,6 +1,5 @@
 package mcl;
 
-import js.html.SubtleCrypto;
 import mcl.error.McbError;
 import mcl.error.CompilerError;
 import mcl.Config.UserConfig;
@@ -394,7 +393,7 @@ class McFile {
 			context.currentFunction);
 	}
 
-	private inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:UidTracker,
+	public inline function createCompilerContext(namespace:String, append:String->Void, variableMap:VariableMap, path:Array<String>, uidIndex:UidTracker,
 			stack:Array<PosInfo>, replacements:VariableMap, templates:Map<String, McTemplate>, requireTemplateKeyword:Bool, compiler:Compiler,
 			globalVariables:VariableMap, functions:Array<String>, baseNameInfo:BaseNameInfo, currentFunction:Null<Array<String>>):CompilerContext {
 		return {
@@ -469,6 +468,23 @@ class McFile {
 				compileCommand(node, newContext);
 			}
 		}
+	}
+
+	private function transformTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>, isMacro:Bool):AstNode {
+		if (context.compiler.templateParsingEnabled) {
+			if (StringUtils.startsWithConstExpr(value, "template ")) {
+				value = value.substring(9);
+			}
+			for (k => v in context.templates) {
+				if (value == k || StringTools.startsWith(value, k)) {
+					throw CompilerError.createInternal("Template processing not implemented", pos, context);
+				}
+			}
+			if (extras != null && extras.length > 0) {
+				throw CompilerError.create("Unexpected extra data in non template command", pos, context);
+			}
+		}
+		return Raw(pos, injectValues(value, context, pos), extras, isMacro);
 	}
 
 	private function processTemplate(context:CompilerContext, pos:PosInfo, value:String, extras:Null<Array<AstNode>>, isMacro:Bool) {
@@ -574,6 +590,58 @@ class McFile {
 		}
 	}
 
+	private function transformCommand(node:AstNode, context:CompilerContext):AstNode {
+		return switch (node) {
+			case MultiLineScript(pos, value):
+				processMlScript(context, pos, value);
+				Void;
+			case Raw(pos, value, extras, isMacro):
+				transformTemplate(context, pos, value, extras, isMacro);
+			case Comment(pos, value):
+				Comment(pos, value);
+			case ReturnRun(pos, value, isMacro):
+				ReturnRun(pos, transformCommand(value, context), isMacro);
+			case CompileTimeIf(pos, expression, body, elseExpressions):
+				transformCompileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
+					transformCommand(v, context);
+				});
+			case EqCommand(pos, command):
+				EqCommand(pos, injectValues(command, context, pos));
+			case AstNode.Block(pos, name, body, data, isMacro, isInline):
+				Block(pos, injectValues(name, context, pos), [for (node in body) transformCommand(node, context)], injectValues(data, context, pos), isMacro,
+					isInline);
+			case ScheduleClear(pos, target, isMacro):
+				ScheduleClear(pos, injectValues(target, context, pos), isMacro);
+			case ScheduleCall(pos, delay, target, mode, isMacro):
+				ScheduleCall(pos, injectValues(delay, context, pos), injectValues(target, context, pos), injectValues(mode, context, pos), isMacro);
+			case ScheduleBlock(pos, delay, type, body, isMacro):
+				ScheduleBlock(pos, injectValues(delay, context, pos), injectValues(type, context, pos), [for (node in body) transformCommand(node, context)],
+					isMacro);
+			case FunctionCall(pos, name, data, isMacro):
+				FunctionCall(pos, injectValues(name, context, pos), injectValues(data, context, pos), isMacro);
+			case Execute(pos, command, value, isMacro):
+				Execute(pos, injectValues(command, context, pos), transformCommand(value, context), isMacro);
+			case ExecuteBlock(pos, execute, data, body, continuations, isMacro):
+				ExecuteBlock(pos, injectValues(execute, context, pos), injectValues(data, context, pos), [for (node in body) transformCommand(node, context)],
+					[for (node in continuations) transformCommand(node, context)], isMacro);
+			case CompileTimeLoop(pos, expression, as, body):
+				var nodes:Array<AstNode> = [];
+				processCompilerLoop(expression, as, context, body, pos, (ctx, v) -> {
+					nodes.push(transformCommand(v, ctx));
+					return;
+				});
+				return Group(nodes);
+			case LoadBlock(pos, body):
+				LoadBlock(pos, [for (node in body) transformCommand(node, context)]);
+			case TickBlock(pos, body):
+				TickBlock(pos, [for (node in body) transformCommand(node, context)]);
+			default:
+				Lib.debug();
+				trace(Std.string(node));
+				throw 'Unexpected node type in transformCommand: ${node}';
+		}
+	}
+
 	private function compileCommand(node:AstNode, context:CompilerContext):Void {
 		switch (node) {
 			case MultiLineScript(pos, value):
@@ -610,7 +678,7 @@ class McFile {
 					compileCommand(v, context);
 				});
 			case EqCommand(pos, command):
-				var res = McMath.compile(command, context);
+				var res = McMath.compile(injectValues(command, context, pos), context);
 				context.append(res.commands);
 				var addScoreboardCommand = 'scoreboard objectives add ${context.compiler.config.eqConstScoreboardName} dummy';
 				if (!this.loadCommands.contains(addScoreboardCommand)) {
@@ -627,6 +695,7 @@ class McFile {
 					}
 				}
 			case ScheduleClear(pos, name, isMacro):
+				name = injectValues(name, context, pos);
 				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
 				if (tagPrefix != "") {
 					name = name.substring(1);
@@ -666,6 +735,9 @@ class McFile {
 						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
 				}
 			case ScheduleCall(pos, delay, name, mode, isMacro):
+				name = injectValues(name, context, pos);
+				delay = injectValues(delay, context, pos);
+				mode = injectValues(mode, context, pos);
 				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
 				if (tagPrefix != "") {
 					name = name.substring(1);
@@ -706,6 +778,8 @@ class McFile {
 						context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} $delay $mode'), context, pos));
 				}
 			case ScheduleBlock(pos, delay, type, body, isMacro):
+				delay = injectValues(delay, context, pos);
+				type = injectValues(type, context, pos);
 				var commands:Array<String> = [];
 				var append = function(command:String) {
 					commands.push(command);
@@ -899,6 +973,15 @@ class McFile {
 		}
 	}
 
+	private function transformFunction(pos:PosInfo, name:String, body:Array<AstNode>, appendTo:Null<String>, context:CompilerContext):AstNode {
+		name = injectValues(name, context, pos);
+		var nodes:Array<AstNode> = [];
+		return FunctionDef(pos, name, [
+			for (node in body)
+				this.transformCommand(node, context)
+		], appendTo);
+	}
+
 	private function compileFunction(pos:PosInfo, name:String, body:Array<AstNode>, appendTo:Null<String>, context:CompilerContext) {
 		name = injectValues(name, context, pos);
 		var commands:Array<String> = [];
@@ -913,7 +996,7 @@ class McFile {
 		}
 
 		if (appendTo != null) {
-			context.compiler.tags.addTagEntry(appendTo, funcId, context);
+			context.compiler.tags.addTagEntry(injectValues(appendTo, context, pos), funcId, context);
 		}
 		saveContent(context, Path.join(['data', context.namespace, functionsDir].concat(context.path.concat([name + ".mcfunction"]))), commands.join("\n"));
 	}
@@ -928,6 +1011,36 @@ class McFile {
 		for (node in body) {
 			compileTld(node, newContext);
 		}
+	}
+
+	private function transformTld(node:AstNode, context:CompilerContext):AstNode {
+		return switch (node) {
+			case FunctionDef(pos, name, body, appendTo):
+				FunctionDef(pos, injectValues(name, context, pos), [for (node in body) this.transformCommand(node, context)], appendTo);
+			case Directory(pos, name, body):
+				Directory(pos, injectValues(name, context, pos), [for (node in body) this.transformTld(node, context)]);
+			case JsonFile(pos, name, info):
+				JsonFile(pos, name, info);
+			case CompileTimeLoop(pos, expression, as, body):
+				var results:Array<AstNode> = [];
+				processCompilerLoop(expression, as, context, body, pos, (context, v) -> {
+					results.push(this.transformTld(v, context));
+				});
+				Group(results);
+			case CompileTimeIf(pos, expression, body, elseExpressions):
+				transformCompileTimeIf(expression, body, elseExpressions, pos, context, (v) -> {
+					this.transformTld(v, context);
+				});
+			case ClockExpr(pos, name, time, body):
+				ClockExpr(pos, name, time, [for (node in body) this.transformCommand(node, context)]);
+			case MultiLineScript(pos, value):
+				processMlScript(context, pos, value, true);
+				Void;
+			case Comment(_, _):
+				node;
+			default:
+				throw CompilerError.createInternal("unexpected node type:" + Std.string(node), AstNodeUtils.getPos(node), context);
+		};
 	}
 
 	private function compileTld(node:AstNode, context:CompilerContext) {
@@ -1060,7 +1173,7 @@ class McFile {
 		}
 	}
 
-	function processCompilerLoop(expression:String, as:Null<String>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
+	public function processCompilerLoop(expression:String, as:Null<String>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
 			handler:CompilerContext->AstNode->Void) {
 		var itterator = invokeExpressionInline(expression, context, pos);
 		for (v in itterator) {
@@ -1106,7 +1219,9 @@ class McFile {
 		return values.join('');
 	}
 
-	function injectValues(target:String, context:CompilerContext, pos:PosInfo):String {
+	function injectValues(target:Null<String>, context:CompilerContext, pos:PosInfo):String {
+		if (target == null)
+			return '';
 		if (target.indexOf("<%") == -1)
 			return target;
 		var variables = context.variables.get();
@@ -1160,6 +1275,25 @@ class McFile {
 		}
 	}
 
+	function transformCompileTimeIf(expression:String, body:Array<AstNode>, elseExpression:CompileTimeIfElseExpressions, pos:PosInfo,
+			newContext:CompilerContext, processNode:AstNode->AstNode, isContinuation:Bool = false):AstNode {
+		var bool = invokeExpressionInline(expression, newContext, pos);
+		if (bool) {
+			return Group([
+				for (node in body)
+					processNode(node)
+			]);
+		} else {
+			for (elseNode in elseExpression) {
+				var invoke = elseNode.condition == null ? true : invokeExpressionInline(elseNode.condition, newContext, pos);
+				if (invoke) {
+					return Group([for (node in elseNode.node) processNode(node)]);
+				}
+			}
+			return Void;
+		}
+	}
+
 	function compileTimeIf(expression:String, body:Array<AstNode>, elseExpression:CompileTimeIfElseExpressions, pos:PosInfo, newContext:CompilerContext,
 			processNode:AstNode->Void, isContinuation:Bool = false) {
 		var bool = invokeExpressionInline(expression, newContext, pos);
@@ -1178,6 +1312,35 @@ class McFile {
 				}
 			}
 		}
+	}
+
+	public function transform(vars:VariableMap, compiler:Compiler):Array<AstNode> {
+		var info = compiler.getInitialPathInfo(this.name);
+		var thisFileVars = new VariableMap(vars, [
+			for (k in Reflect.fields(this.fileJs))
+				k => Reflect.field(this.fileJs, k)
+		]);
+		var context = createCompilerContext(info.namespace, v -> {
+			throw new CompilerError("append not available for top-level context", true);
+		},
+			new VariableMap(thisFileVars, Globals.map), info.path, new UidTracker(), [], new VariableMap(null, []), templates, this.ext == "mcbt", compiler,
+			thisFileVars, [], info, null);
+		if (context.isTemplate) {
+			if (ast.length > 0) {
+				throw CompilerError.create("Unexpected top-level content in template file", AstNodeUtils.getPos(ast[0]), context);
+			}
+			return [Void];
+		}
+		return [
+			for (node in ast) {
+				switch (node) {
+					case Import(_, _) | TemplateDef(_, _, _):
+						throw new CompilerError("import or template definition found after setup", true);
+					default:
+						transformTld(node, context);
+				}
+			}
+		];
 	}
 
 	public function compile(vars:VariableMap, compiler:Compiler) {
@@ -1304,6 +1467,20 @@ class Compiler {
 			// pass on error to the wrapping application
 			throw e;
 		}
+	}
+
+	public function transform(root:VariableMap):Map<String, Array<AstNode>> {
+		var result = new Map<String, Array<AstNode>>();
+		for (file in files) {
+			if (alreadySetupFiles.exists(file.name))
+				continue;
+			file.setup(this);
+		}
+
+		for (file in files) {
+			result.set(file.name, file.transform(root, this));
+		}
+		return result;
 	}
 
 	public function new(baseDir:String, config:UserConfig, ?lib:LibStore) {

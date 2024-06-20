@@ -1,5 +1,6 @@
 package testbed;
 
+import mcl.AstStringifier;
 import sys.FileSystem;
 import haxe.macro.Expr.Catch;
 import mcl.FeatureFlags;
@@ -44,6 +45,15 @@ class TestMain {
 					compiler.compile(jsRoot);
 
 					var res = io.print();
+					// try {
+					// 	File.saveContent(t.resultPath + '/${i}.ast.mcb', {
+					// 		var x:Array<String> = [];
+					// 		for (k => v in compiler.transform(jsRoot)) {
+					// 			x.push('### ${k}\n${AstStringifier.stringify(Group(v))}');
+					// 		}
+					// 		x.join("\n");
+					// 	});
+					// }
 					if (t.expectedResult.get(i) == null || Sys.args().contains("--write")) {
 						FileSystem.createDirectory(t.resultPath);
 						File.saveContent(t.resultPath + '/${i}.txt', res);

@@ -2,3 +2,4 @@
 -L hxnodejs
 -L mcli
 -L haxpression
+-cp src
