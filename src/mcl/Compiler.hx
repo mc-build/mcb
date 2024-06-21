@@ -852,7 +852,7 @@ class McFile {
 			case Raw(pos, value, extras, isMacro):
 				transformTemplate(context, pos, value, extras, isMacro);
 			case Comment(pos, value):
-				Comment(pos, value);
+				if (context.compiler.config.dontEmitComments) Void; else Comment(pos, value);
 			case ReturnRun(pos, value, isMacro):
 				ReturnRun(pos, transformCommand(value, context), isMacro);
 			case CompileTimeIf(pos, expression, body, elseExpressions):
@@ -894,6 +894,47 @@ class McFile {
 				trace(Std.string(node));
 				throw 'Unexpected node type in transformCommand: ${node}';
 		}
+	}
+
+	private function evaluateFunctionHandle(handle:String, context:CompilerContext, pos:PosInfo, isMacro:Bool):String {
+		var name = injectValues(handle, context, pos);
+		var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+		if (tagPrefix != "") {
+			name = name.substring(1);
+		}
+		return (switch (name.charAt(0)) {
+			case "^": // hiarchial function call
+				var levels = Std.parseInt(name.substring(1));
+				var fn = context.functions[context.functions.length - levels - 1];
+				if (fn == null) {
+					throw CompilerError.create("Unexpected call: " + name, pos, context);
+				}
+				'${tagPrefix}${fn}';
+			case "*": // root function call
+				'${tagPrefix}${context.namespace}:${name.substring(1)}';
+			case ".":
+				if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+					var path = context.currentFunction.concat(name.split("/"));
+					var resolved:Array<String> = [];
+					for (node in path) {
+						switch (node) {
+							case "..":
+								if (resolved.length == 0)
+									throw CompilerError.create("Invalid call: " + name, pos, context);
+								resolved.pop();
+							case "." | "":
+							// ignore
+							default:
+								resolved.push(node);
+						}
+					}
+					'${tagPrefix}${context.namespace}:${resolved.join("/")}';
+				} else {
+					'${tagPrefix}${name}';
+				}
+			default:
+				'${tagPrefix}${name}';
+		});
 	}
 
 	private function compileCommand(node:AstNode, context:CompilerContext):Void {
@@ -949,88 +990,84 @@ class McFile {
 					}
 				}
 			case ScheduleClear(pos, name, isMacro):
-				name = injectValues(name, context, pos);
-				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
-				if (tagPrefix != "") {
-					name = name.substring(1);
-				}
-				switch (name.charAt(0)) {
-					case "^": // hiarchial function call
-						var levels = Std.parseInt(name.substring(1));
-						var fn = context.functions[context.functions.length - levels - 1];
-						if (fn == null) {
-							throw CompilerError.create("Unexpected schedule call: " + name, pos, context);
-						}
-						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${fn}'), context, pos));
-					case "*": // root function call
-						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${name.substring(1)}'), context, pos));
-					case ".":
-						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
-							var path = context.currentFunction.concat(name.split("/"));
-							var resolved:Array<String> = [];
-							for (node in path) {
-								switch (node) {
-									case "..":
-										if (resolved.length == 0)
-											throw CompilerError.create("Invalid schedule call: " + name, pos, context);
-										resolved.pop();
-									case "." | "":
-									// ignore
-									default:
-										resolved.push(node);
-								}
-							}
-							context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${resolved.join("/")}'), context,
-								pos));
-						} else {
-							context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
-						}
-					default:
-						context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
-				}
+				context.append(makeMacro(isMacro, 'schedule clear ${evaluateFunctionHandle(name, context, pos, isMacro)}'));
+			// switch (name.charAt(0)) {
+			// 	case "^": // hiarchial function call
+			// 		var levels = Std.parseInt(name.substring(1));
+			// 		var fn = context.functions[context.functions.length - levels - 1];
+			// 		if (fn == null) {
+			// 			throw CompilerError.create("Unexpected schedule call: " + name, pos, context);
+			// 		}
+			// 		context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${fn}'), context, pos));
+			// 	case "*": // root function call
+			// 		context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${name.substring(1)}'), context, pos));
+			// 	case ".":
+			// 		if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+			// 			var path = context.currentFunction.concat(name.split("/"));
+			// 			var resolved:Array<String> = [];
+			// 			for (node in path) {
+			// 				switch (node) {
+			// 					case "..":
+			// 						if (resolved.length == 0)
+			// 							throw CompilerError.create("Invalid schedule call: " + name, pos, context);
+			// 						resolved.pop();
+			// 					case "." | "":
+			// 					// ignore
+			// 					default:
+			// 						resolved.push(node);
+			// 				}
+			// 			}
+			// 			context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${context.namespace}:${resolved.join("/")}'), context,
+			// 				pos));
+			// 		} else {
+			// 			context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
+			// 		}
+			// 	default:
+			// 		context.append(injectValues(makeMacro(isMacro, 'schedule clear ${tagPrefix}${name}'), context, pos));
+			// }
 			case ScheduleCall(pos, delay, name, mode, isMacro):
-				name = injectValues(name, context, pos);
 				delay = injectValues(delay, context, pos);
 				mode = injectValues(mode, context, pos);
-				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
-				if (tagPrefix != "") {
-					name = name.substring(1);
-				}
-				switch (name.charAt(0)) {
-					case "^": // hiarchial function call
-						var levels = Std.parseInt(name.substring(1));
-						var fn = context.functions[context.functions.length - levels - 1];
-						if (fn == null) {
-							throw CompilerError.create("Unexpected schedule call: " + name, pos, context);
-						}
-						context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${fn} ${delay} ${mode}'), context, pos));
-					case "*": // root function call
-						context.append(injectValues(makeMacro(isMacro,
-							'schedule function ${tagPrefix}${context.namespace}:${name.substring(1)} ${delay} ${mode}'), context, pos));
-					case ".":
-						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
-							var path = context.currentFunction.concat(name.split("/"));
-							var resolved:Array<String> = [];
-							for (node in path) {
-								switch (node) {
-									case "..":
-										if (resolved.length == 0)
-											throw CompilerError.create("Invalid schedule call: " + name, pos, context);
-										resolved.pop();
-									case "." | "":
-									// ignore
-									default:
-										resolved.push(node);
-								}
-							}
-							context.append(injectValues(makeMacro(isMacro,
-								'schedule function ${tagPrefix}${context.namespace}:${resolved.join("/")} ${delay} ${mode}'), context, pos));
-						} else {
-							context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} ${delay} ${mode}'), context, pos));
-						}
-					default:
-						context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} $delay $mode'), context, pos));
-				}
+				context.append(makeMacro(isMacro, 'schedule function ${evaluateFunctionHandle(name, context, pos, isMacro)} $delay $mode'));
+			// var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+			// if (tagPrefix != "") {
+			// 	name = name.substring(1);
+			// }
+			// switch (name.charAt(0)) {
+			// 	case "^": // hiarchial function call
+			// 		var levels = Std.parseInt(name.substring(1));
+			// 		var fn = context.functions[context.functions.length - levels - 1];
+			// 		if (fn == null) {
+			// 			throw CompilerError.create("Unexpected schedule call: " + name, pos, context);
+			// 		}
+			// 		context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${fn} ${delay} ${mode}'), context, pos));
+			// 	case "*": // root function call
+			// 		context.append(injectValues(makeMacro(isMacro,
+			// 			'schedule function ${tagPrefix}${context.namespace}:${name.substring(1)} ${delay} ${mode}'), context, pos));
+			// 	case ".":
+			// 		if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+			// 			var path = context.currentFunction.concat(name.split("/"));
+			// 			var resolved:Array<String> = [];
+			// 			for (node in path) {
+			// 				switch (node) {
+			// 					case "..":
+			// 						if (resolved.length == 0)
+			// 							throw CompilerError.create("Invalid schedule call: " + name, pos, context);
+			// 						resolved.pop();
+			// 					case "." | "":
+			// 					// ignore
+			// 					default:
+			// 						resolved.push(node);
+			// 				}
+			// 			}
+			// 			context.append(injectValues(makeMacro(isMacro,
+			// 				'schedule function ${tagPrefix}${context.namespace}:${resolved.join("/")} ${delay} ${mode}'), context, pos));
+			// 		} else {
+			// 			context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} ${delay} ${mode}'), context, pos));
+			// 		}
+			// 	default:
+			// 		context.append(injectValues(makeMacro(isMacro, 'schedule function ${tagPrefix}${name} $delay $mode'), context, pos));
+			// }
 			case ScheduleBlock(pos, delay, type, body, isMacro):
 				delay = injectValues(delay, context, pos);
 				type = injectValues(type, context, pos);
@@ -1053,51 +1090,54 @@ class McFile {
 				context.append(makeMacro(isMacro,
 					'schedule function ${context.namespace}:${context.path.concat([context.compiler.config.generatedDirName, id]).join("/")} $delay $type'));
 			case FunctionCall(pos, name, data, isMacro):
-				name = injectValues(name, context, pos);
-				// sanity check * and . calls
-				// support scripting
-				// testcases
-				var tagPrefix = name.charAt(0) == "#" ? "#" : "";
-				if (tagPrefix != "") {
-					name = name.substring(1);
-				}
-				switch (name.charAt(0)) {
-					case "^": // hiarchial function call
-						var levels = Std.parseInt(name.substring(1));
-						var fn = context.functions[context.functions.length - levels - 1];
-						if (fn == null) {
-							throw CompilerError.create("Unexpected function call: " + name, pos, context);
-						}
-						context.append(injectValues(makeMacro(isMacro, 'function ${tagPrefix}${fn}${data.length == 0 ? '' : ' $data'}'), context, pos));
-					case "*": // root function call
-						context.append(injectValues(makeMacro(isMacro,
-							'function ${tagPrefix}${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}'), context,
-							pos));
-					case ".":
-						if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
-							var path = context.currentFunction.concat(name.split("/"));
-							var resolved:Array<String> = [];
-							for (node in path) {
-								switch (node) {
-									case "..":
-										if (resolved.length == 0)
-											throw CompilerError.create("Invalid function call: " + name, pos, context);
-										resolved.pop();
-									case "." | "":
-									// ignore
-									default:
-										resolved.push(node);
-								}
-							}
-							context.append(makeMacro(isMacro,
-								injectValues('function ${tagPrefix}${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context,
-									pos)));
-						} else {
-							context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
-						}
-					default:
-						context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
-				}
+				// name = injectValues(name, context, pos);
+				context.append(injectValues(makeMacro(isMacro,
+					'function ${evaluateFunctionHandle(name, context, pos, isMacro)}${data.length == 0 ? '' : ' ${injectValues(data, context, pos)}'}'),
+					context, pos));
+			// sanity check * and . calls
+			// support scripting
+			// testcases
+			// var tagPrefix = name.charAt(0) == "#" ? "#" : "";
+			// if (tagPrefix != "") {
+			// 	name = name.substring(1);
+			// }
+			// switch (name.charAt(0)) {
+			// 	case "^": // hiarchial function call
+			// 		var levels = Std.parseInt(name.substring(1));
+			// 		var fn = context.functions[context.functions.length - levels - 1];
+			// 		if (fn == null) {
+			// 			throw CompilerError.create("Unexpected function call: " + name, pos, context);
+			// 		}
+			// 		context.append(injectValues(makeMacro(isMacro, 'function ${tagPrefix}${fn}${data.length == 0 ? '' : ' $data'}'), context, pos));
+			// 	case "*": // root function call
+			// 		context.append(injectValues(makeMacro(isMacro,
+			// 			'function ${tagPrefix}${context.namespace}:${name.substring(1)}${data.length == 0 ? '' : ' $data'}'), context,
+			// 			pos));
+			// 	case ".":
+			// 		if (name.charAt(1) == "/" || name.charAt(1) == "." && name.charAt(2) == "/") {
+			// 			var path = context.currentFunction.concat(name.split("/"));
+			// 			var resolved:Array<String> = [];
+			// 			for (node in path) {
+			// 				switch (node) {
+			// 					case "..":
+			// 						if (resolved.length == 0)
+			// 							throw CompilerError.create("Invalid function call: " + name, pos, context);
+			// 						resolved.pop();
+			// 					case "." | "":
+			// 					// ignore
+			// 					default:
+			// 						resolved.push(node);
+			// 				}
+			// 			}
+			// 			context.append(makeMacro(isMacro,
+			// 				injectValues('function ${tagPrefix}${context.namespace}:${resolved.join("/")}${data.length == 0 ? '' : ' $data'}', context,
+			// 					pos)));
+			// 		} else {
+			// 			context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
+			// 		}
+			// 	default:
+			// 		context.append(makeMacro(isMacro, injectValues('function ${tagPrefix}${name}${data.length == 0 ? '' : ' $data'}', context, pos)));
+			// }
 			case Execute(pos, command, value, isMacro):
 				var commands:Array<String> = [];
 				var newContext = forkCompilerContextWithAppend(context, v -> {
@@ -1357,13 +1397,15 @@ class McFile {
 					for (e in entries) {
 						switch (e) {
 							case Raw(pos, value, [], false) | Comment(pos, value):
+								js.Lib.debug();
 								value = injectValues(value, context, pos);
 								if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
-									context.compiler.tags.addTagEntry(name, value.substring(0, value.length - 8), context, true);
+									context.compiler.tags.addTagEntry(name, evaluateFunctionHandle(value.substring(0, value.length - 8), context, pos, false),
+										context, true);
 								} else if (value.indexOf(" ") != -1) {
 									throw CompilerError.create("Malformed tag entry", pos, context);
 								} else {
-									context.compiler.tags.addTagEntry(name, value, context, false);
+									context.compiler.tags.addTagEntry(name, evaluateFunctionHandle(value, context, pos, false), context, false);
 								}
 							default:
 								throw CompilerError.create("Unexpected node type in json tag", pos, context);
@@ -1382,13 +1424,13 @@ class McFile {
 										value = injectValues(value, context, pos);
 										if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
 											cast {
-												id: value.substring(0, value.length - 8),
+												id: evaluateFunctionHandle(value.substring(0, value.length - 8), context, pos, false),
 												replace: true
 											}
 										} else if (value.indexOf(" ") != -1) {
 											throw CompilerError.create("Malformed tag entry", pos, context);
 										} else {
-											cast value;
+											cast evaluateFunctionHandle(value, context, pos, false);
 										}
 									default:
 										throw CompilerError.create("Unexpected node type in json tag", pos, context);

@@ -4,9 +4,17 @@ tag functions test replace {
 }
 dir dir{
 	tag functions test2 replace {
+		*foobar
+		*foobar2 replace
+		a:b
+	}
+	tag functions test3 {
+		*foobar
+		*foobar2 replace
 		a:b
 	}
 	tag blocks test {
+		*foobar
 		minecraft:stone replace
 		minecraft:dirt
 		#foo:bar
@@ -52,43 +60,43 @@ dir dir{
 		"a":1
 	}
 	DimensionType([Raw({
-				line : 54, 
+				line : 62, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	Dimension([Raw({
-				line : 57, 
+				line : 65, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	DamageType([Raw({
-				line : 60, 
+				line : 68, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	ChatType([Raw({
-				line : 63, 
+				line : 71, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	Recipe([Raw({
-				line : 66, 
+				line : 74, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	Predicate([Raw({
-				line : 69, 
+				line : 77, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	LootTable([Raw({
-				line : 72, 
+				line : 80, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	ItemModifier([Raw({
-				line : 75, 
+				line : 83, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	Enchantment([Raw({
-				line : 78, 
+				line : 86, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])	Advancement([Raw({
-				line : 81, 
+				line : 89, 
 				col : 8, 
 				file : main.mcb
 			},"test":1,[],false)])}

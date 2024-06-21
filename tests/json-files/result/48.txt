@@ -1,5 +1,5 @@
 data/main/tags/block/dir/test.json:
-{"replace":false,"values":[{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar","#foo:bar/baz"]}
+{"replace":false,"values":["main:foobar",{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar","#foo:bar/baz"]}
 ----------------
 data/main/worldgen/biome/dir/worldgen_biome.json:
 {"a":1}
@@ -74,5 +74,8 @@ data/main/tags/function/test.json:
 {"values":["a:b"],"replace":true}
 ----------------
 data/main/tags/function/dir/test2.json:
-{"values":["a:b"],"replace":true}
+{"values":["main:foobar","main:foobar2","a:b"],"replace":true}
+----------------
+data/main/tags/function/dir/test3.json:
+{"values":["main:foobar","main:foobar2","a:b"]}
 ----------------

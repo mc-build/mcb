@@ -3,9 +3,17 @@ tag functions test replace {
 }
 dir dir {
     tag functions test2 replace {
+        *foobar
+        *foobar2 replace
+        a:b
+    }
+    tag functions test3 {
+        *foobar
+        *foobar2 replace
         a:b
     }
     tag blocks test{
+        *foobar
         minecraft:stone replace
         minecraft:dirt
         #foo:bar
