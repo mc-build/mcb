@@ -24,7 +24,7 @@
     "dev": "nodemon --config nodemon.json",
     "dist": "yarn build",
     "setup-deps": "dts2hx chokidar && dts2hx figures && dts2hx chalk",
-    "setup": "yarn && yarn setup-deps && haxelib install lib.hxml"
+    "setup": "yarn && yarn setup-deps && haxelib install lib.hxml --always"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",

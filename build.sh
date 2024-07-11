@@ -1,40 +1,30 @@
 #!/usr/bin/env bash
 
 buildType=$1
-
-function SetNOPUBLISH {
-    value=$1
-    export NOPUBLISH=$value
-}
+echo "Building for $buildType"
+if [ ! -d ".haxelib" ]; then
+    echo "Haxelib not found, installing haxelib"
+    haxelib setup .haxelib
+    yarn install
+    yarn setup
+    # itterate folders in overrides non-recursively
+    for folder in overrides/*; do
+        if [ -d "$folder" ]; then
+            echo "patching $folder"
+            folder=${folder#overrides/}
+            cp -r overrides/$folder/* ./.haxelib/$folder/*
+        fi
+    done
+fi
 
 if [ -d "bin" ]; then
     rm -rf bin
 fi
 
-if [ -d "types" ]; then
-    rm -rf types
-fi
-
-if [ -d "dist" ]; then
-    rm -rf dist
-fi
-
-if [ "$buildType" == "cli" ]; then
-    echo "Building CLI"
-    haxe hxml/only/cli.hxml
-elif [ "$buildType" == "testbed" ]; then
-    echo "Building Testbed"
-    haxe hxml/only/testbed.hxml
-elif [ "$buildType" == "lib" ]; then
-    echo "Building Lib"
-    haxe hxml/only/lib.hxml
+if [ "$buildType" == "cli" ] || [ "$buildType" == "testbed" ] || [ "$buildType" == "lib" ]; then
+    haxe hxml/only/$buildType.hxml
 else
-    echo "Building All"
     haxe hxml/build.hxml
-fi
-
-if [ -d "bin" ]; then
-    rm -rf bin
 fi
 
 cp -r mcblib-src dist/.mcblib
