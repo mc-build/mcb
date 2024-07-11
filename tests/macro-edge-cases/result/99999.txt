@@ -55,8 +55,8 @@ $execute if score #ifelse _internal_scoreboard matches 0 if score a b = 3 run fu
 $execute if score #ifelse _internal_scoreboard matches 0 run function main:zzz/2
 $function main:zzz/3 {awd: 1}
 $function main:zzz/4 {awd: 2, asd: $(value)}
-$schedule function main:zzz/6 1t append
+$schedule function main:zzz/6 1t replace
 $schedule function main:zzz/8 1t append
 $schedule function main:zzz/10 $(delay)t append
-$schedule function main:zzz/12 2t append
+$schedule function main:zzz/12 2t replace
 ----------------

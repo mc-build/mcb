@@ -13,7 +13,7 @@ function test{
 	$block{ {awd: 2, asd: $(value)}
 		$say $(asd)
 	}
-	$schedule 1t append {
+	$schedule 1t replace {
 		say hi
 	}
 	$schedule 1t append {
@@ -22,7 +22,7 @@ function test{
 	$schedule $(delay)t append {
 		say hi
 	}
-	$schedule 2t append {
+	$schedule 2t replace {
 		say hi
 	}
 }

@@ -3,10 +3,16 @@ data/main/function/zzz/1.mcfunction:
 
 say hi
 ----------------
+data/main/function/zzz/3.mcfunction:
+# Generated with MC-Build
+
+say replace
+----------------
 data/main/function/test.mcfunction:
 # Generated with MC-Build
 
 schedule function main:zzz/1 1t append
+schedule function main:zzz/3 1t replace
 schedule function main:demo 1t replace
 schedule function main:demo 1t replace
 schedule function main:test 1t replace

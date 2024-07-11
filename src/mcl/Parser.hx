@@ -437,13 +437,13 @@ class Parser {
 						var delayIdx = name.indexOf(" ");
 						var delay = delayIdx == -1 ? name : name.substring(0, delayIdx);
 						var mode = "append";
-						if (StringTools.endsWith(delay, " append")) {
+						if (StringTools.endsWith(name, " append")) {
 							mode = "append";
-							delay = delay.substring(0, delay.length - " append".length);
+							name = name.substring(0, name.length - " append".length);
 						}
-						if (StringTools.endsWith(delay, " replace")) {
+						if (StringTools.endsWith(name, " replace")) {
 							mode = "replace";
-							delay = delay.substring(0, delay.length - " replace".length);
+							name = name.substring(0, name.length - " replace".length);
 						}
 						var content:Array<AstNode> = [];
 						if (Type.enumIndex(reader.peek()) != 1 /* BracketOpen */) {
