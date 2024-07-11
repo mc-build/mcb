@@ -12,6 +12,10 @@ build({
   platform: "node",
   minifySyntax: false,
   banner: { js: header },
+  // allowOverwrite: true,
+  // minify: true,
+  // mangleProps: /./,
+  // format: outputs[0].includes("lib") ? "esm" : "cjs",
   // minifyWhitespace: true,
   // minifyIdentifiers: true,
 });

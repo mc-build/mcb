@@ -1389,6 +1389,35 @@ class McFile {
 		}
 	}
 
+	function compileJsonFileImpl(pos:PosInfo, name:String, info:JsonTagType, entries:Array<AstNode>, context:CompilerContext) {
+		var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
+		var type = switch (info) {
+			case Advancement(_):
+				context.compiler.config.features.useFolderRenames48 ? "advancement" : "advancements";
+			case ChatType(_):
+				"chat";
+			case DamageType(_):
+				"damage";
+			case Dimension(_):
+				"dimension";
+			case DimensionType(_):
+				"dimension_type";
+			case ItemModifier(_):
+				context.compiler.config.features.useFolderRenames48 ? "item_modifier" : "item_modifiers";
+			case LootTable(_):
+				context.compiler.config.features.useFolderRenames48 ? "loot_table" : "loot_tables";
+			case Predicate(_):
+				context.compiler.config.features.useFolderRenames48 ? "predicate" : "predicates";
+			case Recipe(_):
+				context.compiler.config.features.useFolderRenames48 ? "recipe" : "recipes";
+			case Enchantment(_):
+				"enchantment";
+			case _:
+				throw CompilerError.createInternal("unexpected json tag type:" + Std.string(info), pos, context);
+		};
+		saveContent(context, Path.join(['data', context.namespace, type].concat(context.path.concat([name + ".json"]))), values);
+	}
+
 	function compileJsonFile(pos:PosInfo, name:String, info:JsonTagType, context:CompilerContext) {
 		switch (info) {
 			case Tag(subType, replace, entries):
@@ -1448,32 +1477,7 @@ class McFile {
 				}
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
 				LootTable(entries) | Predicate(entries) | Recipe(entries) | Enchantment(entries):
-				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
-				var type = switch (info) {
-					case Advancement(_):
-						context.compiler.config.features.useFolderRenames48 ? "advancement" : "advancements";
-					case ChatType(_):
-						"chat";
-					case DamageType(_):
-						"damage";
-					case Dimension(_):
-						"dimension";
-					case DimensionType(_):
-						"dimension_type";
-					case ItemModifier(_):
-						context.compiler.config.features.useFolderRenames48 ? "item_modifier" : "item_modifiers";
-					case LootTable(_):
-						context.compiler.config.features.useFolderRenames48 ? "loot_table" : "loot_tables";
-					case Predicate(_):
-						context.compiler.config.features.useFolderRenames48 ? "predicate" : "predicates";
-					case Recipe(_):
-						context.compiler.config.features.useFolderRenames48 ? "recipe" : "recipes";
-					case Enchantment(_):
-						"enchantment";
-					case _:
-						throw CompilerError.createInternal("unexpected json tag type:" + Std.string(info), pos, context);
-				};
-				saveContent(context, Path.join(['data', context.namespace, type].concat(context.path.concat([name + ".json"]))), values);
+				compileJsonFileImpl(pos, name, info, entries, context);
 			case WorldGen(subType, name, entries):
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				saveContent(context, Path.join(['data', context.namespace, 'worldgen', subType].concat(context.path.concat([name + ".json"]))), values);

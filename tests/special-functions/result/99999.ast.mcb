@@ -1,12 +1,12 @@
 ### main.mcb
 dir test{
-	function onload{
+	function onload minecraft:load{
 		say this will run on load
 	}
-	function ontick{
+	function ontick minecraft:tick{
 		say this will run every tick
 	}
-	function magic{
+	function magic tag{
 		say hi
 	}
 }

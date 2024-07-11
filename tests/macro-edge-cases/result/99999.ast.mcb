@@ -2,16 +2,16 @@
 function test{
 	$execute if score a b = 2 run { 
 		say 1
-	} else run $execute if score a b = 3 run { 
+	} else $execute if score a b = 3 run { 
 		say 2
-	} else run { 
+	} else $run { 
 		say 3
 	}
-	block{ {awd: 1}
+	$block{ {awd: 1}
 		say hi
 	}
-	block{ {awd: 2, asd: $(value)}
-		say $(asd)
+	$block{ {awd: 2, asd: $(value)}
+		$say $(asd)
 	}
 	$schedule 1t append {
 		say hi

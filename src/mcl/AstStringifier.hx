@@ -2,13 +2,22 @@ package mcl;
 
 @:expose
 class AstStringifier {
-	var writer:StringBuf = new StringBuf();
+	var segments:Array<String> = [];
 	var indent:Int = 0;
+	var tabs:Array<String> = [""];
 
 	public function new() {}
 
 	function tab() {
-		writer.add([for (i in 0...indent) "\t"].join(""));
+		var tab = tabs.length > indent ? tabs[indent] : {
+			var s = tabs[tabs.length - 1];
+			for (i in (tabs.length - 1)...(indent)) {
+				tabs[i] = s;
+				s += "\t";
+			}
+			s;
+		};
+		segments.push(tab);
 	}
 
 	function inc() {
@@ -20,11 +29,11 @@ class AstStringifier {
 	}
 
 	inline function literal(s:String) {
-		writer.add(s);
+		segments.push(s);
 	}
 
 	function write(node:AstNode, indent:Bool = true, hideBlock:Bool = false) {
-		if (!indent && StringTools.endsWith(writer.toString(), "\\")) {
+		if (!indent && StringTools.endsWith(segments[segments.length - 1], "\\")) {
 			literal("\n");
 			indent = true;
 		}
@@ -34,6 +43,8 @@ class AstStringifier {
 			case Raw(pos, value, continuations, isMacro):
 				if (indent)
 					tab();
+				if (isMacro)
+					literal("$");
 				literal(value);
 				if (continuations.length > 0) {
 					throw "continuations not supported";
@@ -44,6 +55,10 @@ class AstStringifier {
 					tab();
 				literal("function ");
 				literal(name);
+				if (appendTo != null) {
+					literal(" ");
+					literal(appendTo);
+				}
 				literal("{\n");
 				inc();
 				for (child in body) {
@@ -110,6 +125,8 @@ class AstStringifier {
 			case Block(pos, name, body, data, isMacro, isInline):
 				if (indent)
 					tab();
+				if (isMacro && !hideBlock)
+					literal("$");
 				if (!hideBlock)
 					literal("block");
 				if (name != null && name != "") {
@@ -169,9 +186,16 @@ class AstStringifier {
 				tab();
 				literal("}");
 				var i = 0;
+				var lastI = continuations.length - 1;
 				for (continuation in continuations) {
-					literal(" else run ");
-					write(continuation, false, true);
+					switch (continuation) {
+						case Block(pos, '' | null, body, data, isMacro, isInline):
+							literal(' else ${isMacro ? "$" : ""}run ');
+							write(continuation, false, true);
+						default:
+							literal(" else ");
+							write(continuation, false, true);
+					}
 					i++;
 				}
 				// literal("</b>");
@@ -325,7 +349,7 @@ class AstStringifier {
 
 	function toString(node:AstNode):String {
 		write(node);
-		return writer.toString();
+		return segments.join("");
 	}
 
 	public static function stringify(node:AstNode):String {

@@ -1,5 +1,5 @@
 ### main.mcb
 function test{
-	say hi!
+	$say hi!
 	$function ./demo
 }
