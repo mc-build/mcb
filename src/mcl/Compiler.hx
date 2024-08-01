@@ -1426,7 +1426,6 @@ class McFile {
 					for (e in entries) {
 						switch (e) {
 							case Raw(pos, value, [], false) | Comment(pos, value):
-								js.Lib.debug();
 								value = injectValues(value, context, pos);
 								if (value.indexOf(" ") != -1 && StringTools.endsWith(value, " replace")) {
 									context.compiler.tags.addTagEntry(name, evaluateFunctionHandle(value.substring(0, value.length - 8), context, pos, false),
@@ -1484,7 +1483,7 @@ class McFile {
 		}
 	}
 
-	public function processCompilerLoop(expression:String, as:Null<String>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
+	public function processCompilerLoop(expression:String, as:Null<Array<String>>, context:CompilerContext, body:Array<AstNode>, pos:PosInfo,
 			handler:CompilerContext->AstNode->Void) {
 		var itterator = invokeExpressionInline(expression, context, pos);
 		for (v in itterator) {
@@ -1493,7 +1492,20 @@ class McFile {
 					handler(context, node);
 				}
 			} else {
-				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork([as => v]), context.path, context.uidIndex,
+				var varMap = new Map<String, Any>();
+				if (as.length == 1) {
+					varMap.set(as[0], v);
+				} else if (Syntax.code("Array.isArray({0})", as)) {
+					if ((cast v).length < as.length) {
+						throw CompilerError.create("Failed to destructure as there are fewer elements then requested", pos, context);
+					}
+					for (i in 0...as.length) {
+						varMap.set(as[i], (cast v)[i]);
+					}
+				} else {
+					throw CompilerError.create("Invalid as clause", pos, context);
+				}
+				var newContext = createCompilerContext(context.namespace, context.append, context.variables.fork(varMap), context.path, context.uidIndex,
 					context.stack, context.variables, context.templates, context.requireTemplateKeyword, context.compiler, context.globalVariables,
 					context.functions, context.baseNamespaceInfo, context.currentFunction);
 				for (node in body) {

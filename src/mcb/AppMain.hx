@@ -239,4 +239,22 @@ class AppMain {
 		}
 		#end
 	}
+
+	public static function generate(outfile:String, arg:{libDir:String, baseDir:String, configPath:String}) {
+		var configPath = discoverConfigFile(arg.configPath);
+		var config = if (js.node.Fs.existsSync(configPath)) try {
+			Syntax.code('require({0})', configPath);
+		} catch (e) {
+			Logger.error('Failed to load config file: ${configPath}');
+			throw e;
+		} else {
+			Logger.warn('Config file not found, using default config.');
+			cast {};
+		};
+		var compiler = new Compiler(arg.baseDir, config, new LibStore(arg.libDir));
+		var tokens = Tokenizer.tokenize(File.getContent(outfile), outfile);
+		var ast = Parser.parseMcbFile(tokens);
+		compiler.addFile(outfile, ast);
+		compiler.transform(new VariableMap(null, ["config" => config, "global" => globalJsData, "store" => {}]));
+	}
 }

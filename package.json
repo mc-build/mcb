@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
@@ -17,7 +17,7 @@
     "scripts"
   ],
   "scripts": {
-    "build": "yarn build:io-worker && powershell ./build.ps1",
+    "build": "yarn build:io-worker && ./build.sh",
     "build:io-worker": "tsx ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
     "test": "node ./dist/testbed",

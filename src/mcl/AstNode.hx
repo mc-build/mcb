@@ -30,7 +30,7 @@ enum AstNode {
 
 	// compile time expressions
 	Import(pos:PosInfo, name:String);
-	CompileTimeLoop(pos:PosInfo, expression:String, as:String, body:Array<AstNode>);
+	CompileTimeLoop(pos:PosInfo, expression:String, as:Null<Array<String>>, body:Array<AstNode>);
 	CompileTimeIf(pos:PosInfo, expression:String, body:Array<AstNode>, elseExpressions:CompileTimeIfElseExpressions);
 	MultiLineScript(pos:PosInfo, value:Array<Token>);
 

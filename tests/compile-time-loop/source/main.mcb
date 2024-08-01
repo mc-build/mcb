@@ -22,4 +22,12 @@ dir test{
             say <%i%>
         }
     }
+    function object{
+        REPEAT({a:1,b:2,c:3}) as i{
+            say i=<%JSON.stringify(i)%>
+        }
+        REPEAT({a:1,b:2,c:3}) as k,v{
+            say k=<%k%>,v=<%JSON.stringify(v)%>
+        }
+    }
 }

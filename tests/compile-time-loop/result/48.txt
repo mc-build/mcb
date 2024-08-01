@@ -52,3 +52,13 @@ say 5
 say 7
 say 9
 ----------------
+data/main/function/test/object.mcfunction:
+# Generated with MC-Build
+
+say i=["a",1]
+say i=["b",2]
+say i=["c",3]
+say k=a,v=1
+say k=b,v=2
+say k=c,v=3
+----------------

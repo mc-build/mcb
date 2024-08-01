@@ -1,8 +1,7 @@
 package mcl;
 
-import mcl.error.CompilerError;
-import js.Syntax;
 import js.lib.Object;
+import js.Syntax;
 import Type.ValueType;
 import haxe.iterators.ArrayIterator;
 
@@ -96,6 +95,10 @@ class Globals {
 		},
 		[TClass(Array)] => (args:Array<Any>) -> {
 			return cast new ArrayIterator(args[0]);
+		},
+		[TObject] => (args:Array<Any>) -> {
+			var iterator = Object.entries(args[0]).iterator();
+			return iterator;
 		},
 		[TFunction] => (args) -> {
 			var iterator:Void->js.lib.Iterator<Any> = cast args[0];

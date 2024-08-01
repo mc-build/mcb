@@ -31,6 +31,15 @@ class Cli extends CommandLine {
 		});
 	}
 
+	public function generate(outfile:String) {
+		didRun = true;
+		mcb.AppMain.generate(outfile, {
+			libDir: this.libPath,
+			baseDir: this.baseDir,
+			configPath: this.configPath,
+		});
+	}
+
 	public function help() {
 		Sys.println("MCB - A Minecraft Data Pack build tool.");
 		Sys.println("");
@@ -40,6 +49,7 @@ class Cli extends CommandLine {
 		Sys.println("mcb create <pack-name>");
 		Sys.println("mcb venv setup <name>");
 		Sys.println("mcb venv activate");
+		Sys.println("mcb generate");
 		Sys.println("");
 		Sys.println("Flags:");
 		Sys.println(this.showUsage());
@@ -61,6 +71,8 @@ class Cli extends CommandLine {
 					case "activate":
 						Venv.activate();
 				}
+			case "generate":
+				this.generate(venvAction);
 			case "create":
 				this.create(venvAction);
 			default:

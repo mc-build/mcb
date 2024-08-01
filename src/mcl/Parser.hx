@@ -254,7 +254,7 @@ class Parser {
 		return nodes;
 	}
 
-	static var loopRegExp = new EReg("(REPEAT\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z]+)", "");
+	static var loopRegExp = new EReg("(REPEAT\\s*\\(.+?\\))\\s\\s*as\\s\\s*([a-zA-Z,\\s]+)", "");
 	static var executeRegExp = new EReg("\\b(run\\s+?)\\b", "");
 
 	public static function parserCompilerLoop(v:String, pos:PosInfo, reader:TokenInput, handler:Void->AstNode):AstNode {
@@ -265,7 +265,7 @@ class Parser {
 		if (loopRegExp.match(v)) {
 			var loop = loopRegExp.matched(1);
 			var as = loopRegExp.matched(2);
-			return CompileTimeLoop(pos, loop, as, content);
+			return CompileTimeLoop(pos, loop, as.length == 0 ? null : [for (e in as.split(",")) StringTools.trim(e)], content);
 		};
 		return CompileTimeLoop(pos, v, null, content);
 	}

@@ -46,4 +46,12 @@ dir test{
 		say 7
 		say 9
 	}
+	function object{
+		say i=["a",1]
+		say i=["b",2]
+		say i=["c",3]
+		say k=a,v=1
+		say k=b,v=2
+		say k=c,v=3
+	}
 }
