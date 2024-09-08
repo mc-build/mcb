@@ -1,0 +1,5 @@
+function test{
+    <%%
+        emit.mcb("execute run{\nsay hi\n}");
+    %%>
+}

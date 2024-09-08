@@ -470,7 +470,7 @@ class Parser {
 							var extraBlocks:Array<AstNode> = [];
 							while (true) {
 								if (!reader.hasNext())
-									throw new ParserError("Unexpected end of file!");
+									break;
 								switch (reader.peek()) {
 									case Literal("else $run", pos):
 										reader.skip();

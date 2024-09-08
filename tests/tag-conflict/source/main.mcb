@@ -1,0 +1,3 @@
+function tick_fn tick {
+  say hi
+}

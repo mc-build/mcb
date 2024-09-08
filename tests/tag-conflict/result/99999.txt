@@ -1,0 +1,11 @@
+data/main/function/tick_fn.mcfunction:
+# Generated with MC-Build
+
+say hi
+----------------
+data/main/tags/function/tick.json:
+{"values":["main:tick_fn"]}
+----------------
+data/minecraft/tags/function/tick.json:
+{"values":["test_tag"]}
+----------------

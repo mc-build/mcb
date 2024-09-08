@@ -1,0 +1,6 @@
+### main.mcb
+function test{
+	execute run { 
+		say hi
+	}
+}
