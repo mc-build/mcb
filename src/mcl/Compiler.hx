@@ -104,7 +104,7 @@ class McTemplate {
 					else
 						throw new CompilerError(ErrorUtil.format("Templates can only have one top-level tick block", pos), false);
 				case _ if (Type.enumIndex(node) == AstNodeIds.Comment):
-				// ignore comments on the top level, they are allowed but have no output
+					// ignore comments on the top level, they are allowed but have no output
 				default:
 					throw new CompilerError(ErrorUtil.format("Unexpected node type: " + Std.string(node), Reflect.field(node, 'pos')), true);
 			}
@@ -744,7 +744,7 @@ class McFile {
 				return v.embedTo(context, pos, this);
 			},
 			#if !disableRequire
-			context.compiler.disableRequire ?(s) -> {
+			context.compiler.disableRequire ? (s) -> {
 				throw CompilerError.create("Require not available as it has been disabled, please disable compiler.disableRequire", pos, context);
 			} : Module.createRequire(this.name)
 			#else
@@ -818,7 +818,7 @@ class McFile {
 				return v.embedTo(context, pos, this, false);
 			},
 			#if !disableRequire
-			context.compiler.disableRequire ?(s) -> {
+			context.compiler.disableRequire ? (s) -> {
 				throw CompilerError.create("Require not available as it has been disabled, please disable compiler.disableRequire", pos, context);
 			} : Module.createRequire(this.name)
 			#else
@@ -923,7 +923,7 @@ class McFile {
 									throw CompilerError.create("Invalid call: " + name, pos, context);
 								resolved.pop();
 							case "." | "":
-							// ignore
+								// ignore
 							default:
 								resolved.push(node);
 						}
@@ -1383,7 +1383,7 @@ class McFile {
 			case MultiLineScript(pos, value):
 				processMlScript(context, pos, value, true);
 			case Comment(_, _):
-			// ignore comments on the top level, they are allowed but have no output
+				// ignore comments on the top level, they are allowed but have no output
 			default:
 				throw CompilerError.createInternal("unexpected node type:" + Std.string(node), AstNodeUtils.getPos(node), context);
 		}
@@ -1730,8 +1730,13 @@ class Compiler {
 	}
 
 	public function resolve(baseFile:String, resolutionPath:String):ImportFileType {
-		if (resolutionPath.charAt(0) == ".") {
-			var base = Path.directory(baseFile);
+		if (resolutionPath.charAt(0) == "." || resolutionPath.charAt(0) == "/") {
+			var base = if (resolutionPath.charAt(0) == "/") {
+				resolutionPath = resolutionPath.substring(1);
+				this.baseDir;
+			} else {
+				Path.directory(baseFile);
+			};
 			var resolved = Path.join([base, resolutionPath]);
 			var ext = Path.extension(resolutionPath);
 			if (StringTools.endsWith(ext, "js") || ext == "json") {
