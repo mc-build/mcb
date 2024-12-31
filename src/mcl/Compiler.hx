@@ -28,7 +28,10 @@ class ErrorUtil {
 	public static function formatWithStack(message:String, stack:Array<PosInfo>):String {
 		var res = message;
 		for (pos in stack) {
-			res += '\n\tat ${pos.file}:${pos.line}:${pos.col + 1}';
+			if(pos == null)
+				res += '\n\tat <unknown>';
+			else
+				res += '\n\tat ${pos.file}:${pos.line}:${pos.col + 1}';
 		}
 		return res;
 	}
@@ -930,9 +933,15 @@ class McFile {
 					}
 					'${tagPrefix}${context.namespace}:${resolved.join("/")}';
 				} else {
+					if(name.indexOf(":") == -1) {
+						name = '${context.namespace}:${context.path.concat([name]).join("/")}';
+					}
 					'${tagPrefix}${name}';
 				}
-			default:
+				default:
+				if(name.indexOf(":") == -1) {
+					name = '${context.namespace}:${context.path.concat([name]).join("/")}';
+				}
 				'${tagPrefix}${name}';
 		});
 	}
@@ -1423,6 +1432,7 @@ class McFile {
 			case Tag(subType, replace, entries):
 				if (subType == "function" || subType == "functions") {
 					name = context.namespace + ":" + context.path.concat([name]).join("/");
+					context.compiler.tags.ensureTag(name, context);
 					for (e in entries) {
 						switch (e) {
 							case Raw(pos, value, [], false) | Comment(pos, value):
@@ -1440,7 +1450,7 @@ class McFile {
 						}
 					}
 					if (replace) {
-						context.compiler.tags.setTagReplace(name, true);
+						context.compiler.tags.setTagReplace(name, context, true);
 					}
 				} else {
 					var data = Json.stringify({

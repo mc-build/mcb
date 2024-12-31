@@ -33,3 +33,27 @@ cp -r template dist/template
 
 mkdir -p dist/.venv
 cp -r venv-scripts dist/.venv/scripts
+
+# check if test-pack does not exist
+if [ ! -d "dev-pack" ]; then
+    {
+        node ./dist/mcb.js create dev-pack
+    } || {
+        echo "Failed to create dev-pack"
+    }
+fi
+echo "Build complete"
+echo "building dev-pack"
+CWD=$(pwd)
+{
+    cd dev-pack
+    node ../dist/mcb.js build
+}
+echo "Running tests"
+cd $CWD
+node ./dist-testbed/testbed.js > testresults.log
+{
+    grep FAIL testresults.log
+} || {
+    echo "All tests passed"
+}

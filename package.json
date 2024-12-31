@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "3.4.3",
+  "version": "3.5.0",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "bin": {
@@ -19,7 +19,7 @@
     "build": "yarn build:io-worker && ./build.sh",
     "build:io-worker": "tsx ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
-    "test": "node ./dist/testbed",
+    "test": "node ./dist-testbed/testbed",
     "dev": "nodemon --config nodemon.json",
     "dist": "yarn build",
     "setup-deps": "dts2hx chokidar && dts2hx figures && dts2hx chalk",

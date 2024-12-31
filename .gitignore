@@ -12,3 +12,6 @@ types/
 test/
 test-pack/
 web/
+dist-testbed/
+dev-pack/
+testresults.log

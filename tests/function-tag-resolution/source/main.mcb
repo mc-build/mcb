@@ -1,0 +1,20 @@
+function on_load minecraft:load{
+    # you can use MC-Build without its internal scoreboard but this will limit the available features
+    scoreboard objectives add mcb.internal dummy
+
+    say Hello World from dev-pack!
+}
+tag functions test {
+    minecraft:load
+    #minecraft:load
+    #tag
+    untagged
+}
+dir test{
+    tag functions test {
+        minecraft:load
+        #minecraft:load
+        #tag
+        untagged
+    }
+}

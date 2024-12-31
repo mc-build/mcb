@@ -1,5 +1,5 @@
 ### main.mcb
-function tick_fn tick{
+function tick_fn minecraft:tick{
 	say hi
 }
 

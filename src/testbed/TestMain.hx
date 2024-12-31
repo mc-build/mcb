@@ -15,7 +15,7 @@ import mcl.Compiler;
 class TestMain {
 	public static function main() {
 		TemplateRegisterer.register();
-		var versionMatrix = [0];
+		var versionMatrix = [];
 		for (k => _ in FeatureFlags.flags) {
 			versionMatrix.push(k);
 		}

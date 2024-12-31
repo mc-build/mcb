@@ -1,0 +1,16 @@
+data/main/functions/on_load.mcfunction:
+# Generated with MC-Build
+
+# you can use MC-Build without its internal scoreboard but this will limit the available features
+scoreboard objectives add mcb.internal dummy
+say Hello World from dev-pack!
+----------------
+data/minecraft/tags/functions/load.json:
+{"values":["main:on_load"]}
+----------------
+data/main/tags/functions/test.json:
+{"values":["minecraft:load","#minecraft:load","#main:tag","main:untagged"]}
+----------------
+data/main/tags/functions/test/test.json:
+{"values":["minecraft:load","#minecraft:load","#main:test/tag","main:test/untagged"]}
+----------------

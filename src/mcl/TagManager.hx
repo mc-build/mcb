@@ -1,5 +1,7 @@
 package mcl;
 
+import mcl.Tokenizer.PosInfo;
+import mcl.error.CompilerError;
 import mcl.Compiler.CompilerContext;
 import js.Syntax;
 import haxe.Json;
@@ -14,28 +16,29 @@ class TagManager {
 
 	public function new() {}
 
-	public function addTagEntry(tag:String, entry:String, context:CompilerContext, replace:Bool = false) {
+	public function ensureTag(tag:String, context:CompilerContext):String {
 		var colonIndex = tag.indexOf(':');
-		if (colonIndex != tag.lastIndexOf(':')) {
-			throw "TagManager.addTagEntry: found multiple colons in entry name: " + entry;
-		}
 		if (colonIndex == -1) {
-			tag = context.namespace + ":" + tag;
+			tag = context.namespace + ':' + context.path.concat([tag]).join('/');
+		}else if(colonIndex != tag.lastIndexOf(":")){
+			throw CompilerError.create("Invalid tag name: " + tag, null, context);
 		}
-		if (!tagEntries.exists(tag))
+		if (!tagEntries.exists(tag)) {
 			tagEntries.set(tag, {
 				entries: new Set(),
 				replace: false
 			});
+		}
+		return tag;
+		
+	}
+	public function addTagEntry(tag:String, entry:String, context:CompilerContext, replace:Bool = false) {
+		tag = ensureTag(tag, context);
 		tagEntries.get(tag).entries.add({value: entry, replace: replace});
 	}
 
-	public function setTagReplace(tag:String, replace:Bool) {
-		if (!tagEntries.exists(tag))
-			tagEntries.set(tag, {
-				entries: new Set(),
-				replace: false
-			});
+	public function setTagReplace(tag:String, context:CompilerContext, replace:Bool) {
+		tag = ensureTag(tag, context);
 		tagEntries.get(tag).replace = replace;
 	}
 
@@ -55,8 +58,7 @@ class TagManager {
 			compiler.io.write(tagPath, Json.stringify({
 				values: [
 					for (entry in v.entries) {
-						if (entry.replace)
-							cast entry;
+						if (entry.replace) cast entry;
 						entry.value;
 					}
 				],

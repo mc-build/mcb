@@ -16,7 +16,7 @@ class CompilerError extends McbError {
 		return new CompilerError(ErrorUtil.formatContext(message, pos, context), true, [pos].concat(context.stack));
 	}
 
-	static public inline function create(message:String, pos:PosInfo, context:CompilerContext) {
+	static public inline function create(message:String, pos:Null<PosInfo>, context:CompilerContext) {
 		return new CompilerError(ErrorUtil.formatContext(message, pos, context), false, [pos].concat(context.stack));
 	}
 }

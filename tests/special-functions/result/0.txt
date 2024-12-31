@@ -19,6 +19,9 @@ data/minecraft/tags/functions/load.json:
 data/minecraft/tags/functions/tick.json:
 {"values":["main:test/ontick"]}
 ----------------
+data/main/tags/functions/test/tag.json:
+{"values":["main:test/magic"]}
+----------------
 data/main/tags/functions/tag.json:
-{"values":["main:test/magic","a:b"],"replace":true}
+{"values":["a:b"],"replace":true}
 ----------------

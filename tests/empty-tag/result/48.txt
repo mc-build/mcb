@@ -1,0 +1,6 @@
+data/main/tags/function/test.json:
+{"values":[]}
+----------------
+data/main/tags/function/test2.json:
+{"values":[],"replace":true}
+----------------

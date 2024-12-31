@@ -3,9 +3,6 @@ data/main/function/tick_fn.mcfunction:
 
 say hi
 ----------------
-data/main/tags/function/tick.json:
-{"values":["main:tick_fn"]}
-----------------
 data/minecraft/tags/function/tick.json:
-{"values":["test_tag"]}
+{"values":["main:tick_fn","minecraft:test_tag"]}
 ----------------
