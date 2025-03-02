@@ -4,13 +4,15 @@ import mcl.Tokenizer.PosInfo;
 import haxe.Exception;
 import js.Syntax;
 
-class McbError extends Exception {
+class McbError {
 	@:keep
 	var mcbstack:Array<PosInfo>;
+	@:keep
+	public var message:String;
 
 	public function new(msg:String, stack:Array<PosInfo>) {
-		super(msg);
 		this.mcbstack = stack;
+		this.message = msg;
 	}
 
 	public static function isMclError(e:Any):Bool {
