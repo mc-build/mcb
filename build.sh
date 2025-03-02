@@ -27,8 +27,9 @@ else
     haxe hxml/build.hxml
 fi
 
+rm -rf dist/.mcblib
 cp -r mcblib-src dist/.mcblib
-
+rm -rf dist/template
 cp -r template dist/template
 
 mkdir -p dist/.venv
