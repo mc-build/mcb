@@ -1,8 +1,8 @@
-### a.mcbt
-
 ### b.mcbt
 
 ### main.mcb
 function test{
 	say hi
 }
+
+### a.mcbt

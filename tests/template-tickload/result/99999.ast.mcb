@@ -1,6 +1,6 @@
+### test.mcbt
+
 ### main.mcb
 function main{
 	say hi
 }
-
-### test.mcbt
