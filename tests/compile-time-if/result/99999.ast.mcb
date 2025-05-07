@@ -1,8 +1,8 @@
-### test.mcbt
-
 ### main.mcb
 function test{
 	say 0 is 0
 	say 1 is 1
 	say 2 is not 0 or 1
 }
+
+### test.mcbt

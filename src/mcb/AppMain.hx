@@ -106,7 +106,7 @@ class AppMain {
 
 	private static var globalJsData = {};
 
-	public static function compile(opts:BuildOpts) {
+	public static function compile(opts:BuildOpts,done:Null<Compiler->Void> = null):Compiler {
 		Logger.log('Started build at ${Date.now().toString()}');
 		var startTime = Sys.time();
 		var srcDir = Path.join([opts.baseDir, 'src']);
@@ -122,26 +122,7 @@ class AppMain {
 		};
 		var compiler = new Compiler(srcDir, config, new LibStore(opts.libDir));
 		var didFail = true;
-		try {
-			compiler.config.events.onPreBuild.dispatch({});
-			var sourceFiles = getFilesInDirectory(srcDir);
-			for (f in sourceFiles) {
-				var ext = Path.extension(f);
-				if (ext != "mcb" && ext != "mcbt")
-					continue;
-				var tokens = Tokenizer.tokenize(File.getContent(f), f);
-				try {
-					var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
-					compiler.addFile(f, ast);
-				} catch (e:Dynamic) {
-					compiler.success = false;
-					throw e;
-				}
-			}
-
-			compiler.compile(new VariableMap(null, ["config" => config, "global" => globalJsData, "store" => {}]));
-			didFail = false;
-		} catch (e:Dynamic) {
+		function _error(e:Dynamic) {
 			didFail = true;
 			if (McbError.isMclError(e)) {
 				var x:McbError = cast e;
@@ -151,9 +132,38 @@ class AppMain {
 				throw e;
 			}
 		}
-		compiler.config.events.onPostBuild.dispatch({
-			success: !didFail
-		});
+		try {
+			compiler.config.events.onPreBuild.dispatch({}).then((_)->{
+				var sourceFiles = getFilesInDirectory(srcDir);
+				for (f in sourceFiles) {
+					var ext = Path.extension(f);
+					if (ext != "mcb" && ext != "mcbt")
+						continue;
+					var tokens = Tokenizer.tokenize(File.getContent(f), f);
+					try {
+						var ast = ext == "mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
+						compiler.addFile(f, ast);
+					} catch (e:Dynamic) {
+						compiler.success = false;
+						throw e;
+					}
+				}
+				compiler.compile(new VariableMap(null, ["config" => config, "global" => globalJsData, "store" => {}]));
+				didFail = false;
+			}).catchError((e:Dynamic)->{
+				_error(e);
+			}).finally(() -> {
+				compiler.config.events.onPostBuild.dispatch({
+					success: !didFail
+				}).finally(() -> {
+					if (done != null) {
+						done(compiler);
+					}
+				});
+			});
+		} catch (e:Dynamic) {
+			_error(e);
+		}
 		var endTime = Sys.time();
 		Logger.log('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
 		// var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
@@ -207,37 +217,40 @@ class AppMain {
 			cache = io.reportFileMetadata();
 			writeCache();
 		}
-		var build = compile(opts);
-		if (build.success)
-			handleUpdatingFilesBasedOnCache(build.io);
-		else {
-			if (Syntax.instanceof(build.io, SyncIo)) {
-				var x:SyncIo = cast build.io;
-				Logger.warn("Reverting file changes...");
-				x.revertMap.revert();
-			}
-		}
-		#if !lib
-		if (opts.watch) {
-			Logger.log('Watch mode enabled, Watching for changes...');
-			var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
-			function handleFsEvent() {
-				Logger.log('File change detected, recompiling...');
-				var compiler = compile(opts);
-				if (compiler.success)
-					handleUpdatingFilesBasedOnCache(compiler.io);
-				else if (Syntax.instanceof(compiler.io, SyncIo)) {
-					var x:SyncIo = cast compiler.io;
+		compile(opts,(build)->{
+
+			if (build.success)
+				handleUpdatingFilesBasedOnCache(build.io);
+			else {
+				if (Syntax.instanceof(build.io, SyncIo)) {
+					var x:SyncIo = cast build.io;
 					Logger.warn("Reverting file changes...");
 					x.revertMap.revert();
 				}
-				Logger.log('Watching for changes...');
 			}
-			watcher.on("change", handleFsEvent);
-			watcher.on("add", handleFsEvent);
-			watcher.on("unlink", handleFsEvent);
-		}
-		#end
+			#if !lib
+			if (opts.watch) {
+				Logger.log('Watch mode enabled, Watching for changes...');
+				var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
+				function handleFsEvent() {
+					Logger.log('File change detected, recompiling...');
+					compile(opts,(compiler)->{
+						if (compiler.success)
+							handleUpdatingFilesBasedOnCache(compiler.io);
+						else if (Syntax.instanceof(compiler.io, SyncIo)) {
+							var x:SyncIo = cast compiler.io;
+							Logger.warn("Reverting file changes...");
+							x.revertMap.revert();
+						}
+						Logger.log('Watching for changes...');
+					});
+				}
+				watcher.on("change", handleFsEvent);
+				watcher.on("add", handleFsEvent);
+				watcher.on("unlink", handleFsEvent);
+			}
+			#end
+		});
 	}
 
 	public static function generate(outfile:String, arg:{libDir:String, baseDir:String, configPath:String}) {

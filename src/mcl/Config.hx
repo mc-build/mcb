@@ -1,5 +1,7 @@
 package mcl;
 
+import haxe.extern.EitherType;
+import js.Promise;
 import mcb.Logger;
 import sys.io.File;
 import Io.ThreadedIo;
@@ -16,16 +18,16 @@ class EventDispatcher<T> {
 	}
 
 	@:keep
-	public function subscribe(callback:T->Void) {
+	public function subscribe(callback:T->EitherType<Void,Promise<Void>>) {
 		this._subscribers.push(callback);
 	}
 
-	public function dispatch(event:T) {
+	public function dispatch(event:T):Promise<Void> {
 		if (this._subscribers.length == 0)
-			return;
-		for (subscriber in this._subscribers) {
-			subscriber(event);
-		}
+			return Promise.resolve();
+		return Promise.all([for (subscriber in this._subscribers) {
+			untyped subscriber(event);
+		}]).then(cast (_)->{});
 	}
 
 	private var _subscribers:Array<T->Void>;

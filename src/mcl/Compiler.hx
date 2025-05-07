@@ -1486,8 +1486,10 @@ class McFile {
 				}
 			case Advancement(entries) | ChatType(entries) | DamageType(entries) | Dimension(entries) | DimensionType(entries) | ItemModifier(entries) |
 				LootTable(entries) | Predicate(entries) | Recipe(entries) | Enchantment(entries):
+				name = injectValues(name, context, pos);
 				compileJsonFileImpl(pos, name, info, entries, context);
 			case WorldGen(subType, name, entries):
+				name = injectValues(name, context, pos);
 				var values = '{${stringifyJsonTag(pos, name, entries, context)}}';
 				saveContent(context, Path.join(['data', context.namespace, 'worldgen', subType].concat(context.path.concat([name + ".json"]))), values);
 		}

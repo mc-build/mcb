@@ -1,5 +1,3 @@
-### test.mcbt
-
 ### main.mcb
 dir test{
 	function with-args{
@@ -31,3 +29,5 @@ dir test{
 		say no
 	}
 }
+
+### test.mcbt

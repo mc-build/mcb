@@ -1,4 +1,3 @@
-// THIS FILE IS PART OF THE 'genes' LIBRARY, IT CONTAINS A FIX FOR AN ISSUE WITHIN THAT LIBRARY AND NEEDS TO BE COPPIED OF THE VERSION IN THE LIBRARY
 package genes;
 
 import js.lib.Object;
@@ -73,9 +72,8 @@ class Register {
       if (!defer) {
         if (resolve && resolve[Register.init]) {
           defer = true
-          res[Register.init] = () => {            
-            // this does not exist in the base library, we add this due to some super types not having an __init__ (eg. Native Error)
-            if (resolve.__init__) resolve[Register.init]()
+          res[Register.init] = () => {
+            if (resolve[Register.init]) resolve[Register.init]()
             Object.setPrototypeOf(res.prototype, resolve.prototype)
             res[Register.init] = undefined
           } 

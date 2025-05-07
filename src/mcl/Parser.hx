@@ -536,7 +536,7 @@ class Parser {
 							col: pos.col + "return run ".length
 						};
 						switch (reader.peek()) {
-							case BracketOpen(pos, data):
+							case BracketOpen(pos, data) if (subCommand.length == 0):
 								var content:Array<AstNode> = [];
 								var data = block(reader, () -> {
 									content.push(innerParse(reader));
