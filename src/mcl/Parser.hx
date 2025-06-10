@@ -154,7 +154,7 @@ class Parser {
 		return FunctionDef(pos, name, commands, appendTo);
 	}
 
-	private static function innerParseTemplate(reader:TokenInput):AstNode {
+	private static function innerParseTemplate(reader:TokenInput):Null<AstNode> {
 		return switch (reader.peek()) {
 			case Literal("load", pos):
 				reader.skip();
@@ -178,6 +178,9 @@ class Parser {
 					content.push(innerParse(reader));
 				}, false);
 				AstNode.TemplateOverload(pos, args, content);
+			case Literal(v, pos) if (StringUtils.startsWithConstExpr(v, "#")):
+				reader.skip();
+				null;
 			default:
 				throw unreachable(reader.next());
 		}
@@ -186,7 +189,8 @@ class Parser {
 	private static function readTemplate(name:String, reader:TokenInput, pos:PosInfo) {
 		var entries:Array<AstNode> = [];
 		block(reader, () -> {
-			entries.push(innerParseTemplate(reader));
+			var node = innerParseTemplate(reader);
+			if(node != null)entries.push(node);
 		}, false);
 		return AstNode.TemplateDef(pos, name, entries);
 	}

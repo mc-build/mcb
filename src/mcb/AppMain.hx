@@ -151,6 +151,7 @@ class AppMain {
 				compiler.compile(new VariableMap(null, ["config" => config, "global" => globalJsData, "store" => {}]));
 				didFail = false;
 			}).catchError((e:Dynamic)->{
+				trace(Std.string(e));
 				_error(e);
 			}).finally(() -> {
 				compiler.config.events.onPostBuild.dispatch({
@@ -159,13 +160,13 @@ class AppMain {
 					if (done != null) {
 						done(compiler);
 					}
+					var endTime = Sys.time();
+					Logger.log('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
 				});
 			});
 		} catch (e:Dynamic) {
 			_error(e);
 		}
-		var endTime = Sys.time();
-		Logger.log('Build finished in ${untyped (endTime - startTime).toFixed(2)} seconds');
 		// var npmCacheFiles:Array<String> = untyped Object.keys(require.cache);
 		return compiler; // .concat(npmCacheFiles);
 	}
@@ -231,7 +232,7 @@ class AppMain {
 			#if !lib
 			if (opts.watch) {
 				Logger.log('Watch mode enabled, Watching for changes...');
-				var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true});
+				var watcher = Chokidar.watch(["src/**"], {ignoreInitial: true, awaitWriteFinish:true});
 				function handleFsEvent() {
 					Logger.log('File change detected, recompiling...');
 					compile(opts,(compiler)->{

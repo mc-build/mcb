@@ -652,7 +652,7 @@ class McFile {
 				value = value.substring(9);
 			}
 			for (k => v in context.templates) {
-				if (value == k || StringTools.startsWith(value, k)) {
+				if (value == k || StringTools.startsWith(value, '$k ')) {
 					// trace(this, context, pos, value, extras);
 					v.process(this, context, pos, value, extras);
 					return;
