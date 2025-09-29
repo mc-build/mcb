@@ -1,5 +1,10 @@
 <img src="https://raw.githubusercontent.com/IanSSenne/mcbuild/master/assets/MCB%20Title%20B.png" alt="MCB Banner"/>
 
+> **🚀 TypeScript Migration In Progress!** 
+> 
+> This project has been partially migrated from Haxe to TypeScript. Pack creation (`mcb create`) works perfectly! 
+> Full build functionality is still being migrated. See [TYPESCRIPT_MIGRATION.md](./TYPESCRIPT_MIGRATION.md) for details.
+
 ## need help?
 
 feel free to come ask for help in the mc-build discord https://discord.gg/kpGqTDX or read the docs at https://github.com/mc-build/mcb/wiki
@@ -10,10 +15,11 @@ mc-build is a cli tool that helps with the creation of data packs through compil
 
 ## cli
 
-| command     | result                                                                                                                      |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `mcb`       | will show the help for the command line                                                                                     |
-| `mcb build` | will cause mc-build to run a single build of the project and then exit, also sets the build flag in the js config to `true` |
+| command     | result                                                                                                                      | status |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `mcb`       | will show the help for the command line                                                                                     | ✅ Working |
+| `mcb create <name>` | creates a new MCB pack project | ✅ **Fully Working in TypeScript** |
+| `mcb build` | will cause mc-build to run a single build of the project and then exit, also sets the build flag in the js config to `true` | ⚠️ Migrating to TypeScript |
 
 ## installation
 
@@ -32,6 +38,16 @@ $ yarn global add mc-build
 ```bash
 $ npm i -g mc-build
 ```
+
+## migration status
+
+This project is being migrated from Haxe to TypeScript. Current status:
+
+- ✅ **Pack Creation**: `mcb create` fully works and creates proper MCB project structure
+- ⚠️ **Build System**: `mcb build` shows helpful status but core compilation not yet migrated
+- 🔄 **In Progress**: MCL compiler, parser, and template system migration
+
+See [TYPESCRIPT_MIGRATION.md](./TYPESCRIPT_MIGRATION.md) for detailed migration status and next steps.
 
 ### documentation
 
