@@ -1,5 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import axios from 'axios';
+import * as mustache from 'mustache';
+import { Logger } from './logger';
 
 export interface DebugFile {
   f: string;
@@ -15,11 +18,64 @@ export interface BuildOpts {
   configPath: string;
 }
 
+interface MinecraftVersion {
+  data_pack_version: number;
+}
+
 export class AppMain {
-  public static create(packName: string): void {
-    // TODO: Implement pack creation logic
-    console.log(`Creating pack: ${packName}`);
-    throw new Error('AppMain.create not yet implemented in TypeScript migration');
+  public static async create(packName: string): Promise<void> {
+    try {
+      Logger.log(`Creating pack: ${packName}`);
+      
+      const templateDir = path.join(path.dirname(__dirname), '..', 'template');
+      const destDir = path.join(process.cwd(), packName);
+      
+      // Create destination directory
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      
+      // Fetch the latest Minecraft version
+      Logger.log('Fetching latest Minecraft version...');
+      const response = await axios.get<MinecraftVersion>('https://raw.githubusercontent.com/misode/mcmeta/summary/version.json');
+      const version = response.data;
+      
+      // Copy template directory with variable substitution
+      const copyDir = (from: string, to: string) => {
+        const files = fs.readdirSync(from);
+        
+        for (const file of files) {
+          const fromPath = path.join(from, file);
+          const toPath = path.join(to, file);
+          
+          if (fs.statSync(fromPath).isDirectory()) {
+            if (!fs.existsSync(toPath)) {
+              fs.mkdirSync(toPath, { recursive: true });
+            }
+            copyDir(fromPath, toPath);
+          } else {
+            const content = fs.readFileSync(fromPath, 'utf8');
+            // Use mustache-like templating but replace :: with {{ }}
+            const processedContent = content
+              .replace(/::(\w+)::/g, '{{$1}}');
+            
+            const renderedContent = mustache.render(processedContent, {
+              name: packName || 'MC-Build',
+              version: version.data_pack_version
+            });
+            
+            fs.writeFileSync(toPath, renderedContent);
+          }
+        }
+      };
+      
+      copyDir(templateDir, destDir);
+      Logger.log(`Pack '${packName}' created successfully!`);
+      
+    } catch (error) {
+      Logger.error(`Failed to create pack: ${error}`);
+      throw error;
+    }
   }
 
   public static doBuild(opts: BuildOpts): void {

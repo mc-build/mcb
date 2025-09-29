@@ -23,9 +23,9 @@ export class Cli {
     this.configPath = path.join(this.baseDir, './mcb.config');
   }
 
-  public create(packName: string): void {
+  public async create(packName: string): Promise<void> {
     this.didRun = true;
-    AppMain.create(packName);
+    await AppMain.create(packName);
   }
 
   public build(): void {
@@ -61,7 +61,7 @@ export class Cli {
     process.exit(0);
   }
 
-  public runDefault(mode?: string, venvAction?: string, venvName?: string): void {
+  public async runDefault(mode?: string, venvAction?: string, venvName?: string): Promise<void> {
     if (this.didRun) return;
     
     switch (mode) {
@@ -85,7 +85,7 @@ export class Cli {
         this.generate(venvAction || '');
         break;
       case 'create':
-        this.create(venvAction || '');
+        await this.create(venvAction || '');
         break;
       default:
         this.help();
@@ -136,7 +136,7 @@ export class Cli {
     program
       .command('create <pack-name>')
       .description('Create a new pack')
-      .action((packName) => cli.create(packName));
+      .action(async (packName) => await cli.create(packName));
 
     program
       .command('generate <outfile>')
@@ -160,8 +160,8 @@ export class Cli {
     program.parse();
   }
 
-  public init(name: string): void {
+  public async init(name: string): Promise<void> {
     this.didRun = true;
-    this.create(name);
+    await this.create(name);
   }
 }
