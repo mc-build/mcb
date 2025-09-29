@@ -1,5 +1,3 @@
-### template.mcbt
-
 ### test.mcb
 function test{
 	execute run block test_block { 
@@ -11,3 +9,5 @@ function test{
 		say test
 	}
 }
+
+### template.mcbt

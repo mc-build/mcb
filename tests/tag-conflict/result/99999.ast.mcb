@@ -1,9 +1,9 @@
-### main.mcb
-function tick_fn minecraft:tick{
-	say hi
-}
-
 ### minecraft.mcb
 tag functions tick {
 	test_tag
+}
+
+### main.mcb
+function tick_fn minecraft:tick{
+	say hi
 }
