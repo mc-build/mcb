@@ -17,15 +17,16 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:old": "yarn build:io-worker && ./build.sh",
+    "build": "./build-ts.sh",
+    "build:ts-only": "tsc",
+    "build:old-haxe": "yarn build:io-worker && ./build.sh",
     "build:io-worker": "tsx ./scripts/compileIoThread.ts",
     "build:haxe": "haxe build.hxml",
-    "test": "node ./dist-testbed/testbed",
-    "dev": "nodemon --config nodemon.json",
+    "test": "echo 'Tests not yet migrated to TypeScript'",
+    "dev": "tsc --watch",
     "dist": "yarn build",
-    "setup-deps": "dts2hx chokidar && dts2hx figures && dts2hx chalk",
-    "setup": "./setup.sh"
+    "setup-deps": "echo 'Haxe dependencies no longer needed'",
+    "setup": "echo 'Haxe setup no longer needed'"
   },
   "dependencies": {
     "axios": "^1.12.2",

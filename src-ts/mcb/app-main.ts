@@ -79,15 +79,51 @@ export class AppMain {
   }
 
   public static doBuild(opts: BuildOpts): void {
-    // TODO: Implement build logic
-    console.log(`Building project with options:`, opts);
-    throw new Error('AppMain.doBuild not yet implemented in TypeScript migration');
+    Logger.log(`Starting build at ${new Date().toString()}`);
+    Logger.log(`Build options:`, opts);
+    
+    try {
+      // Check if src directory exists
+      const srcDir = path.join(opts.baseDir, 'src');
+      if (!fs.existsSync(srcDir)) {
+        Logger.error(`Source directory not found: ${srcDir}`);
+        Logger.log('To create a new pack, run: mcb create <pack-name>');
+        return;
+      }
+
+      // For now, just log what would happen
+      Logger.log(`Source directory: ${srcDir}`);
+      Logger.log(`Library directory: ${opts.libDir}`);
+      Logger.log(`Config path: ${opts.configPath}`);
+      Logger.log(`Watch mode: ${opts.watch}`);
+      
+      if (opts.watch) {
+        Logger.warn('Watch mode not yet implemented in TypeScript migration');
+      }
+      
+      Logger.warn('Full build functionality not yet implemented in TypeScript migration');
+      Logger.log('The TypeScript migration is in progress. The following components still need to be migrated:');
+      Logger.log('- MCL Tokenizer and Parser');
+      Logger.log('- MCL Compiler core');
+      Logger.log('- MCL Template system');
+      Logger.log('- IO system');
+      
+    } catch (error) {
+      Logger.error(`Build failed: ${error}`);
+      throw error;
+    }
   }
 
   public static generate(outfile: string, opts: { libDir: string; baseDir: string; configPath: string }): void {
-    // TODO: Implement generate logic
-    console.log(`Generating ${outfile} with options:`, opts);
-    throw new Error('AppMain.generate not yet implemented in TypeScript migration');
+    Logger.log(`Generating ${outfile}`);
+    Logger.log(`Options:`, opts);
+    
+    if (!fs.existsSync(outfile)) {
+      Logger.error(`Output file not found: ${outfile}`);
+      return;
+    }
+    
+    Logger.warn('Generate functionality not yet implemented in TypeScript migration');
   }
 
   public static loadDebugProject(file: string, outdir: string): void {

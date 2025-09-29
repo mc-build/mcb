@@ -17,21 +17,21 @@ export class Logger {
 
   public static prefix = chalk.gray('[') + chalk.green('MCB') + chalk.gray('] ');
 
-  public static log(msg: any): void {
+  public static log(...args: any[]): void {
     if (Logger.enabled) {
-      console.log(Logger.prefix + chalk.white(msg));
+      console.log(Logger.prefix + chalk.white(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ')));
     }
   }
 
-  public static error(msg: any): void {
+  public static error(...args: any[]): void {
     if (Logger.enabled) {
-      console.log(Logger.prefix + chalk.redBright(msg));
+      console.log(Logger.prefix + chalk.redBright(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ')));
     }
   }
 
-  public static warn(msg: any): void {
+  public static warn(...args: any[]): void {
     if (Logger.enabled) {
-      console.log(Logger.prefix + chalk.yellow(msg));
+      console.log(Logger.prefix + chalk.yellow(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ')));
     }
   }
 }
