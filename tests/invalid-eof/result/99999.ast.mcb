@@ -1,6 +1,6 @@
 ### main.mcb
 function test{
-	execute run { 
+	execute run {
 		say hi
 	}
 }

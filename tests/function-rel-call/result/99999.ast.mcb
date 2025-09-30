@@ -1,6 +1,6 @@
 ### main.mcb
 function test{
-	block{ 
+	block{
 		function ^0
 		function ^1
 		function ./dummy
@@ -19,12 +19,12 @@ dir folder{
 		function *dummy
 		function #../dummy
 		function #*dummy
-		block{ 
+		block{
 			function #*dummy/as_root/on_summon
 		}
 		function #*dummy/as_root/on_summon
 		function #minecraft:some_function
-		execute run { 
+		execute run {
 			function #*dummy/as_root/on_summon
 		}
 	}

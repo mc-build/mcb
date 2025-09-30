@@ -1,6 +1,6 @@
 ### test.mcb
 function test{
-	block{ 
+	block{
 		say hi
 	}
 }

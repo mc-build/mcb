@@ -2,12 +2,12 @@
 
 ### test.mcb
 function test{
-	execute run block test_block { 
+	execute run block test_block {
 		say test
 	}
 	execute run say hi
 
-	execute if score a b matches 1 run { 
+	execute if score a b matches 1 run {
 		say test
 	}
 }

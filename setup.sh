@@ -1,6 +1,6 @@
-yarn
+npm i
 rm -rf ./.haxelib
-yarn setup-deps
+npm run setup-deps
 haxelib install lib.hxml --always
 # cp ./overrides/genes/src/genes/Register.hx ./.haxelib/genes/0,4,13/src/genes/Register.hx
 cd ./.haxelib/haxpression

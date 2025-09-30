@@ -59,44 +59,4 @@ dir dir{
 	worldgen worldgen_flat_level_generator_preset {
 		"a":1
 	}
-	DimensionType([Raw({
-				line : 62, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	Dimension([Raw({
-				line : 65, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	DamageType([Raw({
-				line : 68, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	ChatType([Raw({
-				line : 71, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	Recipe([Raw({
-				line : 74, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	Predicate([Raw({
-				line : 77, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	LootTable([Raw({
-				line : 80, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	ItemModifier([Raw({
-				line : 83, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	Enchantment([Raw({
-				line : 86, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])	Advancement([Raw({
-				line : 89, 
-				col : 8, 
-				file : main.mcb
-			},"test":1,[],false)])}
+	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]	[object Object]}

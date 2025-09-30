@@ -16,14 +16,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn build:io-worker && ./build.sh",
-    "build:io-worker": "tsx ./scripts/compileIoThread.ts",
-    "build:haxe": "haxe build.hxml",
-    "test": "node ./dist-testbed/testbed",
-    "dev": "nodemon --config nodemon.json",
-    "dist": "yarn build",
-    "setup-deps": "dts2hx chokidar && dts2hx figures && dts2hx chalk",
-    "setup": "./setup.sh"
+  "build": "tsx scripts/build.ts",
+  "test": "tsx src/testbed/TestMain.ts",
+  "test:write": "tsx src/testbed/TestMain.ts --write",
+  "dev": "nodemon --config nodemon.json",
+  "dist": "npm run build",
+  "setup": "./setup.sh"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
@@ -33,7 +31,8 @@
     "esbuild": "^0.19.4",
     "figures": "^6.0.1",
     "nodemon": "^3.0.1",
-    "typescript": "^5.2.2",
-    "tsx": "^4.7.2"
+    "tsx": "^4.7.2",
+    "typescript": "^5.2.2"
+    
   }
 }
