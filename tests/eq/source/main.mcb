@@ -1,4 +1,65 @@
-function test{
-    eq a b = 1
-    eq a b = a d + 7 * (2 * c e + 3 * f g)
+dir test{
+	function 0{
+    	eq a b = 1
+	}
+	function 1{
+    	eq a b = a d + 7 * (2 * c e + 3 * f g)
+	}
+	function 2{
+		eq constTarget points = 42
+	}
+	function 3{
+		eq sumTarget score += h i + 4 - 5
+	}
+	function 4{
+		eq selfTarget main = selfTarget main + otherTarget alt * 2
+	}
+	function 5{
+		eq multTarget calc *= (j k + 3) * (l m + 2)
+	}
+	function 6{
+		eq negateTarget main = -(negSource value)
+	}
+	function 7{
+		eq copyTarget data = copySource data
+	}
+	function 8{
+		eq augmentTarget data += addend data
+	}
+	function 9{
+		eq decrementTarget counter -= 3
+	}
+	function 10{
+		eq shrinkTarget counter -= shrinkSource counter + 2
+	}
+	function 11{
+		eq divideTarget stat /= divisor stat
+	}
+	function 12{
+		eq ratioTarget stat /= divisor stat + 4
+	}
+	function 13{
+		eq moduloTarget stat %= 5
+	}
+	function 14{
+		eq moduloExprTarget stat %= otherTarget alt + 2
+	}
+	function 15{
+		eq selectorTarget stat += @s ticker
+	}
+	function 16{
+		eq incrementTarget counter += 3
+	}
+	function 17{
+		eq bonusTarget score += h i + 4
+	}
+	function 18{
+		eq divisionExprTarget stat = h i / divisor stat
+	}
+	function 19{
+		eq moduloBinaryTarget stat = h i % divisor stat
+	}
+	function 20{
+		eq divideConstTarget stat /= 2
+	}
 }

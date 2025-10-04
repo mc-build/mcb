@@ -16,12 +16,12 @@
     "dist"
   ],
   "scripts": {
-  "build": "tsx scripts/build.ts",
-  "test": "tsx src/testbed/TestMain.ts",
-  "test:write": "tsx src/testbed/TestMain.ts --write",
-  "dev": "nodemon --config nodemon.json",
-  "dist": "npm run build",
-  "setup": "./setup.sh"
+    "build": "tsx scripts/build.ts",
+    "test": "tsx src/testbed/TestMain.ts",
+    "test:write": "tsx src/testbed/TestMain.ts --write",
+    "dev": "nodemon --config nodemon.json",
+    "dist": "npm run build",
+    "setup": "./setup.sh"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
@@ -33,6 +33,5 @@
     "nodemon": "^3.0.1",
     "tsx": "^4.7.2",
     "typescript": "^5.2.2"
-    
   }
 }

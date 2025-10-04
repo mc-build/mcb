@@ -2426,25 +2426,27 @@ export class Compiler {
   }
 
   addFile(name: string, ast: AstNode[]): void {
-    const file = new McFile(name, ast);
-    this.files.set(name, file);
+    const normalizedName = Compiler.normalizeProjectPath(name);
+    const file = new McFile(normalizedName, ast);
+    this.files.set(normalizedName, file);
   }
 
   resolve(baseFile: string, resolutionPath: string): ImportFileType {
     if (resolutionPath.startsWith(".") || resolutionPath.startsWith("/")) {
       const base = resolutionPath.startsWith("/") ? this.baseDir : path.dirname(baseFile);
       const resolved = path.join(base, resolutionPath.startsWith("/") ? resolutionPath.substring(1) : resolutionPath);
+      const normalizedResolved = Compiler.normalizeProjectPath(resolved);
       const ext = path.extname(resolutionPath);
       if (ext.endsWith("js") || ext === ".json") {
         const value = createRequire(resolved);
         return { kind: "JsFile", value };
       }
-      if (this.files.has(resolved)) {
-        if (!this.alreadySetupFiles.has(resolved)) {
-          this.alreadySetupFiles.set(resolved, true);
-          this.files.get(resolved)!.setup(this);
+      if (this.files.has(normalizedResolved)) {
+        if (!this.alreadySetupFiles.has(normalizedResolved)) {
+          this.alreadySetupFiles.set(normalizedResolved, true);
+          this.files.get(normalizedResolved)!.setup(this);
         }
-        return { kind: "McFile", file: this.files.get(resolved)! };
+        return { kind: "McFile", file: this.files.get(normalizedResolved)! };
       }
       throw new CompilerError("Failed to resolve import: " + resolved, false, []);
     }
@@ -2454,18 +2456,51 @@ export class Compiler {
     return { kind: "McFile", file: this.libStore.lookup(resolutionPath, { file: baseFile, line: 0, col: 0 }, this) };
   }
 
-  getInitialPathInfo(p: string): BaseNameInfo {
-    let projectPath = p.startsWith(this.baseDir) ? p.substring(this.baseDir.length) : p;
-    projectPath = projectPath.split("\\").join("/");
-    if (projectPath.startsWith("/")) {
-      projectPath = projectPath.substring(1);
+  private static withoutExtension(value: string): string {
+    if (!value) {
+      return value;
     }
-    const parts = projectPath.split("/");
-    const namespace = path.parse(parts[0]).name;
-    const rest = parts.slice(1).join("/");
+    const lastSlash = value.lastIndexOf("/");
+    const lastDot = value.lastIndexOf(".");
+    if (lastDot === -1 || (lastSlash !== -1 && lastDot <= lastSlash)) {
+      return value;
+    }
+    return value.substring(0, lastDot);
+  }
+
+  static normalizeProjectPath(value: string): string {
+    if (!value) {
+      return "";
+    }
+    const replaced = value.replace(/\\/g, "/");
+    const normalized = path.posix.normalize(replaced);
+    return normalized === "." ? "" : normalized;
+  }
+
+  getInitialPathInfo(p: string): BaseNameInfo {
+    const normalizedBase = Compiler.normalizeProjectPath(this.baseDir);
+    const normalizedInput = Compiler.normalizeProjectPath(p);
+
+    let relative = normalizedInput;
+    if (normalizedBase.length > 0 && normalizedInput.startsWith(normalizedBase)) {
+      relative = normalizedInput.substring(normalizedBase.length);
+    }
+    relative = relative.replace(/^\/+/, "");
+
+    if (relative.length === 0) {
+      return { namespace: "", path: [] };
+    }
+
+    const parts = relative.split("/").filter((segment) => segment.length > 0);
+    const namespaceWithExt = parts.shift() ?? "";
+    const namespace = Compiler.withoutExtension(namespaceWithExt);
+    const restJoined = parts.join("/");
+    const restWithoutExtension = Compiler.withoutExtension(restJoined);
+    const pathParts = restWithoutExtension.length > 0 ? restWithoutExtension.split("/") : [];
+
     return {
       namespace,
-      path: rest.length > 0 ? path.parse(rest).dir.split("/").filter(Boolean) : [],
+      path: pathParts,
     };
   }
 

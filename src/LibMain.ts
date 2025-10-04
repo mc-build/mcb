@@ -11,7 +11,6 @@ import type { LibStore } from "./mcl/LibStore";
 import { SyncIo } from "./mcb/io/SyncIo";
 import { ThreadedIo } from "./mcb/io/ThreadedIo";
 import { MultiThreadIo } from "./mcb/io/MultiThreadIo";
-
 export type CompileOptions = Record<string, never>;
 
 function normalizeExtension(filePath: string): string {
@@ -88,3 +87,7 @@ export const mcb = {
 };
 
 export default mcb;
+export type { IoLike };
+export { SyncIo, ThreadedIo, MultiThreadIo };
+export { Parser, Tokenizer };
+

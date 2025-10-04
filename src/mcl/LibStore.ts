@@ -50,11 +50,11 @@ export class LibStore {
       const content = fs.readFileSync(file, "utf8");
       const tokens = Tokenizer.tokenize(content, file);
       const ast = ext === ".mcb" ? Parser.parseMcbFile(tokens) : Parser.parseMcbtFile(tokens);
-      const mcFile = new McFile(file, ast);
-      mcFile.setup(compiler);
-      const relativePath = path.relative(srcDir, file).split(path.sep).join("/");
-      mcFile.name = relativePath;
-      result.set(relativePath, mcFile);
+  const mcFile = new McFile(file, ast);
+  mcFile.setup(compiler);
+  const relativePath = Compiler.normalizeProjectPath(path.relative(srcDir, file));
+  mcFile.name = relativePath;
+  result.set(relativePath, mcFile);
     }
 
     this.loadedLibs.set(id, result);
