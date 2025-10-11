@@ -1,3 +1,0 @@
---debug
-# this is required for the haxe lsp to work
-hxml/build.hxml

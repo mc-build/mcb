@@ -1,7 +1,0 @@
-hxml/header.hxml
--m testbed.TestMain
--D disableRequire
---js ./bin/testbed.js
---cmd yarn tsx ./scripts/compile-output.ts bin/testbed.js
-
---next

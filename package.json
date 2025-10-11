@@ -20,8 +20,7 @@
     "test": "tsx src/testbed/TestMain.ts",
     "test:write": "tsx src/testbed/TestMain.ts --write",
     "dev": "nodemon --config nodemon.json",
-    "dist": "npm run build",
-    "setup": "./setup.sh"
+    "dist": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
