@@ -1,21 +1,18 @@
 import path from "node:path";
 import Module from "node:module";
 
-import { AstNode, AstNodeIds, AstNodeUtils, CompileTimeIfElseExpressions, JsonTagType } from "./AstNode";
-import { ArrayInput } from "./ArrayInput";
+import { AstNode, AstNodeUtils, CompileTimeIfElseExpressions, JsonTagType } from "./AstNode";
 import { Config, IoLike, UserConfig } from "./Config";
 import { Globals } from "./Globals";
 import { Parser } from "./Parser";
 import { Token, TokenIds, PosInfo } from "./Tokenizer";
 import { Tokenizer } from "./TokenizerImpl";
 import { CompilerError, ErrorUtil } from "./error/CompilerError";
-import { LibraryError } from "./error/LibraryError";
 import { McbError } from "./error/McbError";
 import { StringUtils } from "../strutils/StringUtils";
 import { TagManager } from "./TagManager";
-import { TemplateArgument, TemplateParseResult } from "./args/TemplateArgument";
+import { TemplateArgument } from "./args/TemplateArgument";
 import * as McMath from "./McMath";
-import type { LibStore } from "./LibStore";
 
 const createRequire = Module.createRequire(__filename);
 
@@ -2410,12 +2407,10 @@ export class Compiler {
 
   private files: Map<string, McFile> = new Map();
   private alreadySetupFiles: Map<string, boolean> = new Map();
-  private libStore: LibStore | null;
   private topLevelAstNodes: AstNode[] = [];
 
-  constructor(public baseDir: string, config: UserConfig, lib?: LibStore | null) {
+  constructor(public baseDir: string, config: UserConfig) {
     this.config = Config.create(config);
-    this.libStore = lib ?? null;
     this.io = this.config.io ?? {
       write() {},
       cleanup() {},
@@ -2432,28 +2427,22 @@ export class Compiler {
   }
 
   resolve(baseFile: string, resolutionPath: string): ImportFileType {
-    if (resolutionPath.startsWith(".") || resolutionPath.startsWith("/")) {
-      const base = resolutionPath.startsWith("/") ? this.baseDir : path.dirname(baseFile);
-      const resolved = path.join(base, resolutionPath.startsWith("/") ? resolutionPath.substring(1) : resolutionPath);
-      const normalizedResolved = Compiler.normalizeProjectPath(resolved);
-      const ext = path.extname(resolutionPath);
-      if (ext.endsWith("js") || ext === ".json") {
-        const value = createRequire(resolved);
-        return { kind: "JsFile", value };
-      }
-      if (this.files.has(normalizedResolved)) {
-        if (!this.alreadySetupFiles.has(normalizedResolved)) {
-          this.alreadySetupFiles.set(normalizedResolved, true);
-          this.files.get(normalizedResolved)!.setup(this);
-        }
-        return { kind: "McFile", file: this.files.get(normalizedResolved)! };
-      }
-      throw new CompilerError("Failed to resolve import: " + resolved, false, []);
+    const base = resolutionPath.startsWith("/") ? this.baseDir : path.dirname(baseFile);
+    const resolved = path.join(base, resolutionPath.startsWith("/") ? resolutionPath.substring(1) : resolutionPath);
+    const normalizedResolved = Compiler.normalizeProjectPath(resolved);
+    const ext = path.extname(resolutionPath);
+    if (ext.endsWith("js") || ext === ".json") {
+      const value = createRequire(resolved);
+      return { kind: "JsFile", value };
     }
-    if (!this.libStore) {
-      throw new LibraryError("Library support not configured");
+    if (this.files.has(normalizedResolved)) {
+      if (!this.alreadySetupFiles.has(normalizedResolved)) {
+        this.alreadySetupFiles.set(normalizedResolved, true);
+        this.files.get(normalizedResolved)!.setup(this);
+      }
+      return { kind: "McFile", file: this.files.get(normalizedResolved)! };
     }
-    return { kind: "McFile", file: this.libStore.lookup(resolutionPath, { file: baseFile, line: 0, col: 0 }, this) };
+    throw new CompilerError("Failed to resolve import: " + resolved, false, []);
   }
 
   private static withoutExtension(value: string): string {

@@ -12,7 +12,6 @@ import { Parser } from "../mcl/Parser";
 import { McbError } from "../mcl/error/McbError";
 import { Logger } from "./Logger";
 import { SyncIo } from "./io/SyncIo";
-import { LibStore } from "../mcl/LibStore";
 
 export type BuildOpts = {
   watch: boolean;
@@ -293,7 +292,7 @@ async function runCompile(opts: BuildOpts, callback?: DoneCallback): Promise<Com
   const resolvedConfigPath = discoverConfigFile(resolvePath(resolvedBaseDir, opts.configPath));
   const config = loadConfig(resolvedConfigPath);
   const compilerBaseDir = srcDir;
-  const compiler = new Compiler(compilerBaseDir, config, new LibStore(opts.libDir));
+  const compiler = new Compiler(compilerBaseDir, config);
   const io = new SyncIo();
   compiler.io = io;
 
@@ -431,7 +430,7 @@ export async function generate(outfile: string, arg: { libDir: string; baseDir: 
   const resolvedOutfile = resolvePath(resolvedBaseDir, outfile);
   const resolvedConfigPath = discoverConfigFile(resolvePath(resolvedBaseDir, arg.configPath));
   const config = loadConfig(resolvedConfigPath);
-  const compiler = new Compiler(resolvedBaseDir, config, new LibStore(arg.libDir));
+  const compiler = new Compiler(resolvedBaseDir, config);
   const content = fs.readFileSync(resolvedOutfile, "utf8");
   const tokens = Tokenizer.tokenize(content, resolvedOutfile);
   const ast = Parser.parseMcbFile(tokens);

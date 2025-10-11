@@ -7,7 +7,6 @@ import { Parser } from "./mcl/Parser";
 import { Tokenizer } from "./mcl/TokenizerImpl";
 import type { AstNode } from "./mcl/AstNode";
 import type { IoLike, UserConfig } from "./mcl/Config";
-import type { LibStore } from "./mcl/LibStore";
 import { SyncIo } from "./mcb/io/SyncIo";
 import { ThreadedIo } from "./mcb/io/ThreadedIo";
 import { MultiThreadIo } from "./mcb/io/MultiThreadIo";
@@ -25,8 +24,8 @@ export function main(): void {
   TemplateRegisterer.register();
 }
 
-export function createCompiler(baseDir: string, config: UserConfig, libStore?: LibStore | null): Compiler {
-  return new Compiler(baseDir, config, libStore ?? null);
+export function createCompiler(baseDir: string, config: UserConfig): Compiler {
+  return new Compiler(baseDir, config);
 }
 
 export function parseFile(filePath: string, content: string): AstNode[] {
@@ -53,7 +52,7 @@ export function addFileToCompiler(compiler: Compiler, filePath: string): void {
 }
 
 export function compileFromFsLikeMap(baseDir: string, files: Map<string, string>, io: IoLike): void {
-  const compiler = createCompiler(baseDir, {}, null);
+  const compiler = createCompiler(baseDir, {});
   for (const [filePath, content] of files.entries()) {
     const ext = normalizeExtension(filePath);
     if (ext !== "mcb" && ext !== "mcbt") {
