@@ -2,6 +2,7 @@ export class TestIo {
   private files: Map<string, string> = new Map();
 
   write(path: string, content: string) {
+    path = path.replace(/\\/g,"/");
     if (this.files.has(path)) {
       console.debug();
       console.warn(`Warning: overwriting file ${path}`);
