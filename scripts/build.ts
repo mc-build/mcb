@@ -1,6 +1,7 @@
 import { build } from "esbuild";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { spawn } from "node:child_process";
 
 type CopyOptions = {
 	filter?: (srcPath: string, destPath: string) => boolean | Promise<boolean>;
@@ -89,9 +90,43 @@ async function buildTargets(): Promise<void> {
 	await fs.chmod(path.join(distDir, "mcb.js"), 0o755);
 }
 
+async function generateTypeDefinitions(): Promise<void> {
+	console.log("Generating TypeScript declaration files...");
+
+	return new Promise((resolve, reject) => {
+		const tsc = spawn(
+			"npx",
+			["tsc", "--project", "tsconfig.declarations.json"],
+			{
+				cwd: rootDir,
+				stdio: "inherit",
+				shell: true,
+			},
+		);
+
+		tsc.on("close", (code) => {
+			if (code === 0) {
+				console.log("✓ TypeScript declaration files generated");
+				resolve();
+			} else {
+				reject(
+					new Error(
+						`TypeScript declaration generation failed with exit code ${code}`,
+					),
+				);
+			}
+		});
+
+		tsc.on("error", (error) => {
+			reject(error);
+		});
+	});
+}
+
 async function main(): Promise<void> {
 	await ensureEmptyDir(distDir);
 	await buildTargets();
+	await generateTypeDefinitions();
 
 	await copyDir(templateDir, path.join(distDir, "template"));
 }

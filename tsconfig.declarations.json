@@ -1,0 +1,24 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "./dist",
+		"target": "ES2020",
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"downlevelIteration": true,
+		"skipLibCheck": true
+	},
+	"include": ["src/libmcb.ts", "src/LibMain.ts", "src/mcl/**/*.ts"],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"src/testbed/**",
+		"src/mcb/**",
+		"**/*.test.ts",
+		"**/*.spec.ts"
+	]
+}
