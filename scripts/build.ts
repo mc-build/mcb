@@ -53,7 +53,7 @@ async function buildTargets(): Promise<void> {
       platform: "node",
       target: "node18",
       format: "cjs",
-      sourcemap: false,
+      sourcemap: true,
       logLevel: "info",
       external: ["esbuild"],
     }),
@@ -67,7 +67,7 @@ async function buildTargets(): Promise<void> {
       banner: {
         js: "#!/usr/bin/env node",
       },
-      sourcemap: false,
+      sourcemap: true,
       logLevel: "info",
     }),
     build({
@@ -77,7 +77,7 @@ async function buildTargets(): Promise<void> {
       platform: "node",
       target: "node18",
       format: "esm",
-      sourcemap: false,
+      sourcemap: true,
       logLevel: "info",
     }),
   ]);

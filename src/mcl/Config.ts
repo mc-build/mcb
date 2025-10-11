@@ -1,4 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import { FeatureFlags, FeatureFlagOverrides } from "./FeatureFlags";
+import { Logger } from "../mcb/Logger";
+
 
 export interface UserConfig {
   libDir?: string | null;
@@ -79,6 +83,23 @@ export class Config {
 
     if (typeof base.formatVersion === "number") {
       config.formatVersion = base.formatVersion;
+    } else {
+      // Try to read format version from pack.mcmeta
+      try {
+        const packMetaPath = path.join(process.cwd(), "pack.mcmeta");
+        const content = fs.readFileSync(packMetaPath, "utf8");
+        const json = JSON.parse(content);
+        
+        if (json?.pack?.pack_format != null) {
+          config.formatVersion = json.pack.pack_format;
+        } else {
+          Logger.error("Could not determine pack format version, please specify it in the config or pack.mcmeta file, if you have a pack.mcmeta file already this may be the result of a parsing error.");
+          process.exit(21);
+        }
+      } catch (error) {
+        Logger.error("Could not determine pack format version, please specify it in the config or pack.mcmeta file, if you have a pack.mcmeta file already this may be the result of a parsing error.");
+        process.exit(21);
+      }
     }
 
     if (base.features) {

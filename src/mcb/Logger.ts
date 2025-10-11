@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { performance } from "node:perf_hooks";
-
-const prefix = `${chalk.gray("[")}${chalk.green("MCB")}${chalk.gray("] ")}`;
+import { getVersionString } from "./Version";
+const prefix = `${chalk.gray("[")}${chalk.greenBright("MCB")} ${chalk.green(getVersionString())}${chalk.gray("] ")}`;
 
 export class Logger {
   static enabled = true;

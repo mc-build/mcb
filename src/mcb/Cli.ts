@@ -3,6 +3,7 @@ import process from "node:process";
 
 import { create, doBuild, generate, BuildOpts } from "./AppMain";
 import { Logger } from "./Logger";
+import { getVersionString } from "./Version";
 
 interface ParsedOptions {
   libDir: string;
@@ -41,6 +42,10 @@ function resolveOptions(argv: string[]): { options: ParsedOptions; positional: s
       case "--help":
         positional.push("help");
         break;
+      case "-v":
+      case "--version":
+        positional.push("version");
+        break;
       default:
         positional.push(arg);
         break;
@@ -63,6 +68,12 @@ function showHelp(): void {
   Logger.log("  --lib <path>     Override library directory");
   Logger.log("  --base <path>    Override project base directory");
   Logger.log("  --config <path>  Override config file path");
+  Logger.log("  -v, --version    Show version information");
+  Logger.log("  -h, --help       Show this help message");
+}
+
+function showVersion(): void {
+  Logger.log(getVersionString());
 }
 
 async function runCommand(command: string | undefined, args: string[], options: ParsedOptions): Promise<void> {
@@ -96,6 +107,9 @@ async function runCommand(command: string | undefined, args: string[], options: 
       await generate(outfile, buildOptions);
       return;
     }
+    case "version":
+      showVersion();
+      return;
     case "help":
     case undefined:
       showHelp();
