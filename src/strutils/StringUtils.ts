@@ -1,5 +1,5 @@
 export const StringUtils = {
-  startsWithConstExpr(str: string, prefix: string): boolean {
-    return str.startsWith(prefix);
-  },
+	startsWithConstExpr(str: string, prefix: string): boolean {
+		return str.startsWith(prefix);
+	},
 };

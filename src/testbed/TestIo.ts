@@ -1,42 +1,42 @@
 export class TestIo {
-  private files: Map<string, string> = new Map();
+	private files: Map<string, string> = new Map();
 
-  write(path: string, content: string) {
-    path = path.replace(/\\/g,"/");
-    if (this.files.has(path)) {
-      console.debug();
-      console.warn(`Warning: overwriting file ${path}`);
-    }
-    this.files.set(path, content);
-  }
+	write(path: string, content: string) {
+		path = path.replace(/\\/g, "/");
+		if (this.files.has(path)) {
+			console.debug();
+			console.warn(`Warning: overwriting file ${path}`);
+		}
+		this.files.set(path, content);
+	}
 
-  cleanup() {}
+	cleanup() {}
 
-  finished(): boolean {
-    return true;
-  }
+	finished(): boolean {
+		return true;
+	}
 
-  print(): string {
-    let result = "";
-    for (const [k, v] of this.files.entries()) {
-      result += `${k}:\n${v}\n----------------\n`;
-    }
-    return result;
-  }
+	print(): string {
+		let result = "";
+		for (const [k, v] of this.files.entries()) {
+			result += `${k}:\n${v}\n----------------\n`;
+		}
+		return result;
+	}
 
-  reportFilesRemoved(_oldFiles: Map<string, string>): string[] {
-    return [];
-  }
+	reportFilesRemoved(_oldFiles: Map<string, string>): string[] {
+		return [];
+	}
 
-  reportFilesAdded(_oldFiles: Map<string, string>): string[] {
-    return [];
-  }
+	reportFilesAdded(_oldFiles: Map<string, string>): string[] {
+		return [];
+	}
 
-  reportFilesChanged(_oldFiles: Map<string, string>): string[] {
-    return [];
-  }
+	reportFilesChanged(_oldFiles: Map<string, string>): string[] {
+		return [];
+	}
 
-  reportFileMetadata(): Map<string, string> {
-    return new Map();
-  }
+	reportFileMetadata(): Map<string, string> {
+		return new Map();
+	}
 }

@@ -1,7 +1,7 @@
 {
-  "verbose": true,
-  "ignore": ["**/bin/**", "**/generated/**"],
-  "exec": "yarn build",
-  "ext": "ts,mcb,mcbt,txt,js",
-  "watch": ["src/**/*", "tests/**/*", "build.hxml"]
+	"verbose": true,
+	"ignore": ["**/bin/**", "**/generated/**"],
+	"exec": "yarn build",
+	"ext": "ts,mcb,mcbt,txt,js",
+	"watch": ["src/**/*", "tests/**/*", "build.hxml"]
 }

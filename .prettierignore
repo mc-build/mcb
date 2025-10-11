@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.min.js
+*.map
+.git/
+coverage/
+.nyc_output/
+mcblib-src/
+template/
+tests/*/result/
+*.d.ts
+tsconfig*.json
+package*.json

@@ -9,17 +9,17 @@ import { WordTemplateArgument } from "./args/WordTemplateArgument";
 let registered = false;
 
 export const TemplateRegisterer = {
-  register(): void {
-    if (registered) {
-      return;
-    }
-    registered = true;
-    RawTemplateArgument.register();
-    IntTemplateArgument.register();
-    JsTemplateArgument.register();
-    BlockTemplateArgument.register();
-    FloatTemplateArgument.register();
-    WordTemplateArgument.register();
-    LiteralTemplateArgument.register();
-  },
+	register(): void {
+		if (registered) {
+			return;
+		}
+		registered = true;
+		RawTemplateArgument.register();
+		IntTemplateArgument.register();
+		JsTemplateArgument.register();
+		BlockTemplateArgument.register();
+		FloatTemplateArgument.register();
+		WordTemplateArgument.register();
+		LiteralTemplateArgument.register();
+	},
 };
