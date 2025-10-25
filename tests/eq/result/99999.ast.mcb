@@ -63,4 +63,7 @@ dir test{
 	function 20{
 		eq divideConstTarget stat /= 2
 	}
+	function 21{
+		eq #a.b c = #d.e f + 2
+	}
 }

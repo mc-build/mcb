@@ -132,6 +132,12 @@ data/main/function/test/20.mcfunction:
 
 scoreboard players operation divideConstTarget stat /= 2 mcb.eq.const
 ----------------
+data/main/function/test/21.mcfunction:
+# Generated with MC-Build
+
+scoreboard players operation #a.b c = #d.e f
+scoreboard players add #a.b c 2
+----------------
 data/main/function/zzz/load.mcfunction:
 # Generated with MC-Build
 

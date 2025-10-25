@@ -456,6 +456,10 @@ function normalizeEquation(
 			}
 
 			if (second.length === 0) {
+				if (/^[0-9]+$/.test(first)) {
+					normalized += first;
+					continue;
+				}
 				throw CompilerError.create(
 					"Malformed scoreboard reference in eq expression",
 					null,
