@@ -427,7 +427,7 @@ function normalizeEquation(
 		const char = rhs.charAt(idx);
 		const code = char.charCodeAt(0);
 		const isStart =
-			char === "@" || (code >= 97 && code <= 122) || (code >= 65 && code <= 90);
+			isAlphaNumeric(char);
 
 		if (isStart) {
 			let first = "";
@@ -437,6 +437,10 @@ function normalizeEquation(
 			}
 
 			if (idx >= rhs.length || rhs.charAt(idx) !== " ") {
+				if (/^[0-9]+$/.test(first)) {
+					normalized += first;
+					continue;
+				}
 				throw CompilerError.create(
 					"Scoreboard entries must contain a space between name and objective",
 					null,
