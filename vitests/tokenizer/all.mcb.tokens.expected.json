@@ -1,0 +1,6118 @@
+[
+  {
+    "type": 2,
+    "content": "# Contains all `.mcb` file syntax",
+    "line": 1,
+    "column": 1
+  },
+  {
+    "type": 3,
+    "content": "###\nMulti-line Comments\n\nfunction basic_definition {\n\tsay basic definition\n}\n###\n",
+    "line": 3,
+    "column": 1
+  },
+  {
+    "type": 2,
+    "content": "# Function Definitions",
+    "line": 11,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function basic_definition ",
+    "line": 12,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 12,
+    "column": 27
+  },
+  {
+    "type": 1,
+    "line": 12,
+    "column": 28
+  },
+  {
+    "type": 0,
+    "content": "say basic definition",
+    "line": 13,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 13,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 14,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 14,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "function add_to_tag minecraft:tick ",
+    "line": 15,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 15,
+    "column": 36
+  },
+  {
+    "type": 1,
+    "line": 15,
+    "column": 37
+  },
+  {
+    "type": 0,
+    "content": "say add to tag",
+    "line": 16,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 16,
+    "column": 16
+  },
+  {
+    "type": 6,
+    "line": 17,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 17,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "function add_to_tag_no_namespace tick ",
+    "line": 18,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 18,
+    "column": 39
+  },
+  {
+    "type": 1,
+    "line": 18,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "say add to tag no namespace",
+    "line": 19,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 19,
+    "column": 29
+  },
+  {
+    "type": 6,
+    "line": 20,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 20,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Blocks",
+    "line": 22,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function blocks ",
+    "line": 23,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 23,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 23,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "# Max whitespace",
+    "line": 24,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 24,
+    "column": 18
+  },
+  {
+    "type": 5,
+    "line": 25,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 25,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block",
+    "line": 26,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 26,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 27,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 27,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block ",
+    "line": 28,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 28,
+    "column": 8
+  },
+  {
+    "type": 1,
+    "line": 28,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block with keyword",
+    "line": 29,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 29,
+    "column": 35
+  },
+  {
+    "type": 6,
+    "line": 30,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 30,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block foo ",
+    "line": 31,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 31,
+    "column": 12
+  },
+  {
+    "type": 1,
+    "line": 31,
+    "column": 13
+  },
+  {
+    "type": 0,
+    "content": "say named block",
+    "line": 32,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 32,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 33,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 33,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 34,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 34,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 34,
+    "column": 4
+  },
+  {
+    "type": 0,
+    "content": " boo: 1, bar: 2, baz: 3 ",
+    "line": 34,
+    "column": 5
+  },
+  {
+    "type": 6,
+    "line": 34,
+    "column": 29
+  },
+  {
+    "type": 1,
+    "line": 34,
+    "column": 30
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block",
+    "line": 35,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 35,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 36,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 36,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block ",
+    "line": 37,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 37,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 37,
+    "column": 9
+  },
+  {
+    "type": 5,
+    "line": 37,
+    "column": 10
+  },
+  {
+    "type": 0,
+    "content": " boo: 1, bar: 2, baz: 3 ",
+    "line": 37,
+    "column": 11
+  },
+  {
+    "type": 6,
+    "line": 37,
+    "column": 35
+  },
+  {
+    "type": 1,
+    "line": 37,
+    "column": 36
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block with keyword",
+    "line": 38,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 38,
+    "column": 35
+  },
+  {
+    "type": 6,
+    "line": 39,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 39,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block foo ",
+    "line": 40,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 40,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 40,
+    "column": 13
+  },
+  {
+    "type": 5,
+    "line": 40,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": " boo: 1, bar: 2, baz: 3 ",
+    "line": 40,
+    "column": 15
+  },
+  {
+    "type": 6,
+    "line": 40,
+    "column": 39
+  },
+  {
+    "type": 1,
+    "line": 40,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "say named block",
+    "line": 41,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 41,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 42,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 42,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 43,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " with storage mcb:data test.path",
+    "line": 43,
+    "column": 3
+  },
+  {
+    "type": 7,
+    "line": 43,
+    "column": 35
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 43,
+    "column": 36
+  },
+  {
+    "type": 8,
+    "line": 43,
+    "column": 37
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 43,
+    "column": 38
+  },
+  {
+    "type": 1,
+    "line": 43,
+    "column": 43
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block",
+    "line": 44,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 44,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 45,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 45,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block ",
+    "line": 46,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 46,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": " with storage mcb:data test.path",
+    "line": 46,
+    "column": 9
+  },
+  {
+    "type": 7,
+    "line": 46,
+    "column": 41
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 46,
+    "column": 42
+  },
+  {
+    "type": 8,
+    "line": 46,
+    "column": 43
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 46,
+    "column": 44
+  },
+  {
+    "type": 1,
+    "line": 46,
+    "column": 49
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block with keyword",
+    "line": 47,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 47,
+    "column": 35
+  },
+  {
+    "type": 6,
+    "line": 48,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 48,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block foo ",
+    "line": 49,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 49,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": " with storage mcb:data test.path",
+    "line": 49,
+    "column": 13
+  },
+  {
+    "type": 7,
+    "line": 49,
+    "column": 45
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 49,
+    "column": 46
+  },
+  {
+    "type": 8,
+    "line": 49,
+    "column": 47
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 49,
+    "column": 48
+  },
+  {
+    "type": 1,
+    "line": 49,
+    "column": 53
+  },
+  {
+    "type": 0,
+    "content": "say named block",
+    "line": 50,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 50,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 51,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 51,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "# Min Whitespace",
+    "line": 52,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 52,
+    "column": 18
+  },
+  {
+    "type": 5,
+    "line": 53,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 53,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "boo:1,bar:2,baz:3",
+    "line": 53,
+    "column": 4
+  },
+  {
+    "type": 6,
+    "line": 53,
+    "column": 21
+  },
+  {
+    "type": 1,
+    "line": 53,
+    "column": 22
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block",
+    "line": 54,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 54,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 55,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 55,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block ",
+    "line": 56,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 56,
+    "column": 8
+  },
+  {
+    "type": 5,
+    "line": 56,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "boo:1,bar:2,baz:3",
+    "line": 56,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 56,
+    "column": 27
+  },
+  {
+    "type": 1,
+    "line": 56,
+    "column": 28
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block with keyword",
+    "line": 57,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 57,
+    "column": 35
+  },
+  {
+    "type": 6,
+    "line": 58,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 58,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block foo ",
+    "line": 59,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 59,
+    "column": 12
+  },
+  {
+    "type": 5,
+    "line": 59,
+    "column": 13
+  },
+  {
+    "type": 0,
+    "content": "boo:1,bar:2,baz:3",
+    "line": 59,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 59,
+    "column": 31
+  },
+  {
+    "type": 1,
+    "line": 59,
+    "column": 32
+  },
+  {
+    "type": 0,
+    "content": "say named block",
+    "line": 60,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 60,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 61,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 61,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 62,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "with storage mcb:data test.path",
+    "line": 62,
+    "column": 3
+  },
+  {
+    "type": 7,
+    "line": 62,
+    "column": 34
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 62,
+    "column": 35
+  },
+  {
+    "type": 8,
+    "line": 62,
+    "column": 36
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 62,
+    "column": 37
+  },
+  {
+    "type": 1,
+    "line": 62,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block",
+    "line": 63,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 63,
+    "column": 22
+  },
+  {
+    "type": 6,
+    "line": 64,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 64,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block ",
+    "line": 65,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 65,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": "with storage mcb:data test.path",
+    "line": 65,
+    "column": 9
+  },
+  {
+    "type": 7,
+    "line": 65,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 65,
+    "column": 41
+  },
+  {
+    "type": 8,
+    "line": 65,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 65,
+    "column": 43
+  },
+  {
+    "type": 1,
+    "line": 65,
+    "column": 48
+  },
+  {
+    "type": 0,
+    "content": "say anonymous block with keyword",
+    "line": 66,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 66,
+    "column": 35
+  },
+  {
+    "type": 6,
+    "line": 67,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 67,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "block foo ",
+    "line": 68,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 68,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": "with storage mcb:data test.path",
+    "line": 68,
+    "column": 13
+  },
+  {
+    "type": 7,
+    "line": 68,
+    "column": 44
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 68,
+    "column": 45
+  },
+  {
+    "type": 8,
+    "line": 68,
+    "column": 46
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 68,
+    "column": 47
+  },
+  {
+    "type": 1,
+    "line": 68,
+    "column": 52
+  },
+  {
+    "type": 0,
+    "content": "say named block",
+    "line": 69,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 69,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 70,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 70,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 71,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 71,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Clocks",
+    "line": 73,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "clock foo 1t ",
+    "line": 74,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 74,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 74,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "say tick clock",
+    "line": 75,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 75,
+    "column": 16
+  },
+  {
+    "type": 6,
+    "line": 76,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 76,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "clock foo 1s ",
+    "line": 77,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 77,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 77,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "say second clock",
+    "line": 78,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 78,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 79,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 79,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "clock foo 1d ",
+    "line": 80,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 80,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 80,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "say day clock",
+    "line": 81,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 81,
+    "column": 15
+  },
+  {
+    "type": 6,
+    "line": 82,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 82,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "clock foo 1t",
+    "line": 83,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 83,
+    "column": 13
+  },
+  {
+    "type": 1,
+    "line": 83,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "say tick clock",
+    "line": 84,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 84,
+    "column": 16
+  },
+  {
+    "type": 6,
+    "line": 85,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 85,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Compile IF / ELSE",
+    "line": 87,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "IF (true) ",
+    "line": 89,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 89,
+    "column": 11
+  },
+  {
+    "type": 1,
+    "line": 89,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": "function true ",
+    "line": 90,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 90,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 90,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say true",
+    "line": 91,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 91,
+    "column": 11
+  },
+  {
+    "type": 6,
+    "line": 92,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 92,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 93,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": " ELSE ",
+    "line": 93,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 93,
+    "column": 8
+  },
+  {
+    "type": 1,
+    "line": 93,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "function false ",
+    "line": 94,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 94,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 94,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say false",
+    "line": 95,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 95,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 96,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 96,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 97,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 97,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "IF(true)",
+    "line": 98,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 98,
+    "column": 9
+  },
+  {
+    "type": 1,
+    "line": 98,
+    "column": 10
+  },
+  {
+    "type": 0,
+    "content": "function true ",
+    "line": 99,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 99,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 99,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say true",
+    "line": 100,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 100,
+    "column": 11
+  },
+  {
+    "type": 6,
+    "line": 101,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 101,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 102,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "ELSE",
+    "line": 102,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 102,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 102,
+    "column": 7
+  },
+  {
+    "type": 0,
+    "content": "function false ",
+    "line": 103,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 103,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 103,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say false",
+    "line": 104,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 104,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 105,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 105,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 106,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 106,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "function test_compile_if_else ",
+    "line": 107,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 107,
+    "column": 31
+  },
+  {
+    "type": 1,
+    "line": 107,
+    "column": 32
+  },
+  {
+    "type": 0,
+    "content": "IF (true) ",
+    "line": 108,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 108,
+    "column": 12
+  },
+  {
+    "type": 1,
+    "line": 108,
+    "column": 13
+  },
+  {
+    "type": 0,
+    "content": "say true",
+    "line": 109,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 109,
+    "column": 11
+  },
+  {
+    "type": 6,
+    "line": 110,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " ELSE ",
+    "line": 110,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 110,
+    "column": 9
+  },
+  {
+    "type": 1,
+    "line": 110,
+    "column": 10
+  },
+  {
+    "type": 0,
+    "content": "say false",
+    "line": 111,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 111,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 112,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 112,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "IF(true)",
+    "line": 113,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 113,
+    "column": 10
+  },
+  {
+    "type": 1,
+    "line": 113,
+    "column": 11
+  },
+  {
+    "type": 0,
+    "content": "say true",
+    "line": 114,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 114,
+    "column": 11
+  },
+  {
+    "type": 6,
+    "line": 115,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "ELSE",
+    "line": 115,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 115,
+    "column": 7
+  },
+  {
+    "type": 1,
+    "line": 115,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": "say false",
+    "line": 116,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 116,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 117,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 117,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 118,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 118,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Compile REPEAT",
+    "line": 120,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "REPEAT (3) as i ",
+    "line": 121,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 121,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 121,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "function repeat",
+    "line": 122,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 122,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 122,
+    "column": 22
+  },
+  {
+    "type": 5,
+    "line": 122,
+    "column": 23
+  },
+  {
+    "type": 1,
+    "line": 122,
+    "column": 24
+  },
+  {
+    "type": 0,
+    "content": "say repeat ",
+    "line": 123,
+    "column": 3
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 123,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 123,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 124,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 124,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 125,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 125,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "REPEAT(3)as i",
+    "line": 126,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 126,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 126,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "function repeat",
+    "line": 127,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 127,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 127,
+    "column": 22
+  },
+  {
+    "type": 5,
+    "line": 127,
+    "column": 23
+  },
+  {
+    "type": 1,
+    "line": 127,
+    "column": 24
+  },
+  {
+    "type": 0,
+    "content": "say repeat ",
+    "line": 128,
+    "column": 3
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 128,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 128,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 129,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 129,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 130,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 130,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "function repeat ",
+    "line": 131,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 131,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 131,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "REPEAT (3) as i ",
+    "line": 132,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 132,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 132,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "say repeat ",
+    "line": 133,
+    "column": 3
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 133,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 133,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 134,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 134,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "REPEAT(3)as i",
+    "line": 135,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 135,
+    "column": 15
+  },
+  {
+    "type": 1,
+    "line": 135,
+    "column": 16
+  },
+  {
+    "type": 0,
+    "content": "say repeat ",
+    "line": 136,
+    "column": 3
+  },
+  {
+    "type": 9,
+    "content": "i",
+    "line": 136,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 136,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 137,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 137,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 138,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 138,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Directories",
+    "line": 140,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "dir mcb ",
+    "line": 141,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 141,
+    "column": 9
+  },
+  {
+    "type": 1,
+    "line": 141,
+    "column": 10
+  },
+  {
+    "type": 0,
+    "content": "function test ",
+    "line": 142,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 142,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 142,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say in mcb dir",
+    "line": 143,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 143,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 144,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 144,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "dir subdir ",
+    "line": 145,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 145,
+    "column": 13
+  },
+  {
+    "type": 1,
+    "line": 145,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "function test ",
+    "line": 146,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 146,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 146,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say in subdir",
+    "line": 147,
+    "column": 4
+  },
+  {
+    "type": 1,
+    "line": 147,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 148,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 148,
+    "column": 4
+  },
+  {
+    "type": 6,
+    "line": 149,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 149,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 150,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 150,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "dir mcb_nospace",
+    "line": 151,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 151,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 151,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "function test ",
+    "line": 152,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 152,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 152,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say in mcb dir",
+    "line": 153,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 153,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 154,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 154,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "dir subdir",
+    "line": 155,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 155,
+    "column": 12
+  },
+  {
+    "type": 1,
+    "line": 155,
+    "column": 13
+  },
+  {
+    "type": 0,
+    "content": "function test ",
+    "line": 156,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 156,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 156,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say in subdir",
+    "line": 157,
+    "column": 4
+  },
+  {
+    "type": 1,
+    "line": 157,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 158,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 158,
+    "column": 4
+  },
+  {
+    "type": 6,
+    "line": 159,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 159,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 160,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 160,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Execute run",
+    "line": 162,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function execute_run ",
+    "line": 163,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 163,
+    "column": 22
+  },
+  {
+    "type": 1,
+    "line": 163,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run ",
+    "line": 164,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 164,
+    "column": 49
+  },
+  {
+    "type": 1,
+    "line": 164,
+    "column": 50
+  },
+  {
+    "type": 0,
+    "content": "say execute run block",
+    "line": 165,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 165,
+    "column": 24
+  },
+  {
+    "type": 6,
+    "line": 166,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 166,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run ",
+    "line": 167,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 167,
+    "column": 49
+  },
+  {
+    "type": 0,
+    "content": " ",
+    "line": 167,
+    "column": 50
+  },
+  {
+    "type": 5,
+    "line": 167,
+    "column": 51
+  },
+  {
+    "type": 0,
+    "content": "a: 1, b: 2, c: 3",
+    "line": 167,
+    "column": 52
+  },
+  {
+    "type": 6,
+    "line": 167,
+    "column": 68
+  },
+  {
+    "type": 1,
+    "line": 167,
+    "column": 69
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 168,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 168,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 169,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 169,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run ",
+    "line": 170,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 170,
+    "column": 49
+  },
+  {
+    "type": 0,
+    "content": " with storage mcb:data test.path",
+    "line": 170,
+    "column": 50
+  },
+  {
+    "type": 7,
+    "line": 170,
+    "column": 82
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 170,
+    "column": 83
+  },
+  {
+    "type": 8,
+    "line": 170,
+    "column": 84
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 170,
+    "column": 85
+  },
+  {
+    "type": 1,
+    "line": 170,
+    "column": 90
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 171,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 171,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 172,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 172,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run",
+    "line": 174,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 174,
+    "column": 48
+  },
+  {
+    "type": 1,
+    "line": 174,
+    "column": 49
+  },
+  {
+    "type": 0,
+    "content": "say execute run block",
+    "line": 175,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 175,
+    "column": 24
+  },
+  {
+    "type": 6,
+    "line": 176,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 176,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run",
+    "line": 177,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 177,
+    "column": 48
+  },
+  {
+    "type": 5,
+    "line": 177,
+    "column": 49
+  },
+  {
+    "type": 0,
+    "content": "a:1,b:2,c:3",
+    "line": 177,
+    "column": 50
+  },
+  {
+    "type": 6,
+    "line": 177,
+    "column": 61
+  },
+  {
+    "type": 1,
+    "line": 177,
+    "column": 62
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 178,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 178,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 179,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 179,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #success v matches 1.. run",
+    "line": 180,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 180,
+    "column": 48
+  },
+  {
+    "type": 0,
+    "content": "with storage mcb:data test.path",
+    "line": 180,
+    "column": 49
+  },
+  {
+    "type": 7,
+    "line": 180,
+    "column": 80
+  },
+  {
+    "type": 0,
+    "content": "0",
+    "line": 180,
+    "column": 81
+  },
+  {
+    "type": 8,
+    "line": 180,
+    "column": 82
+  },
+  {
+    "type": 0,
+    "content": ".name",
+    "line": 180,
+    "column": 83
+  },
+  {
+    "type": 1,
+    "line": 180,
+    "column": 88
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 181,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 181,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 182,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 182,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 183,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 183,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Execute if / else",
+    "line": 185,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function execute_if_else ",
+    "line": 186,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 186,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 186,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #condition v matches 1.. run ",
+    "line": 187,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 187,
+    "column": 51
+  },
+  {
+    "type": 1,
+    "line": 187,
+    "column": 52
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 188,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 188,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 189,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " else run ",
+    "line": 189,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 189,
+    "column": 13
+  },
+  {
+    "type": 1,
+    "line": 189,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "say execute else",
+    "line": 190,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 190,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 191,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 191,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #condition v matches 1.. run ",
+    "line": 192,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 192,
+    "column": 51
+  },
+  {
+    "type": 1,
+    "line": 192,
+    "column": 52
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 193,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 193,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 194,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " else execute if score @s #other_condition v matches 1.. run ",
+    "line": 194,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 194,
+    "column": 64
+  },
+  {
+    "type": 1,
+    "line": 194,
+    "column": 65
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 195,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 195,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 196,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " else run ",
+    "line": 196,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 196,
+    "column": 13
+  },
+  {
+    "type": 1,
+    "line": 196,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "say execute else",
+    "line": 197,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 197,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 198,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 198,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #condition v matches 1.. run",
+    "line": 200,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 200,
+    "column": 50
+  },
+  {
+    "type": 1,
+    "line": 200,
+    "column": 51
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 201,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 201,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 202,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "else run",
+    "line": 202,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 202,
+    "column": 11
+  },
+  {
+    "type": 1,
+    "line": 202,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": "say execute else",
+    "line": 203,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 203,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 204,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 204,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if score @s #condition v matches 1.. run",
+    "line": 205,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 205,
+    "column": 50
+  },
+  {
+    "type": 1,
+    "line": 205,
+    "column": 51
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 206,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 206,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 207,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "else execute if score @s #other_condition v matches 1.. run",
+    "line": 207,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 207,
+    "column": 62
+  },
+  {
+    "type": 1,
+    "line": 207,
+    "column": 63
+  },
+  {
+    "type": 0,
+    "content": "say execute if",
+    "line": 208,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 208,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 209,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "else run",
+    "line": 209,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 209,
+    "column": 11
+  },
+  {
+    "type": 1,
+    "line": 209,
+    "column": 12
+  },
+  {
+    "type": 0,
+    "content": "say execute else",
+    "line": 210,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 210,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 211,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 211,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 212,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 212,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Execute if / unless function",
+    "line": 214,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function execute_if_unless_function ",
+    "line": 215,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 215,
+    "column": 37
+  },
+  {
+    "type": 1,
+    "line": 215,
+    "column": 38
+  },
+  {
+    "type": 0,
+    "content": "execute if function ",
+    "line": 216,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 216,
+    "column": 22
+  },
+  {
+    "type": 1,
+    "line": 216,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "say execute if function",
+    "line": 217,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 217,
+    "column": 26
+  },
+  {
+    "type": 6,
+    "line": 218,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " run ",
+    "line": 218,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 218,
+    "column": 8
+  },
+  {
+    "type": 1,
+    "line": 218,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 219,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 219,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 220,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 220,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute unless function ",
+    "line": 221,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 221,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 221,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "say execute unless function",
+    "line": 222,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 222,
+    "column": 30
+  },
+  {
+    "type": 6,
+    "line": 223,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": " run ",
+    "line": 223,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 223,
+    "column": 8
+  },
+  {
+    "type": 1,
+    "line": 223,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 224,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 224,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 225,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 225,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute if function",
+    "line": 227,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 227,
+    "column": 21
+  },
+  {
+    "type": 1,
+    "line": 227,
+    "column": 22
+  },
+  {
+    "type": 0,
+    "content": "say execute if function",
+    "line": 228,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 228,
+    "column": 26
+  },
+  {
+    "type": 6,
+    "line": 229,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "run",
+    "line": 229,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 229,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 229,
+    "column": 7
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 230,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 230,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 231,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 231,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "execute unless function",
+    "line": 232,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 232,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 232,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "say execute unless function",
+    "line": 233,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 233,
+    "column": 30
+  },
+  {
+    "type": 6,
+    "line": 234,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "run",
+    "line": 234,
+    "column": 3
+  },
+  {
+    "type": 5,
+    "line": 234,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 234,
+    "column": 7
+  },
+  {
+    "type": 0,
+    "content": "say success",
+    "line": 235,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 235,
+    "column": 14
+  },
+  {
+    "type": 6,
+    "line": 236,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 236,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 237,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 237,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Function Calls",
+    "line": 239,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function function_calls ",
+    "line": 240,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 240,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 240,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "block child ",
+    "line": 241,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 241,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 241,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "function ^1",
+    "line": 242,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 242,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "function ^0",
+    "line": 243,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 243,
+    "column": 14
+  },
+  {
+    "type": 0,
+    "content": "function *foo/bar",
+    "line": 244,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 244,
+    "column": 20
+  },
+  {
+    "type": 0,
+    "content": "function ../parent/path",
+    "line": 245,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 245,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "function ./relative/path",
+    "line": 246,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 246,
+    "column": 27
+  },
+  {
+    "type": 6,
+    "line": 247,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 247,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "function ^0",
+    "line": 248,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 248,
+    "column": 13
+  },
+  {
+    "type": 0,
+    "content": "function *foo/bar",
+    "line": 249,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 249,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "function ./relative/path",
+    "line": 250,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 250,
+    "column": 26
+  },
+  {
+    "type": 6,
+    "line": 251,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 251,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Imports",
+    "line": 253,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "import ./foo/my_script.js",
+    "line": 254,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 254,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "import ./bar/my_template.mcbt",
+    "line": 255,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 255,
+    "column": 30
+  },
+  {
+    "type": 2,
+    "content": "# JavaScript Blocks, and Contexts",
+    "line": 257,
+    "column": 1
+  },
+  {
+    "type": 2,
+    "content": "# Petition to rename these to Script Blocks",
+    "line": 258,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function inline_js_blocks ",
+    "line": 259,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 259,
+    "column": 27
+  },
+  {
+    "type": 1,
+    "line": 259,
+    "column": 28
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 260,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "   10 ** 2   ",
+    "line": 260,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 260,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 261,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "   0x00ACED   ",
+    "line": 261,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 261,
+    "column": 24
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 262,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "   config.dev   ",
+    "line": 262,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 262,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 264,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "10 ** 2",
+    "line": 264,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 264,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 265,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "0x00ACED",
+    "line": 265,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 265,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say ",
+    "line": 266,
+    "column": 2
+  },
+  {
+    "type": 9,
+    "content": "config.dev",
+    "line": 266,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 266,
+    "column": 20
+  },
+  {
+    "type": 6,
+    "line": 267,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 267,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "function multiline_js_blocks ",
+    "line": 268,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 268,
+    "column": 30
+  },
+  {
+    "type": 1,
+    "line": 268,
+    "column": 31
+  },
+  {
+    "type": 10,
+    "content": "\n\t\temit('say hi')\n\t\temit.mcb('function inside_multiline_js_block {\\n\\tsay hello from the other side\\n}')\n\t\temit.block(commands:['say hi', 'say hi1', 'say hi2'])\n\t\tconsole.log(config)\n\t\tconsole.log(context)\n\t\tembed(/* TODO - Define embeddedBlock */embeddedBlock)\n\t\trequire('./some/other/script.js')\n\t",
+    "line": 269,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 277,
+    "column": 5
+  },
+  {
+    "type": 6,
+    "line": 278,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 278,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# JSON Files",
+    "line": 280,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "advancement my_advancement ",
+    "line": 282,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 282,
+    "column": 28
+  },
+  {
+    "type": 1,
+    "line": 282,
+    "column": 29
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 283,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 283,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 284,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 284,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "enchantment my_enchantment ",
+    "line": 285,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 285,
+    "column": 28
+  },
+  {
+    "type": 1,
+    "line": 285,
+    "column": 29
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 286,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 286,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 287,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 287,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "item_modifier my_item_modifier ",
+    "line": 288,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 288,
+    "column": 32
+  },
+  {
+    "type": 1,
+    "line": 288,
+    "column": 33
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 289,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 289,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 290,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 290,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "loot_table my_loot_table ",
+    "line": 291,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 291,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 291,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 292,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 292,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 293,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 293,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "predicate my_predicate ",
+    "line": 294,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 294,
+    "column": 24
+  },
+  {
+    "type": 1,
+    "line": 294,
+    "column": 25
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 295,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 295,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 296,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 296,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "recipe my_recipe ",
+    "line": 297,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 297,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 297,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 298,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 298,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 299,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 299,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "chat_type my_chat_type ",
+    "line": 300,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 300,
+    "column": 24
+  },
+  {
+    "type": 1,
+    "line": 300,
+    "column": 25
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 301,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 301,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 302,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 302,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "damage_type my_damage_type ",
+    "line": 303,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 303,
+    "column": 28
+  },
+  {
+    "type": 1,
+    "line": 303,
+    "column": 29
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 304,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 304,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 305,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 305,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "dimension my_dimension ",
+    "line": 306,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 306,
+    "column": 24
+  },
+  {
+    "type": 1,
+    "line": 306,
+    "column": 25
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 307,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 307,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 308,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 308,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "dimension_type my_dimension_type ",
+    "line": 309,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 309,
+    "column": 34
+  },
+  {
+    "type": 1,
+    "line": 309,
+    "column": 35
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 310,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 310,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 311,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 311,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen biome my_biome ",
+    "line": 312,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 312,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 312,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 313,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 313,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 314,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 314,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen configured_carver my_configured_carver ",
+    "line": 315,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 315,
+    "column": 49
+  },
+  {
+    "type": 1,
+    "line": 315,
+    "column": 50
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 316,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 316,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 317,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 317,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen configured_feature my_configured_feature ",
+    "line": 318,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 318,
+    "column": 51
+  },
+  {
+    "type": 1,
+    "line": 318,
+    "column": 52
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 319,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 319,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 320,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 320,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen density_function my_density_function ",
+    "line": 321,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 321,
+    "column": 47
+  },
+  {
+    "type": 1,
+    "line": 321,
+    "column": 48
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 322,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 322,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 323,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 323,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen noise my_noise ",
+    "line": 324,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 324,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 324,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 325,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 325,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 326,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 326,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen noise_settings my_noise_settings ",
+    "line": 327,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 327,
+    "column": 43
+  },
+  {
+    "type": 1,
+    "line": 327,
+    "column": 44
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 328,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 328,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 329,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 329,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen placed_feature my_placed_feature ",
+    "line": 330,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 330,
+    "column": 43
+  },
+  {
+    "type": 1,
+    "line": 330,
+    "column": 44
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 331,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 331,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 332,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 332,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen processor_list my_processor_list ",
+    "line": 333,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 333,
+    "column": 43
+  },
+  {
+    "type": 1,
+    "line": 333,
+    "column": 44
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 334,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 334,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 335,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 335,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen structure my_structure ",
+    "line": 336,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 336,
+    "column": 33
+  },
+  {
+    "type": 1,
+    "line": 336,
+    "column": 34
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 337,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 337,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 338,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 338,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen structure_set my_structure_set ",
+    "line": 339,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 339,
+    "column": 41
+  },
+  {
+    "type": 1,
+    "line": 339,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 340,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 340,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 341,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 341,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen template_pool my_template_pool ",
+    "line": 342,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 342,
+    "column": 41
+  },
+  {
+    "type": 1,
+    "line": 342,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 343,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 343,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 344,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 344,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen world_preset my_world_preset ",
+    "line": 345,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 345,
+    "column": 39
+  },
+  {
+    "type": 1,
+    "line": 345,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 346,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 346,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 347,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 347,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "worldgen flat_level_generator_preset my_flat_level_generator_preset ",
+    "line": 348,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 348,
+    "column": 69
+  },
+  {
+    "type": 1,
+    "line": 348,
+    "column": 70
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 349,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 349,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 350,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 350,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "advancement my_advancement",
+    "line": 351,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 351,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 351,
+    "column": 28
+  },
+  {
+    "type": 6,
+    "line": 351,
+    "column": 45
+  },
+  {
+    "type": 1,
+    "line": 351,
+    "column": 46
+  },
+  {
+    "type": 0,
+    "content": "enchantment my_enchantment",
+    "line": 352,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 352,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 352,
+    "column": 28
+  },
+  {
+    "type": 6,
+    "line": 352,
+    "column": 45
+  },
+  {
+    "type": 1,
+    "line": 352,
+    "column": 46
+  },
+  {
+    "type": 0,
+    "content": "item_modifier my_item_modifier",
+    "line": 353,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 353,
+    "column": 31
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 353,
+    "column": 32
+  },
+  {
+    "type": 6,
+    "line": 353,
+    "column": 49
+  },
+  {
+    "type": 1,
+    "line": 353,
+    "column": 50
+  },
+  {
+    "type": 0,
+    "content": "loot_table my_loot_table",
+    "line": 354,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 354,
+    "column": 25
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 354,
+    "column": 26
+  },
+  {
+    "type": 6,
+    "line": 354,
+    "column": 43
+  },
+  {
+    "type": 1,
+    "line": 354,
+    "column": 44
+  },
+  {
+    "type": 0,
+    "content": "predicate my_predicate",
+    "line": 355,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 355,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 355,
+    "column": 24
+  },
+  {
+    "type": 6,
+    "line": 355,
+    "column": 41
+  },
+  {
+    "type": 1,
+    "line": 355,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "recipe my_recipe",
+    "line": 356,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 356,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 356,
+    "column": 18
+  },
+  {
+    "type": 6,
+    "line": 356,
+    "column": 35
+  },
+  {
+    "type": 1,
+    "line": 356,
+    "column": 36
+  },
+  {
+    "type": 0,
+    "content": "chat_type my_chat_type",
+    "line": 357,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 357,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 357,
+    "column": 24
+  },
+  {
+    "type": 6,
+    "line": 357,
+    "column": 41
+  },
+  {
+    "type": 1,
+    "line": 357,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "damage_type my_damage_type",
+    "line": 358,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 358,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 358,
+    "column": 28
+  },
+  {
+    "type": 6,
+    "line": 358,
+    "column": 45
+  },
+  {
+    "type": 1,
+    "line": 358,
+    "column": 46
+  },
+  {
+    "type": 0,
+    "content": "dimension my_dimension",
+    "line": 359,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 359,
+    "column": 23
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 359,
+    "column": 24
+  },
+  {
+    "type": 6,
+    "line": 359,
+    "column": 41
+  },
+  {
+    "type": 1,
+    "line": 359,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "dimension_type my_dimension_type",
+    "line": 360,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 360,
+    "column": 33
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 360,
+    "column": 34
+  },
+  {
+    "type": 6,
+    "line": 360,
+    "column": 51
+  },
+  {
+    "type": 1,
+    "line": 360,
+    "column": 52
+  },
+  {
+    "type": 0,
+    "content": "worldgen biome my_biome",
+    "line": 361,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 361,
+    "column": 24
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 361,
+    "column": 25
+  },
+  {
+    "type": 6,
+    "line": 361,
+    "column": 42
+  },
+  {
+    "type": 1,
+    "line": 361,
+    "column": 43
+  },
+  {
+    "type": 0,
+    "content": "worldgen configured_carver my_configured_carver",
+    "line": 362,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 362,
+    "column": 48
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 362,
+    "column": 49
+  },
+  {
+    "type": 6,
+    "line": 362,
+    "column": 66
+  },
+  {
+    "type": 1,
+    "line": 362,
+    "column": 67
+  },
+  {
+    "type": 0,
+    "content": "worldgen configured_feature my_configured_feature",
+    "line": 363,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 363,
+    "column": 50
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 363,
+    "column": 51
+  },
+  {
+    "type": 6,
+    "line": 363,
+    "column": 68
+  },
+  {
+    "type": 1,
+    "line": 363,
+    "column": 69
+  },
+  {
+    "type": 0,
+    "content": "worldgen density_function my_density_function",
+    "line": 364,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 364,
+    "column": 46
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 364,
+    "column": 47
+  },
+  {
+    "type": 6,
+    "line": 364,
+    "column": 64
+  },
+  {
+    "type": 1,
+    "line": 364,
+    "column": 65
+  },
+  {
+    "type": 0,
+    "content": "worldgen noise my_noise",
+    "line": 365,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 365,
+    "column": 24
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 365,
+    "column": 25
+  },
+  {
+    "type": 6,
+    "line": 365,
+    "column": 42
+  },
+  {
+    "type": 1,
+    "line": 365,
+    "column": 43
+  },
+  {
+    "type": 0,
+    "content": "worldgen noise_settings my_noise_settings",
+    "line": 366,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 366,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 366,
+    "column": 43
+  },
+  {
+    "type": 6,
+    "line": 366,
+    "column": 60
+  },
+  {
+    "type": 1,
+    "line": 366,
+    "column": 61
+  },
+  {
+    "type": 0,
+    "content": "worldgen placed_feature my_placed_feature",
+    "line": 367,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 367,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 367,
+    "column": 43
+  },
+  {
+    "type": 6,
+    "line": 367,
+    "column": 60
+  },
+  {
+    "type": 1,
+    "line": 367,
+    "column": 61
+  },
+  {
+    "type": 0,
+    "content": "worldgen processor_list my_processor_list",
+    "line": 368,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 368,
+    "column": 42
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 368,
+    "column": 43
+  },
+  {
+    "type": 6,
+    "line": 368,
+    "column": 60
+  },
+  {
+    "type": 1,
+    "line": 368,
+    "column": 61
+  },
+  {
+    "type": 0,
+    "content": "worldgen structure my_structure",
+    "line": 369,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 369,
+    "column": 32
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 369,
+    "column": 33
+  },
+  {
+    "type": 6,
+    "line": 369,
+    "column": 50
+  },
+  {
+    "type": 1,
+    "line": 369,
+    "column": 51
+  },
+  {
+    "type": 0,
+    "content": "worldgen structure_set my_structure_set",
+    "line": 370,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 370,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 370,
+    "column": 41
+  },
+  {
+    "type": 6,
+    "line": 370,
+    "column": 58
+  },
+  {
+    "type": 1,
+    "line": 370,
+    "column": 59
+  },
+  {
+    "type": 0,
+    "content": "worldgen template_pool my_template_pool",
+    "line": 371,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 371,
+    "column": 40
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 371,
+    "column": 41
+  },
+  {
+    "type": 6,
+    "line": 371,
+    "column": 58
+  },
+  {
+    "type": 1,
+    "line": 371,
+    "column": 59
+  },
+  {
+    "type": 0,
+    "content": "worldgen world_preset my_world_preset",
+    "line": 372,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 372,
+    "column": 38
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 372,
+    "column": 39
+  },
+  {
+    "type": 6,
+    "line": 372,
+    "column": 56
+  },
+  {
+    "type": 1,
+    "line": 372,
+    "column": 57
+  },
+  {
+    "type": 0,
+    "content": "worldgen flat_level_generator_preset my_flat_level_generator_preset",
+    "line": 373,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 373,
+    "column": 68
+  },
+  {
+    "type": 0,
+    "content": "\"something\": true",
+    "line": 373,
+    "column": 69
+  },
+  {
+    "type": 6,
+    "line": 373,
+    "column": 86
+  },
+  {
+    "type": 1,
+    "line": 373,
+    "column": 87
+  },
+  {
+    "type": 2,
+    "content": "# Tags",
+    "line": 375,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "tag function foo ",
+    "line": 376,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 376,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 376,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 377,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 377,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 378,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 378,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 379,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 379,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag functions namespace:foo ",
+    "line": 380,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 380,
+    "column": 29
+  },
+  {
+    "type": 1,
+    "line": 380,
+    "column": 30
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 381,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 381,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 382,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 382,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 383,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 383,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag block foo ",
+    "line": 384,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 384,
+    "column": 15
+  },
+  {
+    "type": 1,
+    "line": 384,
+    "column": 16
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 385,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 385,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 386,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 386,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 387,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 387,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag blocks namespace:foo ",
+    "line": 388,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 388,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 388,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 389,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 389,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 390,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 390,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 391,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 391,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag function foo",
+    "line": 392,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 392,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 392,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 393,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 393,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 394,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 394,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 395,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 395,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag functions namespace:foo",
+    "line": 396,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 396,
+    "column": 28
+  },
+  {
+    "type": 1,
+    "line": 396,
+    "column": 29
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 397,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 397,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 398,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 398,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 399,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 399,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag block foo",
+    "line": 400,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 400,
+    "column": 14
+  },
+  {
+    "type": 1,
+    "line": 400,
+    "column": 15
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 401,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 401,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 402,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 402,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 403,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 403,
+    "column": 2
+  },
+  {
+    "type": 0,
+    "content": "tag blocks namespace:foo",
+    "line": 404,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 404,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 404,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "foo:bar",
+    "line": 405,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 405,
+    "column": 9
+  },
+  {
+    "type": 0,
+    "content": "#baz:qux",
+    "line": 406,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 406,
+    "column": 10
+  },
+  {
+    "type": 6,
+    "line": 407,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 407,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Templates",
+    "line": 409,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function templates ",
+    "line": 410,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 410,
+    "column": 20
+  },
+  {
+    "type": 1,
+    "line": 410,
+    "column": 21
+  },
+  {
+    "type": 0,
+    "content": "template my_template has 3 arguments",
+    "line": 411,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 411,
+    "column": 38
+  },
+  {
+    "type": 0,
+    "content": "my_template has 3 arguments",
+    "line": 412,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 412,
+    "column": 29
+  },
+  {
+    "type": 6,
+    "line": 413,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 413,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Tick and Load Blocks",
+    "line": 415,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function tick_and_load_blocks ",
+    "line": 416,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 416,
+    "column": 31
+  },
+  {
+    "type": 1,
+    "line": 416,
+    "column": 32
+  },
+  {
+    "type": 0,
+    "content": "tick ",
+    "line": 417,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 417,
+    "column": 7
+  },
+  {
+    "type": 1,
+    "line": 417,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": "say tick block",
+    "line": 418,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 418,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 419,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 419,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "load ",
+    "line": 420,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 420,
+    "column": 7
+  },
+  {
+    "type": 1,
+    "line": 420,
+    "column": 8
+  },
+  {
+    "type": 0,
+    "content": "say load block",
+    "line": 421,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 421,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 422,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 422,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "tick",
+    "line": 423,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 423,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 423,
+    "column": 7
+  },
+  {
+    "type": 0,
+    "content": "say tick block",
+    "line": 424,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 424,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 425,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 425,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "load",
+    "line": 426,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 426,
+    "column": 6
+  },
+  {
+    "type": 1,
+    "line": 426,
+    "column": 7
+  },
+  {
+    "type": 0,
+    "content": "say load block",
+    "line": 427,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 427,
+    "column": 17
+  },
+  {
+    "type": 6,
+    "line": 428,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 428,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 429,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 429,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Schedule Blocks",
+    "line": 431,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function schedule_blocks ",
+    "line": 432,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 432,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 432,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1 ",
+    "line": 433,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 433,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 433,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say 1 tick no suffix",
+    "line": 434,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 434,
+    "column": 23
+  },
+  {
+    "type": 6,
+    "line": 435,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 435,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1t ",
+    "line": 436,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 436,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 436,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "say 1 tick",
+    "line": 437,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 437,
+    "column": 13
+  },
+  {
+    "type": 6,
+    "line": 438,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 438,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1s ",
+    "line": 439,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 439,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 439,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "say 1 second",
+    "line": 440,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 440,
+    "column": 15
+  },
+  {
+    "type": 6,
+    "line": 441,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 441,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d ",
+    "line": 442,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 442,
+    "column": 18
+  },
+  {
+    "type": 1,
+    "line": 442,
+    "column": 19
+  },
+  {
+    "type": 0,
+    "content": "say 1 day",
+    "line": 443,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 443,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 444,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 444,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d replace ",
+    "line": 445,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 445,
+    "column": 26
+  },
+  {
+    "type": 1,
+    "line": 445,
+    "column": 27
+  },
+  {
+    "type": 0,
+    "content": "say 1 day replace",
+    "line": 446,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 446,
+    "column": 20
+  },
+  {
+    "type": 6,
+    "line": 447,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 447,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d append ",
+    "line": 448,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 448,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 448,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "say 1 day append",
+    "line": 449,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 449,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 450,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 450,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1",
+    "line": 451,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 451,
+    "column": 16
+  },
+  {
+    "type": 1,
+    "line": 451,
+    "column": 17
+  },
+  {
+    "type": 0,
+    "content": "say 1 tick no suffix",
+    "line": 452,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 452,
+    "column": 23
+  },
+  {
+    "type": 6,
+    "line": 453,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 453,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1t",
+    "line": 454,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 454,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 454,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say 1 tick",
+    "line": 455,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 455,
+    "column": 13
+  },
+  {
+    "type": 6,
+    "line": 456,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 456,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1s",
+    "line": 457,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 457,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 457,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say 1 second",
+    "line": 458,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 458,
+    "column": 15
+  },
+  {
+    "type": 6,
+    "line": 459,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 459,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d",
+    "line": 460,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 460,
+    "column": 17
+  },
+  {
+    "type": 1,
+    "line": 460,
+    "column": 18
+  },
+  {
+    "type": 0,
+    "content": "say 1 day",
+    "line": 461,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 461,
+    "column": 12
+  },
+  {
+    "type": 6,
+    "line": 462,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 462,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d replace",
+    "line": 463,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 463,
+    "column": 25
+  },
+  {
+    "type": 1,
+    "line": 463,
+    "column": 26
+  },
+  {
+    "type": 0,
+    "content": "say 1 day replace",
+    "line": 464,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 464,
+    "column": 20
+  },
+  {
+    "type": 6,
+    "line": 465,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 465,
+    "column": 3
+  },
+  {
+    "type": 0,
+    "content": "schedule foo 1d append",
+    "line": 466,
+    "column": 2
+  },
+  {
+    "type": 5,
+    "line": 466,
+    "column": 24
+  },
+  {
+    "type": 1,
+    "line": 466,
+    "column": 25
+  },
+  {
+    "type": 0,
+    "content": "say 1 day append",
+    "line": 467,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 467,
+    "column": 19
+  },
+  {
+    "type": 6,
+    "line": 468,
+    "column": 2
+  },
+  {
+    "type": 1,
+    "line": 468,
+    "column": 3
+  },
+  {
+    "type": 6,
+    "line": 469,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 469,
+    "column": 2
+  },
+  {
+    "type": 2,
+    "content": "# Line continuations",
+    "line": 471,
+    "column": 1
+  },
+  {
+    "type": 0,
+    "content": "function line_continuations ",
+    "line": 472,
+    "column": 1
+  },
+  {
+    "type": 5,
+    "line": 472,
+    "column": 29
+  },
+  {
+    "type": 1,
+    "line": 472,
+    "column": 30
+  },
+  {
+    "type": 0,
+    "content": "say This is a long message that",
+    "line": 473,
+    "column": 2
+  },
+  {
+    "type": 4,
+    "line": 473,
+    "column": 33
+  },
+  {
+    "type": 0,
+    "content": "continues on the next line",
+    "line": 474,
+    "column": 3
+  },
+  {
+    "type": 4,
+    "line": 474,
+    "column": 29
+  },
+  {
+    "type": 0,
+    "content": "and should be treated as a single line.",
+    "line": 475,
+    "column": 3
+  },
+  {
+    "type": 1,
+    "line": 475,
+    "column": 42
+  },
+  {
+    "type": 6,
+    "line": 476,
+    "column": 1
+  },
+  {
+    "type": 1,
+    "line": 476,
+    "column": 2
+  }
+]
