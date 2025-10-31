@@ -1,0 +1,476 @@
+# Contains all `.mcb` file syntax
+
+###
+Multi-line Comments
+
+function basic_definition {
+	say basic definition
+}
+###
+
+# Function Definitions
+function basic_definition {
+	say basic definition
+}
+function add_to_tag minecraft:tick {
+	say add to tag
+}
+function add_to_tag_no_namespace tick {
+	say add to tag no namespace
+}
+
+# Blocks
+function blocks {
+	# Max whitespace
+	{
+		say anonymous block
+	}
+	block {
+		say anonymous block with keyword
+	}
+	block foo {
+		say named block
+	}
+	{ { boo: 1, bar: 2, baz: 3 }
+		say anonymous block
+	}
+	block { { boo: 1, bar: 2, baz: 3 }
+		say anonymous block with keyword
+	}
+	block foo { { boo: 1, bar: 2, baz: 3 }
+		say named block
+	}
+	{ with storage mcb:data test.path[0].name
+		say anonymous block
+	}
+	block { with storage mcb:data test.path[0].name
+		say anonymous block with keyword
+	}
+	block foo { with storage mcb:data test.path[0].name
+		say named block
+	}
+	# Min Whitespace
+	{{boo:1,bar:2,baz:3}
+		say anonymous block
+	}
+	block {{boo:1,bar:2,baz:3}
+		say anonymous block with keyword
+	}
+	block foo {{boo:1,bar:2,baz:3}
+		say named block
+	}
+	{with storage mcb:data test.path[0].name
+		say anonymous block
+	}
+	block {with storage mcb:data test.path[0].name
+		say anonymous block with keyword
+	}
+	block foo {with storage mcb:data test.path[0].name
+		say named block
+	}
+}
+
+# Clocks
+clock foo 1t {
+	say tick clock
+}
+clock foo 1s {
+	say second clock
+}
+clock foo 1d {
+	say day clock
+}
+clock foo 1t{
+	say tick clock
+}
+
+# Compile IF / ELSE
+
+IF (true) {
+	function true {
+		say true
+	}
+} ELSE {
+	function false {
+		say false
+	}
+}
+IF(true){
+	function true {
+		say true
+	}
+}ELSE{
+	function false {
+		say false
+	}
+}
+function test_compile_if_else {
+	IF (true) {
+		say true
+	} ELSE {
+		say false
+	}
+	IF(true){
+		say true
+	}ELSE{
+		say false
+	}
+}
+
+# Compile REPEAT
+REPEAT (3) as i {
+	function repeat<%i%> {
+		say repeat <%i%>
+	}
+}
+REPEAT(3)as i{
+	function repeat<%i%> {
+		say repeat <%i%>
+	}
+}
+function repeat {
+	REPEAT (3) as i {
+		say repeat <%i%>
+	}
+	REPEAT(3)as i{
+		say repeat <%i%>
+	}
+}
+
+# Directories
+dir mcb {
+	function test {
+		say in mcb dir
+	}
+	dir subdir {
+		function test {
+			say in subdir
+		}
+	}
+}
+dir mcb_nospace{
+	function test {
+		say in mcb dir
+	}
+	dir subdir{
+		function test {
+			say in subdir
+		}
+	}
+}
+
+# Execute run
+function execute_run {
+	execute if score @s #success v matches 1.. run {
+		say execute run block
+	}
+	execute if score @s #success v matches 1.. run { {a: 1, b: 2, c: 3}
+		say success
+	}
+	execute if score @s #success v matches 1.. run { with storage mcb:data test.path[0].name
+		say success
+	}
+
+	execute if score @s #success v matches 1.. run{
+		say execute run block
+	}
+	execute if score @s #success v matches 1.. run{{a:1,b:2,c:3}
+		say success
+	}
+	execute if score @s #success v matches 1.. run{with storage mcb:data test.path[0].name
+		say success
+	}
+}
+
+# Execute if / else
+function execute_if_else {
+	execute if score @s #condition v matches 1.. run {
+		say execute if
+	} else run {
+		say execute else
+	}
+	execute if score @s #condition v matches 1.. run {
+		say execute if
+	} else execute if score @s #other_condition v matches 1.. run {
+		say execute if
+	} else run {
+		say execute else
+	}
+
+	execute if score @s #condition v matches 1.. run{
+		say execute if
+	}else run{
+		say execute else
+	}
+	execute if score @s #condition v matches 1.. run{
+		say execute if
+	}else execute if score @s #other_condition v matches 1.. run{
+		say execute if
+	}else run{
+		say execute else
+	}
+}
+
+# Execute if / unless function
+function execute_if_unless_function {
+	execute if function {
+		say execute if function
+	} run {
+		say success
+	}
+	execute unless function {
+		say execute unless function
+	} run {
+		say success
+	}
+
+	execute if function{
+		say execute if function
+	}run{
+		say success
+	}
+	execute unless function{
+		say execute unless function
+	}run{
+		say success
+	}
+}
+
+# Function Calls
+function function_calls {
+	block child {
+		function ^1
+		function ^0
+		function *foo/bar
+		function ../parent/path
+		function ./relative/path
+	}
+	function ^0
+	function *foo/bar
+	function ./relative/path
+}
+
+# Imports
+import ./foo/my_script.js
+import ./bar/my_template.mcbt
+
+# JavaScript Blocks, and Contexts
+# Petition to rename these to Script Blocks
+function inline_js_blocks {
+	say <%   10 ** 2   %>
+	say <%   0x00ACED   %>
+	say <%   config.dev   %>
+
+	say <%10 ** 2%>
+	say <%0x00ACED%>
+	say <%config.dev%>
+}
+function multiline_js_blocks {
+	<%%
+		emit('say hi')
+		emit.mcb('function inside_multiline_js_block {\n\tsay hello from the other side\n}')
+		emit.block(commands:['say hi', 'say hi1', 'say hi2'])
+		console.log(config)
+		console.log(context)
+		embed(/* TODO - Define embeddedBlock */embeddedBlock)
+		require('./some/other/script.js')
+	%%>
+}
+
+# JSON Files
+
+advancement my_advancement {
+	"something": true
+}
+enchantment my_enchantment {
+	"something": true
+}
+item_modifier my_item_modifier {
+	"something": true
+}
+loot_table my_loot_table {
+	"something": true
+}
+predicate my_predicate {
+	"something": true
+}
+recipe my_recipe {
+	"something": true
+}
+chat_type my_chat_type {
+	"something": true
+}
+damage_type my_damage_type {
+	"something": true
+}
+dimension my_dimension {
+	"something": true
+}
+dimension_type my_dimension_type {
+	"something": true
+}
+worldgen biome my_biome {
+	"something": true
+}
+worldgen configured_carver my_configured_carver {
+	"something": true
+}
+worldgen configured_feature my_configured_feature {
+	"something": true
+}
+worldgen density_function my_density_function {
+	"something": true
+}
+worldgen noise my_noise {
+	"something": true
+}
+worldgen noise_settings my_noise_settings {
+	"something": true
+}
+worldgen placed_feature my_placed_feature {
+	"something": true
+}
+worldgen processor_list my_processor_list {
+	"something": true
+}
+worldgen structure my_structure {
+	"something": true
+}
+worldgen structure_set my_structure_set {
+	"something": true
+}
+worldgen template_pool my_template_pool {
+	"something": true
+}
+worldgen world_preset my_world_preset {
+	"something": true
+}
+worldgen flat_level_generator_preset my_flat_level_generator_preset {
+	"something": true
+}
+advancement my_advancement{"something": true}
+enchantment my_enchantment{"something": true}
+item_modifier my_item_modifier{"something": true}
+loot_table my_loot_table{"something": true}
+predicate my_predicate{"something": true}
+recipe my_recipe{"something": true}
+chat_type my_chat_type{"something": true}
+damage_type my_damage_type{"something": true}
+dimension my_dimension{"something": true}
+dimension_type my_dimension_type{"something": true}
+worldgen biome my_biome{"something": true}
+worldgen configured_carver my_configured_carver{"something": true}
+worldgen configured_feature my_configured_feature{"something": true}
+worldgen density_function my_density_function{"something": true}
+worldgen noise my_noise{"something": true}
+worldgen noise_settings my_noise_settings{"something": true}
+worldgen placed_feature my_placed_feature{"something": true}
+worldgen processor_list my_processor_list{"something": true}
+worldgen structure my_structure{"something": true}
+worldgen structure_set my_structure_set{"something": true}
+worldgen template_pool my_template_pool{"something": true}
+worldgen world_preset my_world_preset{"something": true}
+worldgen flat_level_generator_preset my_flat_level_generator_preset{"something": true}
+
+# Tags
+tag function foo {
+	foo:bar
+	#baz:qux
+}
+tag functions namespace:foo {
+	foo:bar
+	#baz:qux
+}
+tag block foo {
+	foo:bar
+	#baz:qux
+}
+tag blocks namespace:foo {
+	foo:bar
+	#baz:qux
+}
+tag function foo{
+	foo:bar
+	#baz:qux
+}
+tag functions namespace:foo{
+	foo:bar
+	#baz:qux
+}
+tag block foo{
+	foo:bar
+	#baz:qux
+}
+tag blocks namespace:foo{
+	foo:bar
+	#baz:qux
+}
+
+# Templates
+function templates {
+	template my_template has 3 arguments
+	my_template has 3 arguments
+}
+
+# Tick and Load Blocks
+function tick_and_load_blocks {
+	tick {
+		say tick block
+	}
+	load {
+		say load block
+	}
+	tick{
+		say tick block
+	}
+	load{
+		say load block
+	}
+}
+
+# Schedule Blocks
+function schedule_blocks {
+	schedule foo 1 {
+		say 1 tick no suffix
+	}
+	schedule foo 1t {
+		say 1 tick
+	}
+	schedule foo 1s {
+		say 1 second
+	}
+	schedule foo 1d {
+		say 1 day
+	}
+	schedule foo 1d replace {
+		say 1 day replace
+	}
+	schedule foo 1d append {
+		say 1 day append
+	}
+	schedule foo 1{
+		say 1 tick no suffix
+	}
+	schedule foo 1t{
+		say 1 tick
+	}
+	schedule foo 1s{
+		say 1 second
+	}
+	schedule foo 1d{
+		say 1 day
+	}
+	schedule foo 1d replace{
+		say 1 day replace
+	}
+	schedule foo 1d append{
+		say 1 day append
+	}
+}
+
+# Line continuations
+function line_continuations {
+	say This is a long message that \
+		continues on the next line \
+		and should be treated as a single line.
+}
