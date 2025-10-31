@@ -10,8 +10,7 @@ import {
 import { Config, IoLike, UserConfig } from "./Config";
 import { Globals } from "./Globals";
 import { Parser } from "./Parser";
-import { Token, TokenIds, PosInfo } from "./Tokenizer";
-import { Tokenizer } from "./TokenizerImpl";
+import { StreamPosition, Token, Tokenizer } from "./Tokenizer";
 import { CompilerError, ErrorUtil } from "./error/CompilerError";
 import { McbError } from "./error/McbError";
 import { StringUtils } from "../strutils/StringUtils";
@@ -79,13 +78,13 @@ export type CompilerContext = {
 	uidIndex: UidTracker;
 	variables: VariableMap;
 	replacements: VariableMap;
-	stack: (PosInfo | null)[];
+	stack: Array<StreamPosition | null>;
 	isTemplate: boolean;
 	templates: Map<string, McTemplate>;
 	requireTemplateKeyword: boolean;
 	compiler: Compiler;
 	globalVariables: VariableMap;
-	functions: (string | null)[];
+	functions: Array<string | null>;
 	currentFunction: string[] | null;
 	baseNamespaceInfo: BaseNameInfo;
 };
@@ -116,7 +115,7 @@ class McTemplate {
 		this.parse(body);
 	}
 
-	private compileArgs(args: string, pos: PosInfo): TemplateArgument[] {
+	private compileArgs(args: string, pos: StreamPosition): TemplateArgument[] {
 		const result: TemplateArgument[] = [];
 		const sections = args.split(" ");
 		let offset = 0;
@@ -125,11 +124,8 @@ class McTemplate {
 				offset++;
 				continue;
 			}
-			const argumentPos: PosInfo = {
-				file: pos.file,
-				line: pos.line,
-				col: pos.col + offset,
-			};
+			const argumentPos: StreamPosition = { ...pos };
+			argumentPos.column += offset;
 			result.push(TemplateArgument.parse(section, argumentPos));
 			offset += section.length;
 		}
@@ -332,7 +328,7 @@ class McTemplate {
 	process(
 		file: McFile,
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		value: string,
 		extras: AstNode[] | null,
 	): void {
@@ -483,7 +479,7 @@ class McTemplate {
 	transform(
 		file: McFile,
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		value: string,
 		extras: AstNode[] | null,
 	): AstNode {
@@ -745,7 +741,7 @@ export class McFile {
 		variableMap: VariableMap,
 		path: string[],
 		uidIndex: UidTracker,
-		stack: (PosInfo | null)[],
+		stack: Array<StreamPosition | null>,
 		replacements: VariableMap,
 		templates: Map<string, McTemplate>,
 		requireTemplateKeyword: boolean,
@@ -790,7 +786,7 @@ export class McFile {
 	}
 
 	createAnonymousFunction(
-		pos: PosInfo,
+		pos: StreamPosition,
 		body: AstNode[],
 		data: string | null,
 		context: CompilerContext,
@@ -869,7 +865,7 @@ export class McFile {
 	private evaluateFunctionHandle(
 		handle: string,
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		_isMacro: boolean,
 	): string {
 		let name = this.injectValues(handle, context, pos);
@@ -1514,7 +1510,7 @@ export class McFile {
 	}
 
 	private transformFunction(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		body: AstNode[],
 		appendTo: string | null,
@@ -1534,7 +1530,7 @@ export class McFile {
 	}
 
 	private compileFunction(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		body: AstNode[],
 		appendTo: string | null,
@@ -1576,7 +1572,7 @@ export class McFile {
 	}
 
 	private compileDirectory(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		body: AstNode[],
 		context: CompilerContext,
@@ -1827,7 +1823,7 @@ export class McFile {
 	private injectValues(
 		target: string | null,
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 	): string {
 		if (!target) {
 			return "";
@@ -1854,7 +1850,7 @@ export class McFile {
 					value as {
 						embedTo: (
 							ctx: CompilerContext,
-							p: PosInfo,
+							p: StreamPosition,
 							file: McFile,
 						) => unknown;
 					}
@@ -1902,7 +1898,7 @@ export class McFile {
 	static invokeExpressionInline(
 		expression: string,
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 	): unknown {
 		const variables = context.variables.get();
 		const argNames: string[] = ["context"];
@@ -1930,7 +1926,7 @@ export class McFile {
 
 	embed(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		varmap: Map<string, unknown>,
 		body: AstNode[],
 		useTld = false,
@@ -1963,7 +1959,7 @@ export class McFile {
 
 	embedTransform(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		varmap: Map<string, unknown>,
 		body: AstNode[],
 		useTld = false,
@@ -1999,7 +1995,7 @@ export class McFile {
 
 	private transformTemplate(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		value: string,
 		extras: AstNode[] | null,
 		isMacro: boolean,
@@ -2032,7 +2028,7 @@ export class McFile {
 
 	private processTemplate(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		value: string,
 		extras: AstNode[] | null,
 		isMacro: boolean,
@@ -2065,7 +2061,7 @@ export class McFile {
 		code: string,
 		isTLD = false,
 	): void {
-		const tokens = Tokenizer.tokenize(code, `<inline ${this.name}>`);
+		const tokens = new Tokenizer(code, `<inline ${this.name}>`).tokenize();
 		const astNodes = isTLD
 			? Parser.parseInlineTLD(tokens)
 			: Parser.parseInline(tokens);
@@ -2083,7 +2079,7 @@ export class McFile {
 		code: string,
 		isTLD = false,
 	): AstNode {
-		const tokens = Tokenizer.tokenize(code, `<inline ${this.name}>`);
+		const tokens = new Tokenizer(code, `<inline ${this.name}>`).tokenize();
 		const astNodes = isTLD
 			? Parser.parseInlineTLD(tokens)
 			: Parser.parseInline(tokens);
@@ -2102,7 +2098,7 @@ export class McFile {
 
 	private processMlScript(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		tokens: Token[],
 		isTLD = false,
 	): void {
@@ -2161,7 +2157,7 @@ export class McFile {
 		const embed = (value: {
 			embedTo: (
 				ctx: CompilerContext,
-				p: PosInfo,
+				p: StreamPosition,
 				file: McFile,
 				embed?: boolean,
 			) => unknown;
@@ -2218,7 +2214,7 @@ export class McFile {
 
 	private processMlScriptTransform(
 		context: CompilerContext,
-		pos: PosInfo,
+		pos: StreamPosition,
 		tokens: Token[],
 		isTLD = false,
 	): AstNode {
@@ -2296,7 +2292,7 @@ export class McFile {
 		const embed = (value: {
 			embedTo: (
 				ctx: CompilerContext,
-				p: PosInfo,
+				p: StreamPosition,
 				file: McFile,
 				actuallyEmbed?: boolean,
 			) => string;
@@ -2344,7 +2340,7 @@ export class McFile {
 			}
 			const message = error instanceof Error ? error.message : String(error);
 			throw CompilerError.create(
-				`Error in multi-line script, '${message}' at ${pos.file}:${pos.line}:${pos.col + 1}`,
+				`Error in multi-line script, '${message}' at ${pos.srcFile}:${pos.line}:${pos.column + 1}`,
 				pos,
 				context,
 			);
@@ -2354,7 +2350,7 @@ export class McFile {
 	}
 
 	private compileJsonFileImpl(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		info: JsonTagType,
 		entries: AstNode[],
@@ -2425,7 +2421,7 @@ export class McFile {
 	}
 
 	private compileJsonFile(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		info: JsonTagType,
 		context: CompilerContext,
@@ -2632,7 +2628,7 @@ export class McFile {
 		as: string[] | null,
 		context: CompilerContext,
 		body: AstNode[],
-		pos: PosInfo,
+		pos: StreamPosition,
 		handler: (ctx: CompilerContext, node: AstNode) => void,
 	): void {
 		const iterator = McFile.invokeExpressionInline(
@@ -2707,7 +2703,7 @@ export class McFile {
 	}
 
 	private stringifyJsonTag(
-		pos: PosInfo,
+		pos: StreamPosition,
 		name: string,
 		entries: AstNode[],
 		context: CompilerContext,
@@ -2774,7 +2770,7 @@ export class McFile {
 		expression: string,
 		body: AstNode[],
 		elseExpressions: CompileTimeIfElseExpressions,
-		pos: PosInfo,
+		pos: StreamPosition,
 		context: CompilerContext,
 		processNode: (node: AstNode) => AstNode,
 	): AstNode {
@@ -2800,7 +2796,7 @@ export class McFile {
 		expression: string,
 		body: AstNode[],
 		elseExpressions: CompileTimeIfElseExpressions,
-		pos: PosInfo,
+		pos: StreamPosition,
 		context: CompilerContext,
 		processNode: (node: AstNode) => void,
 	): void {

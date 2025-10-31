@@ -7,7 +7,7 @@ import chokidar from "chokidar";
 
 import { Compiler, VariableMap } from "../mcl/Compiler";
 import { TemplateRegisterer } from "../mcl/TemplateRegisterer";
-import { Tokenizer } from "../mcl/TokenizerImpl";
+import { Tokenizer } from "../mcl/Tokenizer";
 import { Parser } from "../mcl/Parser";
 import { McbError } from "../mcl/error/McbError";
 import { Logger } from "./Logger";
@@ -328,7 +328,7 @@ async function runCompile(
 
 	const handleError = (error: unknown) => {
 		didFail = true;
-		if (McbError.isMclError(error)) {
+		if (McbError.isMcbError(error)) {
 			Logger.error(error.message);
 		} else {
 			Logger.error(
@@ -410,7 +410,7 @@ export async function doBuild(opts: BuildOpts): Promise<void> {
 				Logger.warn("Build IO implementation does not support cache tracking.");
 			}
 		} catch (error) {
-			if (!McbError.isMclError(error)) {
+			if (!McbError.isMcbError(error)) {
 				throw error;
 			}
 		}
@@ -439,7 +439,7 @@ export async function doBuild(opts: BuildOpts): Promise<void> {
 		building = true;
 		performBuild()
 			.catch((error) => {
-				if (!McbError.isMclError(error)) {
+				if (!McbError.isMcbError(error)) {
 					Logger.error(error);
 				}
 			})

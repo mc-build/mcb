@@ -1,21 +1,21 @@
-import { PosInfo } from "../Tokenizer";
+import { StreamPosition } from "../StringStream";
 import { McbError } from "./McbError";
 
 export interface CompilerContextLike {
-	stack: (PosInfo | null)[];
+	stack: (StreamPosition | null)[];
 }
 
 export class CompilerError extends McbError {
 	readonly internal: boolean;
 
-	constructor(message: string, internal: boolean, stack: PosInfo[]) {
+	constructor(message: string, internal: boolean, stack: StreamPosition[]) {
 		super(`${internal ? "Internal " : ""}Compiler Error:\n\t${message}`, stack);
 		this.internal = internal;
 	}
 
 	static createInternal(
 		message: string,
-		pos: PosInfo | null,
+		pos: StreamPosition | null,
 		context: CompilerContextLike,
 	): CompilerError {
 		return new CompilerError(
@@ -27,7 +27,7 @@ export class CompilerError extends McbError {
 
 	static create(
 		message: string,
-		pos: PosInfo | null,
+		pos: StreamPosition | null,
 		context: CompilerContextLike,
 	): CompilerError {
 		return new CompilerError(
@@ -39,20 +39,20 @@ export class CompilerError extends McbError {
 }
 
 export const ErrorUtil = {
-	format(message: string, pos: PosInfo | null): string {
+	format(message: string, pos: StreamPosition | null): string {
 		if (!pos) {
 			return message;
 		}
-		return `${pos.file}:${pos.line}:${pos.col + 1}: ${message}`;
+		return `${pos.srcFile}:${pos.line}:${pos.column + 1}: ${message}`;
 	},
 
-	formatWithStack(message: string, stack: (PosInfo | null)[]): string {
+	formatWithStack(message: string, stack: (StreamPosition | null)[]): string {
 		let res = message;
 		for (const pos of stack) {
 			if (!pos) {
 				res += "\n\tat <unknown>";
 			} else {
-				res += `\n\tat ${pos.file}:${pos.line}:${pos.col + 1}`;
+				res += `\n\tat ${pos.srcFile}:${pos.line}:${pos.column + 1}`;
 			}
 		}
 		return res;
@@ -60,14 +60,14 @@ export const ErrorUtil = {
 
 	formatContext(
 		message: string,
-		pos: PosInfo | null,
+		pos: StreamPosition | null,
 		context: CompilerContextLike,
 	): string {
 		return ErrorUtil.formatWithStack(message, [...context.stack, pos]);
 	},
 
 	unexpectedToken(
-		node: { pos?: PosInfo },
+		node: { pos?: StreamPosition },
 		context: CompilerContextLike,
 	): string {
 		const pos = node.pos ?? null;
@@ -78,8 +78,11 @@ export const ErrorUtil = {
 		);
 	},
 
-	toStack(pos: PosInfo | null, context: CompilerContextLike): PosInfo[] {
+	toStack(
+		pos: StreamPosition | null,
+		context: CompilerContextLike,
+	): StreamPosition[] {
 		const entries = [pos, ...context.stack];
-		return entries.filter((p): p is PosInfo => Boolean(p));
+		return entries.filter((p): p is StreamPosition => Boolean(p));
 	},
 };

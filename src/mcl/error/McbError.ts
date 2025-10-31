@@ -1,15 +1,15 @@
-import { PosInfo } from "../Tokenizer";
+import { StreamPosition } from "../StringStream";
 
 export class McbError extends Error {
-	mcbstack: PosInfo[];
+	mcbstack: StreamPosition[];
 
-	constructor(message: string, stack: PosInfo[]) {
+	constructor(message: string, stack: StreamPosition[]) {
 		super(message);
 		this.name = "McbError";
 		this.mcbstack = stack;
 	}
 
-	static isMclError(e: unknown): e is McbError {
+	static isMcbError(e: unknown): e is McbError {
 		return e instanceof McbError;
 	}
 }

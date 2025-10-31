@@ -4,7 +4,7 @@ import path from "node:path";
 import { TemplateRegisterer } from "./mcl/TemplateRegisterer";
 import { Compiler, VariableMap } from "./mcl/Compiler";
 import { Parser } from "./mcl/Parser";
-import { Tokenizer } from "./mcl/TokenizerImpl";
+import { Tokenizer } from "./mcl/Tokenizer";
 import type { AstNode } from "./mcl/AstNode";
 import type { IoLike, UserConfig } from "./mcl/Config";
 import { SyncIo } from "./mcb/io/SyncIo";

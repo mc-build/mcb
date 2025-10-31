@@ -1,8 +1,8 @@
-import { Token, TokenIds, PosInfo } from "./Tokenizer";
 import { ArrayInput } from "./ArrayInput";
 import { ParserError } from "./error/ParserError";
 import { StringUtils } from "../strutils/StringUtils";
 import { AstNode, JsonTagType } from "./AstNode";
+import { Token } from "./Tokenizer";
 
 type TokenInput = ArrayInput<Token>;
 type CompileTimeElse = { condition: string | null; node: AstNode[] };
