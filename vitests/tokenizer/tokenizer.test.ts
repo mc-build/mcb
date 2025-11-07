@@ -1,6 +1,6 @@
 import { join, parse } from "path";
-import { describe, it } from "vitest";
-import { Tokenizer } from "../../src/mcl/Tokenizer";
+import { describe, expect, it } from "vitest";
+import { Tokenizer } from "../../src/mcl/TokenizerImpl";
 import { expectToMatchFile, read } from "../TestFramework";
 
 async function tokenize(srcFile: string) {

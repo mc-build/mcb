@@ -5,7 +5,7 @@ import { TestBuilder } from "./TestBuilder";
 import { TestIo } from "./TestIo";
 import { Compiler, VariableMap } from "../mcl/Compiler";
 import { Parser } from "../mcl/Parser";
-import { Tokenizer } from "../mcl/Tokenizer";
+import { Tokenizer } from "../mcl/TokenizerImpl";
 import { TemplateRegisterer } from "../mcl/TemplateRegisterer";
 import { FeatureFlags } from "../mcl/FeatureFlags";
 import { AstStringifier } from "../mcl/AstStringifier";

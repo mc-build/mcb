@@ -1,5 +1,5 @@
 import { StreamPosition, StringStream } from "./StringStream";
-import { CHARS } from "./Tokenizer";
+import { CHARS } from "./TokenizerImpl";
 
 export interface SyntaxPointerErrorOptions {
 	child?: Error;

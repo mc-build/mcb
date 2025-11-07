@@ -1,7 +1,7 @@
 import type { CompilerContext, McFile } from "../Compiler";
 import type { AstNode } from "../AstNode";
 import { Parser } from "../Parser";
-import { Tokenizer } from "../Tokenizer";
+import { Tokenizer } from "../TokenizerImpl";
 import { PosInfo } from "../Tokenizer";
 import { TemplateArgument, TemplateParseResult } from "./TemplateArgument";
 

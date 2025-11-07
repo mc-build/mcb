@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { parse } from "path";
 import { bench } from "vitest";
-import { Tokenizer } from "../../src/mcl/Tokenizer";
+import { Tokenizer } from "../../src/mcl/TokenizerImpl";
 
 const path = "./vitests/mcb/impossible_to_survive.mcb";
 const file = readFileSync(path, "utf-8");
