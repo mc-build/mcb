@@ -2,80 +2,71 @@ type LoopHandler = (
 	...args: unknown[]
 ) => IterableIterator<unknown> | Iterator<unknown> | unknown;
 
-class McFloatIterator implements IterableIterator<number> {
-	private current: number;
-	private readonly max: number;
-	private readonly step: number;
-
-	constructor(min: number, max: number, step: number) {
-		if ((step < 0 && min < max) || (step > 0 && min > max)) {
-			throw new Error("Invalid step for range");
-		}
-		this.current = min;
-		this.max = max;
-		this.step = step;
-	}
-
-	[Symbol.iterator](): IterableIterator<number> {
-		return this;
-	}
-
-	next(): IteratorResult<number> {
-		const done =
-			this.step > 0 ? this.current > this.max : this.current < this.max;
-		if (done) {
-			return { done: true, value: undefined };
-		}
-		const value = this.current;
-		this.current += this.step;
-		return { done: false, value };
-	}
+type TypeofType =
+	| "string"
+	| "number"
+	| "bigint"
+	| "boolean"
+	| "symbol"
+	| "undefined"
+	| "object"
+	| "function";
+function match(type: TypeofType): { type: TypeofType } {
+	return { type };
 }
-
-class McIntIterator implements IterableIterator<number> {
-	private current: number;
-	private readonly max: number;
-	private readonly step: number;
-
-	constructor(min: number, max: number) {
-		this.current = min;
-		this.max = max;
-		this.step = min <= max ? 1 : -1;
-	}
-
-	[Symbol.iterator](): IterableIterator<number> {
-		return this;
-	}
-
-	next(): IteratorResult<number> {
-		const done =
-			this.step === 1 ? this.current > this.max : this.current < this.max;
-		if (done) {
-			return { done: true, value: undefined };
-		}
-		const value = this.current;
-		this.current += this.step;
-		return { done: false, value };
-	}
-}
-
-const loopVariants: Array<{ signature: string; handler: LoopHandler }> = [
+const loopVariants: Array<{
+	signature: readonly { type: string; match?: (value: any) => boolean }[];
+	handler: LoopHandler;
+}> = [
 	{
-		signature: "number,number",
-		handler: (...args: unknown[]) => {
+		signature: [match("number")],
+		*handler(...args: unknown[]) {
+			const [end] = args as [number];
+			const actualMin = end > 0 ? 0 : end;
+			const actualMax = end < 0 ? end : 0;
+			const step = Math.sign(end);
+			for (
+				let i = step < 0 ? actualMax : actualMin;
+				step < 0 ? i > actualMin : i < actualMax;
+				i += step
+			) {
+				yield i;
+			}
+		},
+	},
+	{
+		signature: [match("number"), match("number")],
+		*handler(...args: unknown[]) {
 			const [min, max] = args as [number, number];
-			return new McIntIterator(min, max);
+			const actualMin = min < max ? min : max;
+			const actualMax = min < max ? max : min;
+			const step = Math.sign(max - min);
+			for (
+				let i = step < 0 ? actualMax : actualMin;
+				step < 0 ? i >= actualMin : i <= actualMax;
+				i += step
+			) {
+				yield i;
+			}
 		},
 	},
 	{
-		signature: "number,number,number",
-		handler: (...args: unknown[]) => {
+		signature: [match("number"), match("number"), match("number")],
+		handler: function* (...args: unknown[]) {
 			const [min, max, step] = args as [number, number, number];
-			return new McFloatIterator(min, max, step);
+			const actualMin = min < max ? min : max;
+			const actualMax = min < max ? max : min;
+			for (
+				let i = step < 0 ? actualMax : actualMin;
+				step < 0 ? i >= actualMin : i <= actualMax;
+				i += step
+			) {
+				yield i;
+			}
 		},
 	},
 	{
-		signature: "array",
+		signature: [{ type: "object", match: Array.isArray.bind(Array) }],
 		handler: (...args: unknown[]) => {
 			const [value] = args as [unknown[]];
 			return (function* arrayIterator() {
@@ -86,7 +77,7 @@ const loopVariants: Array<{ signature: string; handler: LoopHandler }> = [
 		},
 	},
 	{
-		signature: "object",
+		signature: [match("object")],
 		handler: (...args: unknown[]) => {
 			const [value] = args as [Record<string, unknown>];
 			return (function* objectIterator() {
@@ -97,7 +88,7 @@ const loopVariants: Array<{ signature: string; handler: LoopHandler }> = [
 		},
 	},
 	{
-		signature: "function",
+		signature: [match("function")],
 		handler: (...args: unknown[]) => {
 			const [factory] = args as [
 				() => IterableIterator<unknown> | Iterator<unknown>,
@@ -126,40 +117,17 @@ const loopVariants: Array<{ signature: string; handler: LoopHandler }> = [
 ];
 
 function selectLoopVariant(args: unknown[]): LoopHandler {
+	const types = args.map((arg) => typeof arg);
 	for (const variant of loopVariants) {
-		switch (variant.signature) {
-			case "number,number":
-				if (args.length === 2 && args.every((v) => typeof v === "number")) {
-					return variant.handler as LoopHandler;
-				}
-				break;
-			case "number,number,number":
-				if (args.length === 3 && args.every((v) => typeof v === "number")) {
-					return variant.handler as LoopHandler;
-				}
-				break;
-			case "array":
-				if (args.length === 1 && Array.isArray(args[0])) {
-					return variant.handler as LoopHandler;
-				}
-				break;
-			case "object":
-				if (
-					args.length === 1 &&
-					args[0] &&
-					typeof args[0] === "object" &&
-					!Array.isArray(args[0])
-				) {
-					return variant.handler as LoopHandler;
-				}
-				break;
-			case "function":
-				if (args.length === 1 && typeof args[0] === "function") {
-					return variant.handler as LoopHandler;
-				}
-				break;
-			default:
-				break;
+		if (
+			variant.signature.length === args.length &&
+			variant.signature.every(
+				(kind, index) =>
+					types[index] === kind.type &&
+					(kind?.match ? kind.match(args[index]) : true),
+			)
+		) {
+			return variant.handler;
 		}
 	}
 	throw new Error(
