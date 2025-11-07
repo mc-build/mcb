@@ -79,7 +79,7 @@ export type CompilerContext = {
 	uidIndex: UidTracker;
 	variables: VariableMap;
 	replacements: VariableMap;
-	stack: (PosInfo | null)[];
+	stack: PosInfo[];
 	isTemplate: boolean;
 	templates: Map<string, McTemplate>;
 	requireTemplateKeyword: boolean;
@@ -745,7 +745,7 @@ export class McFile {
 		variableMap: VariableMap,
 		path: string[],
 		uidIndex: UidTracker,
-		stack: (PosInfo | null)[],
+		stack: PosInfo[],
 		replacements: VariableMap,
 		templates: Map<string, McTemplate>,
 		requireTemplateKeyword: boolean,
@@ -919,8 +919,15 @@ export class McFile {
 			}
 		}
 
-		if (!name.includes(":")) {
-			name = `${context.namespace}:${context.path.concat([name]).join("/")}`;
+		if (!name.includes(":") && !name.startsWith("$")) {
+			throw new CompilerError(
+				ErrorUtil.format(
+					"Implicit function resolution is no longer supported, please prepend your function name with ./ to achieve the same behavior.",
+					pos,
+				),
+				false,
+				[],
+			);
 		}
 		return `${tagPrefix}${name}`;
 	}
