@@ -33,14 +33,14 @@ export class Tokenizer {
 					line = line.substring(0, line.length - 1);
 				}
 
-				if (line.endsWith(" \\")) {
+				if (line.endsWith("\\")) {
 					const base = line.substring(0, line.length - 2).replace(/\s+$/, "");
 					const nextLine = lines[lineIdx + 1];
 					if (nextLine === undefined) {
 						line = base;
 						break;
 					}
-					line = `${base} ${nextLine.trim()}`;
+					line = `${base}${nextLine.trim()}`;
 					lineIdx++;
 					lineNum++;
 				} else {
