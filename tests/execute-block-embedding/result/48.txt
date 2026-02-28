@@ -1,17 +1,1 @@
-data/test/function/test_block.mcfunction:
-# Generated with MC-Build
-
-say test
-----------------
-data/test/function/zzz/0.mcfunction:
-# Generated with MC-Build
-
-say test
-----------------
-data/test/function/test.mcfunction:
-# Generated with MC-Build
-
-execute run function test:test_block
-execute run say hi
-execute if score a b matches 1 run function test:zzz/0
-----------------
+TypeError: import_Tokenizer.Tokenizer.tokenize is not a function

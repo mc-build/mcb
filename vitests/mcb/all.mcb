@@ -1,5 +1,11 @@
 # Contains all `.mcb` file syntax
 
+# Comments
+	# Tab-indented Comment
+		# with extra indentation
+	# Space-indented Comment
+		# with extra indentation
+
 ###
 Multi-line Comments
 
@@ -9,6 +15,7 @@ function basic_definition {
 ###
 
 # Function Definitions
+# "Recommended" whitespace
 function basic_definition {
 	say basic definition
 }
@@ -17,6 +24,82 @@ function add_to_tag minecraft:tick {
 }
 function add_to_tag_no_namespace tick {
 	say add to tag no namespace
+}
+# Heavy whitespace
+function
+
+basic_definition_heavy_whitespace
+
+{
+
+	say basic definition
+
+}
+
+function
+
+add_to_tag_heavy_whitespace
+
+minecraft:tick
+
+{
+
+	say add to tag
+
+}
+
+function
+
+add_to_tag_no_namespace_heavy_whitespace
+
+tick
+
+{
+
+	say add to tag no namespace
+
+}
+
+# Min whitespace
+function basic_definition_min_whitespace{
+	say basic definition
+}
+function add_to_tag_min_whitespace minecraft:tick{
+	say add to tag
+}
+function add_to_tag_no_namespace_min_whitespace tick{
+	say add to tag no namespace
+}
+
+# Line continuations
+function line_continuations {
+	say This is a long message that \
+		continues on the next line \
+		and should be treated as a single line.
+}
+
+function bracket_multiline {
+	tellraw @a [
+		'',
+		[
+			{ text: '[', color: gray }, { text:'A*',color: green}, ']'
+		],
+		{ text: ' Queued Path', color: white },
+		{ text: ' QueueLength=', color: yellow }, { score: { name: '#queue_length', objective: astar.v }},
+		{ text: ' ID=', color: yellow }, { score: { name: '#astar.last_path_id', objective: astar.v }},
+		{ text: ' From=', color: light_purple },
+		'[',
+		{ storage: 'astar:data', nbt:'path_queue[-1].from.x', color: red }, ' ',
+		{ storage: 'astar:data', nbt:'path_queue[-1].from.y', color: green }, ' ',
+		{ storage: 'astar:data', nbt:'path_queue[-1].from.z', color: blue },
+		']',
+		{ text: ' To=', color: light_purple },
+		'[',
+		{ storage: 'astar:data', nbt:'path_queue[-1].to.x', color: red }, ' ',
+		{ storage: 'astar:data', nbt:'path_queue[-1].to.y', color: green }, ' ',
+		{ storage: 'astar:data', nbt:'path_queue[-1].to.z', color: blue },
+		']'
+	]
 }
 
 # Blocks
@@ -32,41 +115,41 @@ function blocks {
 		say named block
 	}
 	{ { boo: 1, bar: 2, baz: 3 }
-		say anonymous block
+		say anonymous block with arguments
 	}
 	block { { boo: 1, bar: 2, baz: 3 }
-		say anonymous block with keyword
+		say anonymous block with keyword and arguments
 	}
 	block foo { { boo: 1, bar: 2, baz: 3 }
-		say named block
+		say named block with arguments
 	}
 	{ with storage mcb:data test.path[0].name
-		say anonymous block
+		say anonymous block with 'with' clause
 	}
 	block { with storage mcb:data test.path[0].name
-		say anonymous block with keyword
+		say anonymous block with keyword and 'with' clause
 	}
 	block foo { with storage mcb:data test.path[0].name
-		say named block
+		say named block with 'with' clause
 	}
 	# Min Whitespace
 	{{boo:1,bar:2,baz:3}
-		say anonymous block
+		say anonymous block with arguments
 	}
 	block {{boo:1,bar:2,baz:3}
-		say anonymous block with keyword
+		say anonymous block with keyword and arguments
 	}
 	block foo {{boo:1,bar:2,baz:3}
-		say named block
+		say named block with arguments
 	}
 	{with storage mcb:data test.path[0].name
-		say anonymous block
+		say anonymous block with 'with' clause
 	}
 	block {with storage mcb:data test.path[0].name
-		say anonymous block with keyword
+		say anonymous block with keyword and 'with' clause
 	}
 	block foo {with storage mcb:data test.path[0].name
-		say named block
+		say named block with 'with' clause
 	}
 }
 
@@ -85,7 +168,7 @@ clock foo 1t{
 }
 
 # Compile IF / ELSE
-
+# "Recommended" Whitespace
 IF (true) {
 	function true {
 		say true
@@ -95,6 +178,32 @@ IF (true) {
 		say false
 	}
 }
+# Heavy Whitespace
+IF
+
+(
+	true
+)
+
+{
+
+	function true {
+		say true
+	}
+
+}
+
+ELSE
+
+{
+
+	function false {
+		say false
+	}
+
+}
+
+# Min Whitespace
 IF(true){
 	function true {
 		say true
@@ -105,15 +214,148 @@ IF(true){
 	}
 }
 function test_compile_if_else {
+	# "Recommended" Whitespace
 	IF (true) {
 		say true
 	} ELSE {
 		say false
 	}
+	# Heavy Whitespace
+	IF
+
+	(
+		true
+	)
+
+	{
+
+		say true
+
+	}
+
+	ELSE
+
+	{
+
+		say false
+
+	}
+
+	# Min Whitespace
 	IF(true){
 		say true
 	}ELSE{
 		say false
+	}
+}
+IF (0) {
+	function zero {
+		say zero
+	}
+} ELSE IF (1) {
+	function one {
+		say one
+	}
+} ELSE {
+	function not_zero_nor_one {
+		say not zero nor one
+	}
+}
+
+IF
+
+(
+	0
+)
+
+{
+
+	function zero {
+		say zero
+	}
+
+}
+
+ELSE IF
+
+(
+	1
+)
+
+{
+
+	function one {
+		say one
+	}
+
+}
+
+ELSE
+
+{
+
+	function not_zero_nor_one {
+		say not zero nor one
+	}
+
+}
+
+IF(0){
+	function zero {
+		say zero
+	}
+}ELSE IF(1){
+	function one {
+		say one
+	}
+}ELSE{
+	function not_zero_nor_one {
+		say not zero nor one
+	}
+}
+function test_compile_if_else {
+	IF (0) {
+		say zero
+	} ELSE IF (1) {
+		say one
+	} ELSE {
+		say not zero nor one
+	}
+
+	IF
+
+	(
+		0
+	)
+
+	{
+
+		say zero
+
+	}
+
+	ELSE IF
+
+	(
+		1
+	)
+
+	{
+		say one
+	}
+
+	ELSE
+
+	{
+		say not zero nor one
+	}
+
+	IF(0){
+		say zero
+	}ELSE IF(1){
+		say one
+	}ELSE{
+		say not zero nor one
 	}
 }
 
@@ -123,6 +365,23 @@ REPEAT (3) as i {
 		say repeat <%i%>
 	}
 }
+REPEAT
+
+(
+
+	3
+
+)
+
+as i
+
+{
+
+	function repeat<%i%> {
+		say repeat <%i%>
+	}
+
+}
 REPEAT(3)as i{
 	function repeat<%i%> {
 		say repeat <%i%>
@@ -131,6 +390,19 @@ REPEAT(3)as i{
 function repeat {
 	REPEAT (3) as i {
 		say repeat <%i%>
+	}
+	REPEAT
+
+	(
+		3
+	)
+
+	as i
+
+	{
+
+		say repeat <%i%>
+
 	}
 	REPEAT(3)as i{
 		say repeat <%i%>
@@ -148,6 +420,29 @@ dir mcb {
 		}
 	}
 }
+dir
+
+mcb
+
+{
+
+	function test {
+		say in mcb dir
+	}
+
+	dir
+
+	subdir
+
+	{
+
+		function test {
+			say in subdir
+		}
+
+	}
+
+}
 dir mcb_nospace{
 	function test {
 		say in mcb dir
@@ -161,6 +456,11 @@ dir mcb_nospace{
 
 # Execute run
 function execute_run {
+	execute if score @s #condition v matches 1.. run say hi
+	execute \
+		if score @s #condition v matches 1.. run \
+		say hi
+
 	execute if score @s #success v matches 1.. run {
 		say execute run block
 	}
@@ -169,6 +469,46 @@ function execute_run {
 	}
 	execute if score @s #success v matches 1.. run { with storage mcb:data test.path[0].name
 		say success
+	}
+
+	execute \
+		if score @s #success v matches 1.. \
+	run {
+		say execute run block
+	}
+	execute \
+		if score @s #success v matches 1.. \
+	run { {a: 1, b: 2, c: 3}
+		say success
+	}
+	execute \
+		if score @s #success v matches 1.. \
+	run { with storage mcb:data test.path[0].name
+		say success
+	}
+
+	execute if score @s #success v matches 1.. run
+
+	{
+
+		say execute run block
+
+	}
+
+	execute if score @s #success v matches 1.. run
+
+	{ {a: 1, b: 2, c: 3}
+
+		say success
+
+	}
+
+	execute if score @s #success v matches 1.. run
+
+	{ with storage mcb:data test.path[0].name
+
+		say success
+
 	}
 
 	execute if score @s #success v matches 1.. run{
@@ -192,7 +532,7 @@ function execute_if_else {
 	execute if score @s #condition v matches 1.. run {
 		say execute if
 	} else execute if score @s #other_condition v matches 1.. run {
-		say execute if
+		say execute if-else
 	} else run {
 		say execute else
 	}
@@ -205,7 +545,7 @@ function execute_if_else {
 	execute if score @s #condition v matches 1.. run{
 		say execute if
 	}else execute if score @s #other_condition v matches 1.. run{
-		say execute if
+		say execute if-else
 	}else run{
 		say execute else
 	}
@@ -214,23 +554,23 @@ function execute_if_else {
 # Execute if / unless function
 function execute_if_unless_function {
 	execute if function {
-		say execute if function
+		return 1
 	} run {
 		say success
 	}
 	execute unless function {
-		say execute unless function
+		return 0
 	} run {
 		say success
 	}
 
 	execute if function{
-		say execute if function
+		return 1
 	}run{
 		say success
 	}
 	execute unless function{
-		say execute unless function
+		return 0
 	}run{
 		say success
 	}
@@ -277,100 +617,410 @@ function multiline_js_blocks {
 	%%>
 }
 
-# JSON Files
+# Tick and Load Blocks
+function tick_and_load_blocks {
+	tick {
+		say tick block
+	}
+	load {
+		say load block
+	}
+	tick{
+		say tick block
+	}
+	load{
+		say load block
+	}
 
-advancement my_advancement {
+	tick
+
+	{
+
+		say tick block
+
+	}
+
+	load
+
+	{
+
+		say load block
+
+	}
+}
+
+# Schedule Blocks
+function schedule_blocks {
+	# Recommended Whitespace
+	schedule 1 {
+		say 1 tick no suffix
+	}
+	schedule 1t {
+		say 1 tick
+	}
+	schedule 1s {
+		say 1 second
+	}
+	schedule 1d {
+		say 1 day
+	}
+	schedule 1d replace {
+		say 1 day explicit replace
+	}
+	schedule 1d append {
+		say 1 day append
+	}
+	schedule 1t block name {
+		say with name
+	}
+	schedule 1t replace block name {
+		say with name and explicit replace
+	}
+	schedule 1t append block name {
+		say with name and append
+	}
+
+	# Heavy Whitespace
+	schedule 1
+
+	{
+
+		say 1 tick no suffix
+
+	}
+
+	schedule 1t
+
+	{
+
+		say 1 tick
+
+	}
+
+	schedule 1s
+
+	{
+
+		say 1 second
+
+	}
+
+	schedule 1d
+
+	{
+
+		say 1 day
+
+	}
+
+	schedule 1d replace
+
+	{
+
+		say 1 day explicit replace
+
+	}
+
+	schedule 1d append
+
+	{
+
+		say 1 day append
+
+	}
+
+	schedule 1t block name
+
+	{
+
+		say with name
+
+	}
+
+	schedule 1t replace block name
+
+	{
+
+		say with name and explicit replace
+
+	}
+
+	schedule 1t append block name
+
+	{
+
+		say with name and append
+
+	}
+
+	# Min Whitespace
+	schedule 1{
+		say 1 tick no suffix
+	}
+	schedule 1t{
+		say 1 tick
+	}
+	schedule 1s{
+		say 1 second
+	}
+	schedule 1d{
+		say 1 day
+	}
+	schedule 1d replace{
+		say 1 day explicit replace
+	}
+	schedule 1d append{
+		say 1 day append
+	}
+	schedule 1t block name{
+		say with name
+	}
+	schedule 1t replace block name{
+		say with name and explicit replace
+	}
+	schedule 1t append block name{
+		say with name and append
+	}
+}
+
+json advancement foo:bar {
+	// Comments
+	unquoted: 'and you can quote me on that',
+	singleQuotes: 'I can use "double quotes" here',
+	lineBreaks: "Look, Mom! \n\
+	No \\n's!",
+	hexadecimal: 0xdecaf,
+	leadingDecimalPoint: .8675309, andTrailing: 8675309.,
+	positiveSign: +1,
+	trailingComma: 'in objects', andIn: ['arrays',],
+	"backwardsCompatible": "with JSON",
+	generatedObject: {
+		REPEAT (10) as i {
+			'<%i%>': <%i%>,
+		}
+		IF (0) {
+			a: 'conditionalValue',
+		} ELSE IF (1) {
+			b: 'anotherConditionalValue',
+		} ELSE {
+			c: 'alternateValue',
+		}
+		<%JSON.stringify({'foo': 'bar'})%>
+		<%%
+			emit(JSON.stringify({'foo': 'bar'}));
+		%%>
+	},
+	generatedArray: [
+		REPEAT (10) as i {
+			<%i%>,
+		}
+		IF (0) {
+			'conditionalValue',
+		} ELSE IF (1) {
+			'anotherConditionalValue',
+		} ELSE {
+			'alternateValue',
+		}
+		<%JSON.stringify({'foo': 'bar'})%>
+		<%%
+			emit(JSON.stringify({'foo': 'bar'}));
+		%%>
+	]
+}
+
+json predicate foo:bar [
+	// Comments
+	unquoted: 'and you can quote me on that',
+	singleQuotes: 'I can use "double quotes" here',
+	lineBreaks: "Look, Mom! \n\
+	No \\n's!",
+	hexadecimal: 0xdecaf,
+	leadingDecimalPoint: .8675309, andTrailing: 8675309.,
+	positiveSign: +1,
+	trailingComma: 'in objects', andIn: ['arrays',],
+	"backwardsCompatible": "with JSON",
+	generatedObject: {
+		REPEAT (10) as i {
+			'<%i%>': <%i%>,
+		}
+		IF (0) {
+			a: 'conditionalValue',
+		} ELSE IF (1) {
+			b: 'anotherConditionalValue',
+		} ELSE {
+			c: 'alternateValue',
+		}
+		<%JSON.stringify({'foo': 'bar'})%>
+		<%%
+			emit(JSON.stringify({'foo': 'bar'}));
+		%%>
+	},
+	generatedArray: [
+		REPEAT (10) as i {
+			<%i%>,
+		}
+		IF (0) {
+			'conditionalValue',
+		} ELSE IF (1) {
+			'anotherConditionalValue',
+		} ELSE {
+			'alternateValue',
+		}
+		<%JSON.stringify({'foo': 'bar'})%>
+		<%%
+			emit(JSON.stringify({'foo': 'bar'}));
+		%%>
+	]
+]
+
+# JSON Files
+json advancement foo:bar {
 	"something": true
 }
-enchantment my_enchantment {
+json banner_pattern foo:bar {
 	"something": true
 }
-item_modifier my_item_modifier {
+json cat_variant foo:bar {
 	"something": true
 }
-loot_table my_loot_table {
+json chat_type foo:bar {
 	"something": true
 }
-predicate my_predicate {
+json chicken_variant foo:bar {
 	"something": true
 }
-recipe my_recipe {
+json cow_variant foo:bar {
 	"something": true
 }
-chat_type my_chat_type {
+json damage_type foo:bar {
 	"something": true
 }
-damage_type my_damage_type {
+json dialog foo:bar {
 	"something": true
 }
-dimension my_dimension {
+json dimension foo:bar {
 	"something": true
 }
-dimension_type my_dimension_type {
+json dimension_type foo:bar {
 	"something": true
 }
-worldgen biome my_biome {
+json enchantment foo:bar {
 	"something": true
 }
-worldgen configured_carver my_configured_carver {
+json enchantment_provider foo:bar {
 	"something": true
 }
-worldgen configured_feature my_configured_feature {
+json frog_variant foo:bar {
 	"something": true
 }
-worldgen density_function my_density_function {
+json instrument foo:bar {
 	"something": true
 }
-worldgen noise my_noise {
+json item_modifier foo:bar {
 	"something": true
 }
-worldgen noise_settings my_noise_settings {
+json jukebox_song foo:bar {
 	"something": true
 }
-worldgen placed_feature my_placed_feature {
+json loot_table foo:bar {
 	"something": true
 }
-worldgen processor_list my_processor_list {
+json painting_variant foo:bar {
 	"something": true
 }
-worldgen structure my_structure {
+json pig_variant foo:bar {
 	"something": true
 }
-worldgen structure_set my_structure_set {
+json predicate foo:bar {
 	"something": true
 }
-worldgen template_pool my_template_pool {
+json recipe foo:bar {
 	"something": true
 }
-worldgen world_preset my_world_preset {
+json test_environment foo:bar {
 	"something": true
 }
-worldgen flat_level_generator_preset my_flat_level_generator_preset {
+json test_instance foo:bar {
 	"something": true
 }
-advancement my_advancement{"something": true}
-enchantment my_enchantment{"something": true}
-item_modifier my_item_modifier{"something": true}
-loot_table my_loot_table{"something": true}
-predicate my_predicate{"something": true}
-recipe my_recipe{"something": true}
-chat_type my_chat_type{"something": true}
-damage_type my_damage_type{"something": true}
-dimension my_dimension{"something": true}
-dimension_type my_dimension_type{"something": true}
-worldgen biome my_biome{"something": true}
-worldgen configured_carver my_configured_carver{"something": true}
-worldgen configured_feature my_configured_feature{"something": true}
-worldgen density_function my_density_function{"something": true}
-worldgen noise my_noise{"something": true}
-worldgen noise_settings my_noise_settings{"something": true}
-worldgen placed_feature my_placed_feature{"something": true}
-worldgen processor_list my_processor_list{"something": true}
-worldgen structure my_structure{"something": true}
-worldgen structure_set my_structure_set{"something": true}
-worldgen template_pool my_template_pool{"something": true}
-worldgen world_preset my_world_preset{"something": true}
-worldgen flat_level_generator_preset my_flat_level_generator_preset{"something": true}
+json timeline foo:bar {
+	"something": true
+}
+json trial_spawner foo:bar {
+	"something": true
+}
+json trim_material foo:bar {
+	"something": true
+}
+json trim_pattern foo:bar {
+	"something": true
+}
+json wolf_sound_variant foo:bar {
+	"something": true
+}
+json wolf_variant foo:bar {
+	"something": true
+}
+json worldgen/biome foo:bar {
+	"something": true
+}
+json worldgen/configured_carver foo:bar {
+	"something": true
+}
+json worldgen/configured_feature foo:bar {
+	"something": true
+}
+json worldgen/density_function foo:bar {
+	"something": true
+}
+json worldgen/noise foo:bar {
+	"something": true
+}
+json worldgen/noise_settings foo:bar {
+	"something": true
+}
+json worldgen/placed_feature foo:bar {
+	"something": true
+}
+json worldgen/processor_list foo:bar {
+	"something": true
+}
+json worldgen/structure foo:bar {
+	"something": true
+}
+json worldgen/structure_set foo:bar {
+	"something": true
+}
+json worldgen/template_pool foo:bar {
+	"something": true
+}
+json worldgen/world_preset foo:bar {
+	"something": true
+}
+json worldgen/flat_level_generator_preset foo:bar {
+	"something": true
+}
+json worldgen/multi_noise_biome_source_parameter_list foo:bar {
+	"something": true
+}
+json test foo:bar {"something":true}
+json worldgen/test foo:bar {"something":true}
+
+json test foo:bar
+
+{
+
+	"something":true
+
+}
+
+json worldgen/test foo:bar
+
+{
+
+	"something":true
+
+}
 
 # Tags
 tag function foo {
@@ -389,6 +1039,7 @@ tag blocks namespace:foo {
 	foo:bar
 	#baz:qux
 }
+
 tag function foo{
 	foo:bar
 	#baz:qux
@@ -397,80 +1048,28 @@ tag functions namespace:foo{
 	foo:bar
 	#baz:qux
 }
-tag block foo{
+
+tag function foo
+
+{
+
 	foo:bar
 	#baz:qux
+
 }
-tag blocks namespace:foo{
+
+tag functions namespace:foo
+
+{
+
 	foo:bar
 	#baz:qux
+
 }
+
 
 # Templates
 function templates {
 	template my_template has 3 arguments
 	my_template has 3 arguments
-}
-
-# Tick and Load Blocks
-function tick_and_load_blocks {
-	tick {
-		say tick block
-	}
-	load {
-		say load block
-	}
-	tick{
-		say tick block
-	}
-	load{
-		say load block
-	}
-}
-
-# Schedule Blocks
-function schedule_blocks {
-	schedule foo 1 {
-		say 1 tick no suffix
-	}
-	schedule foo 1t {
-		say 1 tick
-	}
-	schedule foo 1s {
-		say 1 second
-	}
-	schedule foo 1d {
-		say 1 day
-	}
-	schedule foo 1d replace {
-		say 1 day replace
-	}
-	schedule foo 1d append {
-		say 1 day append
-	}
-	schedule foo 1{
-		say 1 tick no suffix
-	}
-	schedule foo 1t{
-		say 1 tick
-	}
-	schedule foo 1s{
-		say 1 second
-	}
-	schedule foo 1d{
-		say 1 day
-	}
-	schedule foo 1d replace{
-		say 1 day replace
-	}
-	schedule foo 1d append{
-		say 1 day append
-	}
-}
-
-# Line continuations
-function line_continuations {
-	say This is a long message that \
-		continues on the next line \
-		and should be treated as a single line.
 }

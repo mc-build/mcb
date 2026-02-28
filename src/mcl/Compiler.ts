@@ -218,7 +218,7 @@ class McTemplate {
 			defs.push({
 				type: "FunctionDef",
 				pos,
-				name: "load",
+				path: "load",
 				body: this.loadBlock,
 				appendTo: "minecraft:load",
 			});
@@ -228,7 +228,7 @@ class McTemplate {
 			defs.push({
 				type: "FunctionDef",
 				pos,
-				name: "tick",
+				path: "tick",
 				body: this.tickBlock,
 				appendTo: "minecraft:tick",
 			});
@@ -273,7 +273,7 @@ class McTemplate {
 		const directory: AstNode = {
 			type: "Directory",
 			pos,
-			name: this.name,
+			path: this.name,
 			body: defs,
 		};
 		into.embed(templateContext, pos, new Map(), [directory], true);
@@ -317,7 +317,7 @@ class McTemplate {
 		const directory: AstNode = {
 			type: "Directory",
 			pos,
-			name: this.name,
+			path: this.name,
 			body: defs,
 		};
 		into.embedTransform(templateContext, pos, new Map(), [directory], true);
@@ -1398,13 +1398,13 @@ export class McFile {
 				return {
 					type: "EqCommand",
 					pos: node.pos,
-					command: this.injectValues(node.command, context, node.pos),
+					tokens: this.injectValues(node.command, context, node.pos),
 				};
 			case "Block":
 				return {
 					type: "Block",
 					pos: node.pos,
-					name:
+					path:
 						node.name != null
 							? this.injectValues(node.name, context, node.pos)
 							: (node.name ?? null),
@@ -1445,7 +1445,7 @@ export class McFile {
 				return {
 					type: "FunctionCall",
 					pos: node.pos,
-					name: this.injectValues(node.name, context, node.pos),
+					path: this.injectValues(node.name, context, node.pos),
 					data: this.injectValues(node.data, context, node.pos),
 					isMacro: node.isMacro ?? false,
 				};
@@ -1453,7 +1453,7 @@ export class McFile {
 				return {
 					type: "Execute",
 					pos: node.pos,
-					command: this.injectValues(node.command, context, node.pos),
+					tokens: this.injectValues(node.command, context, node.pos),
 					value: this.transformCommand(node.value, context),
 					isMacro: node.isMacro ?? false,
 				};
@@ -1523,7 +1523,7 @@ export class McFile {
 		return {
 			type: "FunctionDef",
 			pos,
-			name: injectedName,
+			path: injectedName,
 			body: transformedBody,
 			appendTo: appendTo ?? null,
 		};
@@ -1717,7 +1717,7 @@ export class McFile {
 				return {
 					type: "Directory",
 					pos: node.pos,
-					name: this.injectValues(node.name, context, node.pos),
+					path: this.injectValues(node.name, context, node.pos),
 					body: node.body.map((child) => this.transformTld(child, context)),
 				};
 			case "JsonFile":
@@ -1754,7 +1754,7 @@ export class McFile {
 					return {
 						type: "JsonFile",
 						pos: node.pos,
-						name: node.name,
+						path: node.name,
 						info: {
 							kind: "Tag",
 							subType: node.info.subType,
@@ -1766,7 +1766,7 @@ export class McFile {
 				return {
 					type: "JsonFile",
 					pos: node.pos,
-					name: this.injectValues(node.name, context, node.pos),
+					path: this.injectValues(node.name, context, node.pos),
 					info: node.info,
 				};
 			case "CompileTimeLoop": {
@@ -1798,7 +1798,7 @@ export class McFile {
 				return {
 					type: "ClockExpr",
 					pos: node.pos,
-					name: node.name,
+					path: node.name,
 					time: node.time,
 					body: node.body.map((child) => this.transformCommand(child, context)),
 				};
@@ -2258,12 +2258,12 @@ export class McFile {
 				const directory: AstNode = {
 					type: "Directory",
 					pos,
-					name: "mcb_emmited_blocks",
+					path: "mcb_emmited_blocks",
 					body: [
 						{
 							type: "FunctionDef",
 							pos,
-							name: `block_${id}`,
+							path: `block_${id}`,
 							body: commands.map((c) => ({
 								type: "Raw",
 								pos,
@@ -2281,7 +2281,7 @@ export class McFile {
 				results.push({
 					type: "FunctionCall",
 					pos,
-					name: signature,
+					path: signature,
 					data: data ? file.injectValues(data, context, pos) : "",
 					isMacro: false,
 				});

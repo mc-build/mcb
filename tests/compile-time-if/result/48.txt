@@ -1,7 +1,1 @@
-data/main/function/test.mcfunction:
-# Generated with MC-Build
-
-say 0 is 0
-say 1 is 1
-say 2 is not 0 or 1
-----------------
+TypeError: import_Tokenizer.Tokenizer.tokenize is not a function

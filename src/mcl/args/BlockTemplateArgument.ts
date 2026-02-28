@@ -30,7 +30,7 @@ export class BoundBlock {
 		if (this.node.type !== "Block") {
 			throw new Error("BoundBlock.setName: node is not a block");
 		}
-		this.node = { ...this.node, name };
+		this.node = { ...this.node, path: name };
 	}
 
 	embedTo(

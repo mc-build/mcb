@@ -1,0 +1,137 @@
+function schedule {
+	# Vanilla schedule syntax
+	schedule function 1t minecraft:my_function
+	schedule function 1t minecraft:my_function replace
+	schedule function 1t minecraft:my_function append
+
+	# Recommended Whitespace
+	schedule 1 {
+		say 1 tick no suffix
+	}
+	schedule 1t {
+		say 1 tick
+	}
+	schedule 1s {
+		say 1 second
+	}
+	schedule 1d {
+		say 1 day
+	}
+	schedule 1d replace {
+		say 1 day explicit replace
+	}
+	schedule 1d append {
+		say 1 day append
+	}
+	schedule 1t block name {
+		say with name
+	}
+	schedule 1t replace block name {
+		say with name and explicit replace
+	}
+	schedule 1t append block name {
+		say with name and append
+	}
+
+	# Heavy Whitespace
+	schedule 1
+
+	{
+
+		say 1 tick no suffix
+
+	}
+
+	schedule 1t
+
+	{
+
+		say 1 tick
+
+	}
+
+	schedule 1s
+
+	{
+
+		say 1 second
+
+	}
+
+	schedule 1d
+
+	{
+
+		say 1 day
+
+	}
+
+	schedule 1d replace
+
+	{
+
+		say 1 day explicit replace
+
+	}
+
+	schedule 1d append
+
+	{
+
+		say 1 day append
+
+	}
+
+	schedule 1t block name
+
+	{
+
+		say with name
+
+	}
+
+	schedule 1t replace block name
+
+	{
+
+		say with name and explicit replace
+
+	}
+
+	schedule 1t append block name
+
+	{
+
+		say with name and append
+
+	}
+
+	# Min Whitespace
+	schedule 1{
+		say 1 tick no suffix
+	}
+	schedule 1t{
+		say 1 tick
+	}
+	schedule 1s{
+		say 1 second
+	}
+	schedule 1d{
+		say 1 day
+	}
+	schedule 1d replace{
+		say 1 day explicit replace
+	}
+	schedule 1d append{
+		say 1 day append
+	}
+	schedule 1t block name{
+		say with name
+	}
+	schedule 1t replace block name{
+		say with name and explicit replace
+	}
+	schedule 1t append block name{
+		say with name and append
+	}
+}

@@ -6,43 +6,91 @@ import {
 } from "./SyntaxPointerError";
 
 interface BaseToken extends StreamPosition {
-	type: keyof Tokens;
+	type: TOKEN_TYPE;
 }
 
 export const enum TOKEN_TYPE {
 	/** A span of text. */
-	SPAN,
-	NEWLINE,
+	LITERAL,
+	/** A group of spaces. */
+	SPACE,
+	LINE_BREAK,
+
+	STRING,
 
 	COMMENT,
 	MULTI_LINE_COMMENT,
-	/** Minecraft's line continuation `' \'` */
+	/** Minecraft's line continuation `\` */
 	LINE_CONTINUATION,
 
-	LEFT_CURLY_BRACKET,
-	RIGHT_CURLY_BRACKET,
-	LEFT_SQUARE_BRACKET,
-	RIGHT_SQUARE_BRACKET,
+	OPEN_CURLY,
+	CLOSE_CURLY,
+	OPEN_SQUARE,
+	CLOSE_SQUARE,
+	OPEN_PARENTHESIS,
+	CLOSE_PARENTHESIS,
 
 	INLINE_SCRIPT,
 	SCRIPT_BLOCK,
 }
 
 export interface Tokens {
-	[TOKEN_TYPE.COMMENT]: BaseToken & { content: string };
-	[TOKEN_TYPE.MULTI_LINE_COMMENT]: BaseToken & { content: string };
-	[TOKEN_TYPE.LEFT_CURLY_BRACKET]: BaseToken;
-	[TOKEN_TYPE.RIGHT_CURLY_BRACKET]: BaseToken;
-	[TOKEN_TYPE.LEFT_SQUARE_BRACKET]: BaseToken;
-	[TOKEN_TYPE.RIGHT_SQUARE_BRACKET]: BaseToken;
-	[TOKEN_TYPE.INLINE_SCRIPT]: BaseToken & { content: string };
-	[TOKEN_TYPE.SCRIPT_BLOCK]: BaseToken & { content: string };
-	[TOKEN_TYPE.LINE_CONTINUATION]: BaseToken;
-	[TOKEN_TYPE.NEWLINE]: BaseToken;
-	[TOKEN_TYPE.SPAN]: BaseToken & { content: string };
+	[TOKEN_TYPE.LITERAL]: BaseToken & {
+		type: TOKEN_TYPE.LITERAL;
+		content: string;
+	};
+	[TOKEN_TYPE.SPACE]: BaseToken & {
+		type: TOKEN_TYPE.SPACE;
+		count: number;
+	};
+	[TOKEN_TYPE.STRING]: BaseToken & {
+		type: TOKEN_TYPE.STRING;
+		quote: '"' | "'";
+		content: string;
+	};
+	[TOKEN_TYPE.COMMENT]: BaseToken & {
+		type: TOKEN_TYPE.COMMENT;
+		content: string;
+	};
+	[TOKEN_TYPE.MULTI_LINE_COMMENT]: BaseToken & {
+		type: TOKEN_TYPE.MULTI_LINE_COMMENT;
+		content: string;
+	};
+	[TOKEN_TYPE.OPEN_CURLY]: BaseToken & {
+		type: TOKEN_TYPE.OPEN_CURLY;
+	};
+	[TOKEN_TYPE.CLOSE_CURLY]: BaseToken & {
+		type: TOKEN_TYPE.CLOSE_CURLY;
+	};
+	[TOKEN_TYPE.OPEN_SQUARE]: BaseToken & {
+		type: TOKEN_TYPE.OPEN_SQUARE;
+	};
+	[TOKEN_TYPE.CLOSE_SQUARE]: BaseToken & {
+		type: TOKEN_TYPE.CLOSE_SQUARE;
+	};
+	[TOKEN_TYPE.OPEN_PARENTHESIS]: BaseToken & {
+		type: TOKEN_TYPE.OPEN_PARENTHESIS;
+	};
+	[TOKEN_TYPE.CLOSE_PARENTHESIS]: BaseToken & {
+		type: TOKEN_TYPE.CLOSE_PARENTHESIS;
+	};
+	[TOKEN_TYPE.INLINE_SCRIPT]: BaseToken & {
+		type: TOKEN_TYPE.INLINE_SCRIPT;
+		script: string;
+	};
+	[TOKEN_TYPE.SCRIPT_BLOCK]: BaseToken & {
+		type: TOKEN_TYPE.SCRIPT_BLOCK;
+		script: string;
+	};
+	[TOKEN_TYPE.LINE_CONTINUATION]: BaseToken & {
+		type: TOKEN_TYPE.LINE_CONTINUATION;
+	};
+	[TOKEN_TYPE.LINE_BREAK]: BaseToken & {
+		type: TOKEN_TYPE.LINE_BREAK;
+	};
 }
 
-export type Token = Tokens[keyof Tokens];
+export type Token = Tokens[TOKEN_TYPE];
 
 export const enum CHARS {
 	NEWLINE = 10,
@@ -57,6 +105,89 @@ export const enum CHARS {
 	RIGHT_SQUARE_BRACKET = 93,
 	LEFT_CURLY_BRACKET = 123,
 	RIGHT_CURLY_BRACKET = 125,
+	LEFT_PARENTHESIS = 40,
+	RIGHT_PARENTHESIS = 41,
+	DOUBLE_QUOTE = 34,
+	SINGLE_QUOTE = 39,
+}
+
+export function getTokenTypeName(type: TOKEN_TYPE): string {
+	switch (type) {
+		case TOKEN_TYPE.LITERAL:
+			return "Literal";
+		case TOKEN_TYPE.SPACE:
+			return "Space";
+		case TOKEN_TYPE.STRING:
+			return "String";
+		case TOKEN_TYPE.COMMENT:
+			return "Comment";
+		case TOKEN_TYPE.MULTI_LINE_COMMENT:
+			return "MultiLineComment";
+		case TOKEN_TYPE.OPEN_CURLY:
+			return "LeftCurlyBracket";
+		case TOKEN_TYPE.CLOSE_CURLY:
+			return "RightCurlyBracket";
+		case TOKEN_TYPE.OPEN_SQUARE:
+			return "LeftSquareBracket";
+		case TOKEN_TYPE.CLOSE_SQUARE:
+			return "RightSquareBracket";
+		case TOKEN_TYPE.OPEN_PARENTHESIS:
+			return "LeftParenthesis";
+		case TOKEN_TYPE.CLOSE_PARENTHESIS:
+			return "RightParenthesis";
+		case TOKEN_TYPE.INLINE_SCRIPT:
+			return "InlineScript";
+		case TOKEN_TYPE.SCRIPT_BLOCK:
+			return "ScriptBlock";
+		case TOKEN_TYPE.LINE_CONTINUATION:
+			return "LineContinuation";
+		case TOKEN_TYPE.LINE_BREAK:
+			return "Newline";
+		default:
+			return "Unknown";
+	}
+}
+
+export function stringifyToken(token: Token): string {
+	switch (token.type) {
+		case TOKEN_TYPE.LITERAL:
+			return token.content;
+		case TOKEN_TYPE.SPACE:
+			return " ".repeat(token.count);
+		case TOKEN_TYPE.STRING:
+			return `${token.quote}${token.content}${token.quote}`;
+		case TOKEN_TYPE.COMMENT:
+			return token.content;
+		case TOKEN_TYPE.MULTI_LINE_COMMENT:
+			return token.content;
+		case TOKEN_TYPE.OPEN_CURLY:
+			return "{";
+		case TOKEN_TYPE.CLOSE_CURLY:
+			return "}";
+		case TOKEN_TYPE.OPEN_SQUARE:
+			return "[";
+		case TOKEN_TYPE.CLOSE_SQUARE:
+			return "]";
+		case TOKEN_TYPE.OPEN_PARENTHESIS:
+			return "(";
+		case TOKEN_TYPE.CLOSE_PARENTHESIS:
+			return ")";
+		case TOKEN_TYPE.INLINE_SCRIPT:
+			return `<% ${token.script} %>`;
+		case TOKEN_TYPE.SCRIPT_BLOCK:
+			return `<%% ${token.script} %%>`;
+		case TOKEN_TYPE.LINE_CONTINUATION:
+			return `\\\n`;
+		case TOKEN_TYPE.LINE_BREAK:
+			return `\n`;
+		default:
+			throw new Error(`Unknown token type ${(token as any).type}`);
+	}
+}
+
+export interface TokenizerResult {
+	source: string;
+	tokens: Token[];
 }
 
 export class Tokenizer extends StringStream {
@@ -68,14 +199,53 @@ export class Tokenizer extends StringStream {
 	}
 
 	throw(message: string, options?: SyntaxPointerErrorOptions): never {
-		throw new SyntaxPointerError(message, this, options);
+		throw new SyntaxPointerError(
+			message,
+			this.buffer.toString(),
+			this.line,
+			this.column,
+			options,
+		);
 	}
 
 	expected(toBe: string, description: string, butFound: string): never {
 		throw new SyntaxPointerError(
 			`Expected ${JSON.stringify(toBe)} ${description}, but found ${JSON.stringify(butFound)} instead`,
-			this,
+			this.buffer.toString(),
+			this.line,
+			this.column,
 		);
+	}
+
+	skipSpaces(): void {
+		while (this.index < this.length && this.item === CHARS.SPACE) {
+			if (this.buffer[this.index] === CHARS.NEWLINE) {
+				this.index++;
+				this.line++;
+				this.column = 1;
+			} else {
+				this.index++;
+				this.column++;
+			}
+		}
+	}
+
+	skipWhitespace() {
+		while (
+			this.index < this.length &&
+			(this.buffer[this.index] === CHARS.SPACE ||
+				this.buffer[this.index] === CHARS.TAB ||
+				this.buffer[this.index] === CHARS.NEWLINE)
+		) {
+			if (this.buffer[this.index] === CHARS.NEWLINE) {
+				this.index++;
+				this.line++;
+				this.column = 1;
+			} else {
+				this.index++;
+				this.column++;
+			}
+		}
 	}
 
 	skipInlineScriptContent(): void {
@@ -92,6 +262,11 @@ export class Tokenizer extends StringStream {
 				this.index++;
 				this.column++;
 			}
+		}
+		if (this.index >= this.length) {
+			this.expected(`%>`, `to end Inline Script`, `<EOF>`);
+		} else if (this.item === CHARS.NEWLINE) {
+			this.expected(`%>`, `to end Inline Script`, `\n`);
 		}
 	}
 
@@ -113,6 +288,9 @@ export class Tokenizer extends StringStream {
 				this.column++;
 			}
 		}
+		if (this.index >= this.length) {
+			this.expected(`%%>`, `to end Script Block`, `<EOF>`);
+		}
 	}
 
 	skipMultiLineCommentContent(): void {
@@ -133,9 +311,43 @@ export class Tokenizer extends StringStream {
 				this.column++;
 			}
 		}
+		if (this.index >= this.length) {
+			this.expected(`###\n`, `to end Multi-line Comment`, `<EOF>`);
+		}
 	}
 
-	tokenize(): Token[] {
+	skipStringContent(quoteChar: number): void {
+		while (this.index < this.length && this.item !== quoteChar) {
+			if (
+				this.item === quoteChar &&
+				this.buffer[this.index - 1] === CHARS.BACKSLASH
+			) {
+				this.index++;
+				this.column++;
+			} else if (
+				this.buffer[this.index] === CHARS.LESS_THAN &&
+				this.next === CHARS.PERCENT
+			) {
+				this.index += 2;
+				this.column += 2;
+				this.skipInlineScriptContent();
+				this.index += 2;
+				this.column += 2;
+			} else if (this.buffer[this.index] === CHARS.NEWLINE) {
+				this.index++;
+				this.line++;
+				this.column = 1;
+			} else {
+				this.index++;
+				this.column++;
+			}
+		}
+		if (this.index >= this.length) {
+			this.expected(`'`, `to close string`, `<EOF>`);
+		}
+	}
+
+	tokenize(): TokenizerResult {
 		const tokens: Token[] = [];
 
 		let tokenStart = this.index;
@@ -147,7 +359,7 @@ export class Tokenizer extends StringStream {
 				case CHARS.NEWLINE:
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
@@ -155,7 +367,7 @@ export class Tokenizer extends StringStream {
 					}
 
 					tokens.push({
-						type: TOKEN_TYPE.NEWLINE,
+						type: TOKEN_TYPE.LINE_BREAK,
 						line: this.line,
 						column: this.column,
 					});
@@ -163,18 +375,34 @@ export class Tokenizer extends StringStream {
 					break;
 
 				case CHARS.SPACE:
-					if (this.next !== CHARS.BACKSLASH) {
-						this.advance(); // space
-						continue; // Continue collecting span
-					}
-					// Line Continuation
+					// Spaces always split spans
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
+					}
+
+					tokenStart = this.index;
+					tokenLine = this.line;
+					tokenColumn = this.column;
+
+					this.skipSpaces();
+
+					tokens.push({
+						type: TOKEN_TYPE.SPACE,
+						count: this.index - tokenStart,
+						line: tokenLine,
+						column: tokenColumn,
+					});
+					break;
+
+				case CHARS.BACKSLASH:
+					if (this.next !== CHARS.NEWLINE) {
+						this.advance(); // \
+						continue; // Continue collecting span
 					}
 
 					tokens.push({
@@ -182,22 +410,16 @@ export class Tokenizer extends StringStream {
 						line: this.line,
 						column: this.column,
 					});
-					this.advance(); // space
 					this.advance(); // \
-
-					if (this.index >= this.length) {
-						this.expected(
-							`\n`,
-							`to end Line Continuation`,
-							String.fromCharCode(this.item),
-						);
-					}
 					this.skipWhitespace();
 					break;
 
 				case CHARS.HASH:
 					// Require the start of the file or a new line before a comment
-					if (this.index !== 0 && this.previous !== CHARS.NEWLINE) {
+					if (
+						this.index !== 0 &&
+						tokens.at(-1)?.type !== TOKEN_TYPE.LINE_BREAK
+					) {
 						this.advance(); // #
 						continue; // Continue collecting span
 					}
@@ -212,13 +434,9 @@ export class Tokenizer extends StringStream {
 						this.advance(); // #
 						this.advance(); // #
 						this.skipMultiLineCommentContent();
-						if (this.index >= this.length) {
-							this.expected(`###\n`, `to end Multi-line Comment`, `<EOF>`);
-						}
 						this.advance(); // #
 						this.advance(); // #
 						this.advance(); // #
-						this.advance(); // \n
 						tokens.push({
 							type: TOKEN_TYPE.MULTI_LINE_COMMENT,
 							content: this.slice(tokenStart, this.index),
@@ -235,20 +453,25 @@ export class Tokenizer extends StringStream {
 							column: tokenColumn,
 						});
 					}
+					tokens.push({
+						type: TOKEN_TYPE.LINE_BREAK,
+						line: this.line,
+						column: this.column,
+					});
 					this.skipWhitespace();
 					break;
 
 				case CHARS.LEFT_SQUARE_BRACKET:
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
 					}
 					tokens.push({
-						type: TOKEN_TYPE.LEFT_SQUARE_BRACKET,
+						type: TOKEN_TYPE.OPEN_SQUARE,
 						line: this.line,
 						column: this.column,
 					});
@@ -258,14 +481,14 @@ export class Tokenizer extends StringStream {
 				case CHARS.RIGHT_SQUARE_BRACKET:
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
 					}
 					tokens.push({
-						type: TOKEN_TYPE.RIGHT_SQUARE_BRACKET,
+						type: TOKEN_TYPE.CLOSE_SQUARE,
 						line: this.line,
 						column: this.column,
 					});
@@ -275,14 +498,14 @@ export class Tokenizer extends StringStream {
 				case CHARS.LEFT_CURLY_BRACKET:
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
 					}
 					tokens.push({
-						type: TOKEN_TYPE.LEFT_CURLY_BRACKET,
+						type: TOKEN_TYPE.OPEN_CURLY,
 						line: this.line,
 						column: this.column,
 					});
@@ -292,25 +515,111 @@ export class Tokenizer extends StringStream {
 				case CHARS.RIGHT_CURLY_BRACKET:
 					if (tokenStart < this.index) {
 						tokens.push({
-							type: TOKEN_TYPE.SPAN,
+							type: TOKEN_TYPE.LITERAL,
 							content: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
 					}
 					tokens.push({
-						type: TOKEN_TYPE.RIGHT_CURLY_BRACKET,
+						type: TOKEN_TYPE.CLOSE_CURLY,
 						line: this.line,
 						column: this.column,
 					});
 					this.advance();
 					break;
 
+				case CHARS.LEFT_PARENTHESIS:
+					if (tokenStart < this.index) {
+						tokens.push({
+							type: TOKEN_TYPE.LITERAL,
+							content: this.slice(tokenStart, this.index),
+							line: tokenLine,
+							column: tokenColumn,
+						});
+					}
+					tokens.push({
+						type: TOKEN_TYPE.OPEN_PARENTHESIS,
+						line: this.line,
+						column: this.column,
+					});
+					this.advance();
+					break;
+
+				case CHARS.RIGHT_PARENTHESIS:
+					if (tokenStart < this.index) {
+						tokens.push({
+							type: TOKEN_TYPE.LITERAL,
+							content: this.slice(tokenStart, this.index),
+							line: tokenLine,
+							column: tokenColumn,
+						});
+					}
+					tokens.push({
+						type: TOKEN_TYPE.CLOSE_PARENTHESIS,
+						line: this.line,
+						column: this.column,
+					});
+					this.advance();
+					break;
+
+				case CHARS.DOUBLE_QUOTE:
+					if (tokenStart < this.index) {
+						tokens.push({
+							type: TOKEN_TYPE.LITERAL,
+							content: this.slice(tokenStart, this.index),
+							line: tokenLine,
+							column: tokenColumn,
+						});
+					}
+
+					tokenStart = this.index;
+					tokenLine = this.line;
+					tokenColumn = this.column;
+
+					this.advance(); // "
+					this.skipStringContent(CHARS.DOUBLE_QUOTE);
+					tokens.push({
+						type: TOKEN_TYPE.STRING,
+						content: this.slice(tokenStart + 1, this.index),
+						quote: `"`,
+						line: tokenLine,
+						column: tokenColumn,
+					});
+					this.advance(); // "
+					break;
+
+				case CHARS.SINGLE_QUOTE:
+					if (tokenStart < this.index) {
+						tokens.push({
+							type: TOKEN_TYPE.LITERAL,
+							content: this.slice(tokenStart, this.index),
+							line: tokenLine,
+							column: tokenColumn,
+						});
+					}
+
+					tokenStart = this.index;
+					tokenLine = this.line;
+					tokenColumn = this.column;
+
+					this.advance(); // '
+					this.skipStringContent(CHARS.SINGLE_QUOTE);
+					tokens.push({
+						type: TOKEN_TYPE.STRING,
+						content: this.slice(tokenStart + 1, this.index),
+						quote: `'`,
+						line: tokenLine,
+						column: tokenColumn,
+					});
+					this.advance(); // '
+					break;
+
 				case CHARS.LESS_THAN:
 					if ((this.next as number) === CHARS.PERCENT) {
 						if (tokenStart < this.index) {
 							tokens.push({
-								type: TOKEN_TYPE.SPAN,
+								type: TOKEN_TYPE.LITERAL,
 								content: this.slice(tokenStart, this.index),
 								line: tokenLine,
 								column: tokenColumn,
@@ -323,17 +632,14 @@ export class Tokenizer extends StringStream {
 						this.advance(); // <
 						this.advance(); // %
 
-						// Multi-line JS Block
+						// Multi-line Script Block
 						if (this.item === CHARS.PERCENT) {
 							this.advance(); // %
 							tokenStart = this.index;
 							this.skipScriptBlockContent();
-							if (this.index >= this.length) {
-								this.expected(`%%>`, `to end Multi-line JS Block`, `<EOF>`);
-							}
 							tokens.push({
 								type: TOKEN_TYPE.SCRIPT_BLOCK,
-								content: this.slice(tokenStart, this.index),
+								script: this.slice(tokenStart, this.index),
 								line: tokenLine,
 								column: tokenColumn,
 							});
@@ -342,17 +648,12 @@ export class Tokenizer extends StringStream {
 							this.advance(); // >
 							break;
 						}
-						// Inline JS Block
+						// Inline Script
 						tokenStart = this.index;
 						this.skipInlineScriptContent();
-						if (this.index >= this.length) {
-							this.expected(`%>`, `to end Inline JS Block`, `<EOF>`);
-						} else if (this.item === CHARS.NEWLINE) {
-							this.expected(`%>`, `to end Inline JS Block`, `\n`);
-						}
 						tokens.push({
 							type: TOKEN_TYPE.INLINE_SCRIPT,
-							content: this.slice(tokenStart, this.index),
+							script: this.slice(tokenStart, this.index),
 							line: tokenLine,
 							column: tokenColumn,
 						});
@@ -377,13 +678,16 @@ export class Tokenizer extends StringStream {
 
 		if (tokenStart < this.index) {
 			tokens.push({
-				type: TOKEN_TYPE.SPAN,
+				type: TOKEN_TYPE.LITERAL,
 				content: this.slice(tokenStart, this.index),
 				line: tokenLine,
 				column: tokenColumn,
 			});
 		}
 
-		return tokens;
+		return {
+			source: this.buffer.toString(),
+			tokens,
+		};
 	}
 }

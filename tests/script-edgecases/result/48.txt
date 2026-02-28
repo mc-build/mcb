@@ -1,10 +1,1 @@
-data/main/function/zzz/0.mcfunction:
-# Generated with MC-Build
-
-say hi
-----------------
-data/main/function/test.mcfunction:
-# Generated with MC-Build
-
-function main:zzz/0 with 1234
-----------------
+TypeError: import_Tokenizer.Tokenizer.tokenize is not a function

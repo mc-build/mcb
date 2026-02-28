@@ -2,6 +2,7 @@ import { expect } from "vitest";
 import { isAbsolute, join, parse } from "path";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { existsSync } from "fs";
+import { Tokenizer } from "../src/mcl/Tokenizer";
 
 const ABSOLUTE_TESTS_PATH = __dirname;
 
@@ -47,4 +48,10 @@ export async function expectToMatchFile(actual: string, path: string) {
 	const expected = await readFile(expectedPath, "utf-8");
 
 	expect(actual).toBe(expected);
+}
+
+export async function tokenize(srcFile: string) {
+	const parsed = parse(srcFile);
+	const source = await read(srcFile);
+	return new Tokenizer(source, parsed.base).tokenize();
 }

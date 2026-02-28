@@ -1,0 +1,21 @@
+function test {
+	tellraw @a [
+		'',
+		[{ text: '[', color: gray }, { text:'A*',color: green}, ']'],
+		{ text: ' Node', color: white },
+		{ text: ' ID=', color: yellow }, { score: { name: '@s', objective: astar.node.id }},
+		{ text: ' Pos=', color: light_purple },
+		'[',
+			{ score: { name: '#this.x', objective: astar.v }, color: red }, ' ',
+			{ score: { name: '#this.y', objective: astar.v }, color: green }, ' ',
+			{ score: { name: '#this.z', objective: astar.v }, color: blue },
+		']',
+		{ text: ' X=', color: red }, { score: { name: '@s', objective: astar.node.x }},
+		{ text: ' Y=', color: green }, { score: { name: '@s', objective: astar.node.y }},
+		{ text: ' Z=', color: blue }, { score: { name: '@s', objective: astar.node.z }},
+		{ text: ' F=', color: gold }, { score: { name: '@s', objective: astar.node.f }},
+		{ text: ' G=', color: green }, { score: { name: '@s', objective: astar.node.g }},
+		{ text: ' H=', color: red }, { score: { name: '@s', objective: astar.node.h }},
+		{ text: ' ParentID=', color: aqua }, { score: { name: '@s', objective: astar.node.parent_id }}
+	]
+}

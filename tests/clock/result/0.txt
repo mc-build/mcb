@@ -1,9 +1,1 @@
-data/main/functions/test.mcfunction:
-# Generated with MC-Build
-
-schedule function main:test 1s replace
-say hi
-----------------
-data/minecraft/tags/functions/load.json:
-{"values":["main:test"]}
-----------------
+TypeError: import_Tokenizer.Tokenizer.tokenize is not a function

@@ -12,8 +12,6 @@ export interface StreamPosition {
 
 const enum CHARS {
 	NEWLINE = 10,
-	SPACE = 32,
-	TAB = 9,
 }
 
 /**
@@ -116,24 +114,6 @@ export class StringStream {
 		} else {
 			this.index++;
 			this.column++;
-		}
-	}
-
-	skipWhitespace() {
-		while (
-			this.index < this.length &&
-			(this.buffer[this.index] === CHARS.SPACE ||
-				this.buffer[this.index] === CHARS.TAB ||
-				this.buffer[this.index] === CHARS.NEWLINE)
-		) {
-			if (this.buffer[this.index] === CHARS.NEWLINE) {
-				this.index++;
-				this.line++;
-				this.column = 1;
-			} else {
-				this.index++;
-				this.column++;
-			}
 		}
 	}
 

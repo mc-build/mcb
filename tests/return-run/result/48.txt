@@ -1,12 +1,1 @@
-data/main/function/zzz/0.mcfunction:
-# Generated with MC-Build
-
-say $(a)
-----------------
-data/main/function/test.mcfunction:
-# Generated with MC-Build
-
-return run say hi
-return run execute run say hi
-return run function main:zzz/0 {a:1}
-----------------
+TypeError: import_Tokenizer.Tokenizer.tokenize is not a function
