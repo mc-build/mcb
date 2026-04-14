@@ -19,7 +19,11 @@ import { TagManager } from "./TagManager";
 import { TemplateArgument } from "./args/TemplateArgument";
 import * as McMath from "./McMath";
 
-const createRequire = Module.createRequire(__filename);
+let __require: (file: string) => any;
+const selfRequire = (file: string): any => {
+	if (__require === undefined) __require = Module.createRequire(__filename);
+	return __require(file);
+}
 
 class UidTracker {
 	private uid = 0;
@@ -3037,7 +3041,7 @@ export class Compiler {
 		const normalizedResolved = Compiler.normalizeProjectPath(resolved);
 		const ext = path.extname(resolutionPath);
 		if (ext.endsWith("js") || ext === ".json") {
-			const value = createRequire(resolved);
+			const value = selfRequire(resolved);
 			return { kind: "JsFile", value };
 		}
 		if (this.files.has(normalizedResolved)) {
