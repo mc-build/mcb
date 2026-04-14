@@ -34,7 +34,7 @@ export class Tokenizer {
 				}
 
 				if (line.endsWith("\\")) {
-					const base = line.substring(0, line.length - 2).replace(/\s+$/, "");
+					const base = line.substring(0, line.length - 1).replace(/\s+$/, "");
 					const nextLine = lines[lineIdx + 1];
 					if (nextLine === undefined) {
 						line = base;
