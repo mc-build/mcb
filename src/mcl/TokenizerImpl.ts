@@ -32,9 +32,10 @@ export class Tokenizer {
 				) {
 					line = line.substring(0, line.length - 1);
 				}
-
-				if (line.endsWith("\\")) {
-					const base = line.substring(0, line.length - 1).replace(/\s+$/, "");
+				const endTrimmed = line.trimEnd();
+				if (endTrimmed.endsWith("\\")) {
+					line = endTrimmed;
+					const base = line.substring(0, line.length - 1);
 					const nextLine = lines[lineIdx + 1];
 					if (nextLine === undefined) {
 						line = base;
