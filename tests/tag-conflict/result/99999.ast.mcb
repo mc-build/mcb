@@ -5,5 +5,5 @@ function tick_fn minecraft:tick{
 
 ### minecraft.mcb
 tag functions tick {
-	test_tag
+	./test_tag
 }

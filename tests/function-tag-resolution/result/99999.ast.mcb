@@ -7,14 +7,14 @@ function on_load minecraft:load{
 tag functions test {
 	minecraft:load
 	#minecraft:load
-	#tag
-	untagged
+	#./tag
+	./untagged
 }
 dir test{
 	tag functions test {
 		minecraft:load
 		#minecraft:load
-		#tag
-		untagged
+		#./tag
+		./untagged
 	}
 }

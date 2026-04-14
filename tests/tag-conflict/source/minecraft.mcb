@@ -1,3 +1,3 @@
 tag functions tick {
-  test_tag
+  ./test_tag
 }
