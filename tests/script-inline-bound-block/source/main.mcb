@@ -1,0 +1,12 @@
+import ./test.mcbt
+
+function test {
+	inline-block {
+		say hello
+		say world
+	}
+	inline-block 3.4 {
+		say with-var
+		say <%val%>
+	}
+}

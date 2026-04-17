@@ -1,0 +1,13 @@
+template inline-block {
+	with value:int content:block{
+		<%%
+			debugger;
+			emit.mcb(content,new Map([["val",value]]));
+		%%>
+	}
+	with content:block {
+		<%%
+			emit.mcb(content);
+		%%>
+	}
+}

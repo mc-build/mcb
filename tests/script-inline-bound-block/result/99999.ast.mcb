@@ -1,0 +1,3 @@
+McbError: Compiler Error:
+	append not available for top-level context
+	at <unknown>

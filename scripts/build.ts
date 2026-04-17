@@ -12,7 +12,7 @@ const distDir = path.join(rootDir, "dist");
 const templateDir = path.join(rootDir, "template");
 const cliEntry = path.join(rootDir, "src", "mcb", "Cli.ts");
 const testbedEntry = path.join(rootDir, "src", "testbed", "TestMain.ts");
-const libEntry = path.join(rootDir, "src", "libmcb.ts");
+const libEntry = path.join(rootDir, "src", "**/*.ts");
 
 async function ensureEmptyDir(dir: string): Promise<void> {
 	await fs.rm(dir, { recursive: true, force: true });
@@ -77,8 +77,9 @@ async function buildTargets(): Promise<void> {
 		}),
 		build({
 			entryPoints: [libEntry],
-			outfile: path.join(distDir, "libmcb.js"),
-			bundle: true,
+			// outfile: path.join(distDir, "libmcb.js"),
+			bundle: false,
+			outdir:"dist",
 			platform: "node",
 			target: "node18",
 			format: "esm",

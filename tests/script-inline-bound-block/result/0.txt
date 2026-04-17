@@ -1,0 +1,8 @@
+data/main/functions/test.mcfunction:
+# Generated with MC-Build
+
+say hello
+say world
+say with-var
+say 3
+----------------

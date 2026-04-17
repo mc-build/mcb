@@ -4,6 +4,7 @@ import { Parser } from "../Parser";
 import { Tokenizer } from "../TokenizerImpl";
 import { PosInfo } from "../Tokenizer";
 import { TemplateArgument, TemplateParseResult } from "./TemplateArgument";
+import assert from "node:assert";
 
 export class BoundBlock {
 	constructor(
@@ -65,6 +66,13 @@ export class BoundBlock {
 			file.embedTransform(newContext, pos, new Map(), [this.node]);
 		}
 		return content.join("\n");
+	}
+	embedDirectlyInContext(file: McFile, pos: PosInfo, context: CompilerContext,vars:Map<string,any>) {
+		assert.ok(
+			this.node.type === "Block",
+			"attempted to render BoundBlock where node is not of type 'Block'",
+		);
+		file.embed(context, pos, vars, this.node.body, false);
 	}
 }
 

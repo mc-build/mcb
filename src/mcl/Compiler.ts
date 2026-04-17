@@ -18,6 +18,7 @@ import { StringUtils } from "../strutils/StringUtils";
 import { TagManager } from "./TagManager";
 import { TemplateArgument } from "./args/TemplateArgument";
 import * as McMath from "./McMath";
+import { BoundBlock } from "./args/BlockTemplateArgument";
 
 let __require: (file: string) => any;
 const selfRequire = (file: string): any => {
@@ -37,13 +38,12 @@ export type VariableRecord = Map<string, unknown>;
 
 export class VariableMap {
 	private cache: VariableRecord | null = null;
+	static globals: VariableMap;
 
 	constructor(
 		private parent: VariableMap | null,
 		private variables: VariableRecord = new Map(),
 	) {}
-
-	static globals = new VariableMap(null, Globals.map);
 
 	static fromObject(obj: Record<string, unknown>): VariableMap {
 		const result = new Map<string, unknown>();
@@ -70,6 +70,8 @@ export class VariableMap {
 		return new VariableMap(this, variables);
 	}
 }
+VariableMap.globals = new VariableMap(null, Globals.map);
+
 
 export type BaseNameInfo = {
 	namespace: string;
@@ -101,7 +103,8 @@ type ImportFileType =
 type TemplateArgumentMap = Map<TemplateArgument[], AstNode[]>;
 
 type ScriptEmit = ((command: string) => void) & {
-	mcb: (code: string) => void;
+	mcb(code: string | AstNode):void;
+	mcb(code:BoundBlock,vars?:Map<string,any>):void;
 	block?: (commands: string[], data?: string) => string;
 };
 
@@ -1950,7 +1953,7 @@ export class McFile {
 		const newContext = this.createCompilerContext(
 			context.namespace,
 			context.append,
-			new VariableMap(VariableMap.globals, forked.get()),
+			forked,
 			context.path,
 			context.uidIndex,
 			context.stack,
@@ -2138,8 +2141,12 @@ export class McFile {
 				context.append(command);
 			},
 			{
-				mcb: (code: string) => {
-					file.compileInline(context, code, isTLD);
+				mcb: (code: string | AstNode | BoundBlock,vars?:Map<string,any>) => {
+					if(typeof code === "string")
+						return file.compileInline(context, code, isTLD);
+					if (code instanceof BoundBlock)
+						code.embedDirectlyInContext(file, pos, context, vars || new Map());
+					else return file.compileCommand(code,context);
 				},
 			},
 		);
@@ -2261,8 +2268,12 @@ export class McFile {
 				});
 			},
 			{
-				mcb: (code: string) => {
-					results.push(file.transformInline(context, code, isTLD));
+				mcb: (code: string | AstNode | BoundBlock,vars?:Map<string,any>) => {
+					if (typeof code === "string")
+						return results.push(file.transformInline(context, code, isTLD));
+					if (code instanceof BoundBlock)
+						return code.embedDirectlyInContext(file, pos, context,vars || new Map());
+					else return results.push(code);
 				},
 			},
 		);
