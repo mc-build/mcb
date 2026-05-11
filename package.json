@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "4.0.7",
+  "version": "4.1.0",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "browser": "dist/libmcb.browser.js",

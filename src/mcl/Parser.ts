@@ -555,7 +555,7 @@ function readRaw(
 		return { type: "Raw", pos, value: v, continuations: [], isMacro };
 	}
 	const continuations: AstNode[] = [];
-	const line = pos.line;
+	let line = pos.line;
 	while (true) {
 		if (!reader.hasNext()) {
 			throw new ParserError("Unexpected end of file!");
@@ -582,6 +582,9 @@ function readRaw(
 				isMacro: false,
 				isInline: false,
 			});
+			let last = reader.last();
+			if(last)
+				line = last.pos.line;
 		} else if (peek.type === "BracketClose" && peek.pos.line === line) {
 			throw unreachable({ type: "Literal", v, pos } as Token);
 		} else {

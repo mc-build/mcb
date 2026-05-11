@@ -28,7 +28,9 @@ export class ArrayInput<T> {
 	peek(): T {
 		return this.array[this._index];
 	}
-
+	last(): T | undefined {
+		return this.array[this._index - 1];
+	}
 	hasNext(): boolean {
 		return this._index < this.array.length;
 	}
