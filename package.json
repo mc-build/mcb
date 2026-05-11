@@ -1,6 +1,6 @@
 {
   "name": "mc-build",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "A language for creating minecraft datapacks",
   "module": "dist/libmcb.js",
   "browser": "dist/libmcb.browser.js",
@@ -9,15 +9,15 @@
     "mc-build": "./dist/mcb.js",
     "mcb": "./dist/mcb.js"
   },
-  "exports":{
-	"./*":{
-		"default":"./dist/*.js",
-		"types":"./dist/*.d.ts"
-	},
-	".":{
-		"default":"./dist/libmcb.js",
-		"types":"./dist/libmcb.d.ts"
-	}
+  "exports": {
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    ".": {
+      "import": "./dist/libmcb.js",
+      "types": "./dist/libmcb.d.ts"
+    }
   },
   "types": "dist/libmcb.d.ts",
   "repository": "git@github.com:mc-build/mcb.git",

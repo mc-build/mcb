@@ -955,7 +955,7 @@ export class McFile {
 				return;
 			case "Comment":
 				if (!context.compiler.config.dontEmitComments) {
-					context.append(node.value);
+					context.append(this.injectValues(node.value,context,node.pos));
 				}
 				return;
 			case "Block": {
