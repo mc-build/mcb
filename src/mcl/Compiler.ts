@@ -352,7 +352,7 @@ class McTemplate {
 			const args = new Map<string, unknown>();
 			let successCount = 0;
 			let pidx = 0;
-			const argList: unknown[] = [argString, ...(extras ?? [])];
+			const argList: unknown[] = [argString, ...(extras ?? [])].map(_=>typeof _ === "string" ? _ : _.type === "Raw" ? _.value : _);
 			let lastEntryWasBlock = false;
 			let jsCacheIdx = 0;
 
