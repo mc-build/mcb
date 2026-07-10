@@ -5,6 +5,7 @@ import { Tokenizer } from "../TokenizerImpl";
 import { PosInfo } from "../Tokenizer";
 import { TemplateArgument, TemplateParseResult } from "./TemplateArgument";
 import assert from "node:assert";
+import { CompilerError } from "../error/CompilerError";
 
 export class BoundBlock {
 	constructor(
@@ -67,11 +68,8 @@ export class BoundBlock {
 		}
 		return content.join("\n");
 	}
-	embedDirectlyInContext(file: McFile, pos: PosInfo, context: CompilerContext,vars:Map<string,any>) {
-		assert.ok(
-			this.node.type === "Block",
-			"attempted to render BoundBlock where node is not of type 'Block'",
-		);
+	embedDirectlyInContext(file: McFile, pos: PosInfo, context: CompilerContext, vars: Map<string, any>) {
+		if (this.node.type !== "Block") throw new CompilerError("unable to emit a non-block astnode directly to context", true, [pos]);
 		file.embed(context, pos, vars, this.node.body, false);
 	}
 }
