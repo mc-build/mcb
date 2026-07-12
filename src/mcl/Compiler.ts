@@ -26,6 +26,24 @@ const selfRequire = (file: string): any => {
 	return __require(file);
 }
 
+function describeScriptValue(value: unknown): string {
+	if (value === null) return "null";
+	if (value === undefined) return "undefined";
+	if (Array.isArray(value)) return "an array";
+	if (typeof value === "string") {
+		const truncated =
+			value.length > 30 ? `${value.slice(0, 30)}...` : value;
+		return `a string (${JSON.stringify(truncated)})`;
+	}
+	if (typeof value === "object") {
+		const ctorName = value.constructor?.name;
+		return ctorName && ctorName !== "Object"
+			? `an instance of ${ctorName}`
+			: "a plain object";
+	}
+	return `a ${typeof value}`;
+}
+
 class UidTracker {
 	private uid = 0;
 
@@ -2138,6 +2156,14 @@ export class McFile {
 		const file = this;
 		const emit: ScriptEmit = Object.assign(
 			(command: string) => {
+				if (typeof command !== "string") {
+					throw CompilerError.create(
+						`emit() expects a string command, got ${describeScriptValue(command)}. ` +
+							"Use emit.mcb() to emit an AST node or a bound block, or embed() to embed a block-type template argument.",
+						pos,
+						context,
+					);
+				}
 				context.append(command);
 			},
 			{
@@ -2176,14 +2202,7 @@ export class McFile {
 			};
 		}
 
-		const embed = (value: {
-			embedTo: (
-				ctx: CompilerContext,
-				p: PosInfo,
-				file: McFile,
-				embed?: boolean,
-			) => unknown;
-		}) => {
+		const embed = (value: unknown) => {
 			if (isTLD) {
 				throw CompilerError.create(
 					"embed not available in toplevel script blocks",
@@ -2191,7 +2210,27 @@ export class McFile {
 					context,
 				);
 			}
-			return value.embedTo(context, pos, file);
+			if (
+				!value ||
+				typeof (value as { embedTo?: unknown }).embedTo !== "function"
+			) {
+				throw CompilerError.create(
+					`embed() expects a block-type template argument (a value with an .embedTo method), got ${describeScriptValue(value)}. ` +
+						"Did you mean to use emit() instead?",
+					pos,
+					context,
+				);
+			}
+			return (
+				value as {
+					embedTo: (
+						ctx: CompilerContext,
+						p: PosInfo,
+						file: McFile,
+						embed?: boolean,
+					) => unknown;
+				}
+			).embedTo(context, pos, file);
 		};
 
 		let requireFn: (specifier: string) => unknown;
@@ -2259,6 +2298,14 @@ export class McFile {
 		const results: AstNode[] = [];
 		const emit: ScriptEmit = Object.assign(
 			(command: string) => {
+				if (typeof command !== "string") {
+					throw CompilerError.create(
+						`emit() expects a string command, got ${describeScriptValue(command)}. ` +
+							"Use emit.mcb() to emit an AST node or a bound block, or embed() to embed a block-type template argument.",
+						pos,
+						context,
+					);
+				}
 				results.push({
 					type: "Raw",
 					pos,
@@ -2315,14 +2362,7 @@ export class McFile {
 			};
 		}
 
-		const embed = (value: {
-			embedTo: (
-				ctx: CompilerContext,
-				p: PosInfo,
-				file: McFile,
-				actuallyEmbed?: boolean,
-			) => string;
-		}) => {
+		const embed = (value: unknown) => {
 			if (isTLD) {
 				throw CompilerError.create(
 					"embed not available in toplevel script blocks",
@@ -2330,7 +2370,27 @@ export class McFile {
 					context,
 				);
 			}
-			return value.embedTo(context, pos, file, false);
+			if (
+				!value ||
+				typeof (value as { embedTo?: unknown }).embedTo !== "function"
+			) {
+				throw CompilerError.create(
+					`embed() expects a block-type template argument (a value with an .embedTo method), got ${describeScriptValue(value)}. ` +
+						"Did you mean to use emit() instead?",
+					pos,
+					context,
+				);
+			}
+			return (
+				value as {
+					embedTo: (
+						ctx: CompilerContext,
+						p: PosInfo,
+						file: McFile,
+						actuallyEmbed?: boolean,
+					) => string;
+				}
+			).embedTo(context, pos, file, false);
 		};
 
 		let requireFn: (specifier: string) => unknown;
