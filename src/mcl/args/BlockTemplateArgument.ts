@@ -53,6 +53,7 @@ export class BoundBlock {
 			replacements: this.context.replacements,
 			stack: this.context.stack,
 			isTemplate: false,
+			isMacro: this.context.isMacro,
 			templates: this.context.templates,
 			requireTemplateKeyword: this.context.requireTemplateKeyword,
 			compiler: this.context.compiler,

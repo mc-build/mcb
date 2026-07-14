@@ -105,6 +105,7 @@ export type CompilerContext = {
 	replacements: VariableMap;
 	stack: PosInfo[];
 	isTemplate: boolean;
+	isMacro: boolean;
 	templates: Map<string, McTemplate>;
 	requireTemplateKeyword: boolean;
 	compiler: Compiler;
@@ -299,6 +300,7 @@ class McTemplate {
 			replacements: new VariableMap(null),
 			stack: context.stack,
 			isTemplate: false,
+			isMacro: context.isMacro,
 			templates: mergeTemplates(context.templates, this.file.templates),
 			requireTemplateKeyword: true,
 			compiler: context.compiler,
@@ -343,6 +345,7 @@ class McTemplate {
 			replacements: new VariableMap(null),
 			stack: context.stack,
 			isTemplate: false,
+			isMacro: context.isMacro,
 			templates: mergeTemplates(context.templates, this.file.templates),
 			requireTemplateKeyword: true,
 			compiler: context.compiler,
@@ -368,6 +371,7 @@ class McTemplate {
 		pos: PosInfo,
 		value: string,
 		extras: AstNode[] | null,
+		isMacro: boolean,
 	): void {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
@@ -494,6 +498,7 @@ class McTemplate {
 				replacements: context.replacements,
 				stack: [pos, ...context.stack],
 				isTemplate: false,
+				isMacro,
 				templates: mergeTemplates(context.templates, this.file.templates),
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
@@ -519,6 +524,7 @@ class McTemplate {
 		pos: PosInfo,
 		value: string,
 		extras: AstNode[] | null,
+		isMacro: boolean,
 	): AstNode {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
@@ -649,6 +655,7 @@ class McTemplate {
 				replacements: context.replacements,
 				stack: [pos, ...context.stack],
 				isTemplate: false,
+				isMacro,
 				templates: mergeTemplates(context.templates, this.file.templates),
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
@@ -769,6 +776,7 @@ export class McFile {
 			functions,
 			context.baseNamespaceInfo,
 			context.currentFunction,
+			context.isMacro,
 		);
 	}
 
@@ -787,6 +795,7 @@ export class McFile {
 		functions: (string | null)[],
 		baseNameInfo: BaseNameInfo,
 		currentFunction: string[] | null,
+		isMacro: boolean,
 	): CompilerContext {
 		return {
 			append,
@@ -797,6 +806,7 @@ export class McFile {
 			replacements,
 			stack,
 			isTemplate: this.ext === "mcbt",
+			isMacro,
 			templates,
 			requireTemplateKeyword,
 			compiler,
@@ -869,6 +879,7 @@ export class McFile {
 			context.functions.concat([callSig]),
 			context.baseNamespaceInfo,
 			context.currentFunction,
+			context.isMacro,
 		);
 		for (const node of body) {
 			this.compileCommand(node, newContext);
@@ -1640,6 +1651,7 @@ export class McFile {
 			context.functions,
 			context.baseNamespaceInfo,
 			context.currentFunction,
+			context.isMacro,
 		);
 		for (const node of body) {
 			this.compileTld(node, newContext);
@@ -1874,7 +1886,7 @@ export class McFile {
 		}
 
 		const variables = context.variables.get();
-		const argNames: string[] = ["embed", "context"];
+		const argNames: string[] = ["embed", "context", "isMacro"];
 		const argValues: unknown[] = [
 			(value: unknown) => {
 				if (
@@ -1898,6 +1910,7 @@ export class McFile {
 				).embedTo(context, pos, this);
 			},
 			context,
+			context.isMacro,
 		];
 
 		for (const [key, value] of variables.entries()) {
@@ -1942,8 +1955,8 @@ export class McFile {
 		pos: PosInfo,
 	): unknown {
 		const variables = context.variables.get();
-		const argNames: string[] = ["context"];
-		const argValues: unknown[] = [context];
+		const argNames: string[] = ["context", "isMacro"];
+		const argValues: unknown[] = [context, context.isMacro];
 
 		for (const [key, value] of variables.entries()) {
 			argNames.push(key);
@@ -1988,6 +2001,7 @@ export class McFile {
 			context.functions,
 			context.baseNamespaceInfo,
 			context.currentFunction,
+			context.isMacro,
 		);
 		for (const node of body) {
 			if (useTld) {
@@ -2021,6 +2035,7 @@ export class McFile {
 			context.functions,
 			context.baseNamespaceInfo,
 			context.currentFunction,
+			context.isMacro,
 		);
 		const transformed = body.map((node) =>
 			useTld
@@ -2047,7 +2062,7 @@ export class McFile {
 			}
 			for (const [key, template] of context.templates.entries()) {
 				if (value === key || value.startsWith(`${key} `)) {
-					return template.transform(this, context, pos, value, extras);
+					return template.transform(this, context, pos, value, extras, isMacro);
 				}
 			}
 			if (extras && extras.length > 0) {
@@ -2080,7 +2095,7 @@ export class McFile {
 			}
 			for (const [key, template] of context.templates.entries()) {
 				if (value === key || value.startsWith(`${key} `)) {
-					template.process(this, context, pos, value, extras);
+					template.process(this, context, pos, value, extras, isMacro);
 					return;
 				}
 			}
@@ -2252,8 +2267,8 @@ export class McFile {
 			requireFn = (specifier: string) => localRequire(specifier);
 		}
 
-		const names = ["emit", "context", "embed", "require"] as string[];
-		const values: unknown[] = [emit, context, embed, requireFn];
+		const names = ["emit", "context", "embed", "require", "isMacro"] as string[];
+		const values: unknown[] = [emit, context, embed, requireFn, context.isMacro];
 
 		const jsEnv = context.variables.get();
 		for (const [key, value] of jsEnv.entries()) {
@@ -2412,8 +2427,8 @@ export class McFile {
 			requireFn = (specifier: string) => localRequire(specifier);
 		}
 
-		const names = ["emit", "context", "embed", "require"] as string[];
-		const values: unknown[] = [emit, context, embed, requireFn];
+		const names = ["emit", "context", "embed", "require", "isMacro"] as string[];
+		const values: unknown[] = [emit, context, embed, requireFn, context.isMacro];
 
 		const jsEnv = context.variables.get();
 		for (const [key, value] of jsEnv.entries()) {
@@ -2785,6 +2800,7 @@ export class McFile {
 					context.functions,
 					context.baseNamespaceInfo,
 					context.currentFunction,
+					context.isMacro,
 				);
 				for (const node of body) {
 					handler(newContext, node);
@@ -2938,6 +2954,7 @@ export class McFile {
 			[],
 			info,
 			null,
+			false,
 		);
 		context.append = (_command: string) => {
 			throw CompilerError.create(
@@ -3034,6 +3051,7 @@ export class McFile {
 			[],
 			info,
 			null,
+			false,
 		);
 		context.append = (_command: string) => {
 			throw CompilerError.create(
