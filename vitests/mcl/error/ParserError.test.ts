@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { PosInfo } from "../Tokenizer";
-import { SourceRegistry } from "../SourceRegistry";
-import { ParserError } from "./ParserError";
-import { McbError } from "./McbError";
+import { PosInfo } from "../../../src/mcl/Tokenizer";
+import { SourceRegistry } from "../../../src/mcl/SourceRegistry";
+import { ParserError } from "../../../src/mcl/error/ParserError";
+import { McbError } from "../../../src/mcl/error/McbError";
 
 function pos(file: string, line: number, col: number): PosInfo {
 	return { file, line, col };

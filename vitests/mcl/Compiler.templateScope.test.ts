@@ -1,10 +1,10 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { Compiler, VariableMap } from "./Compiler";
-import { Parser } from "./Parser";
-import { Tokenizer } from "./TokenizerImpl";
-import { TemplateRegisterer } from "./TemplateRegisterer";
-import { TestIo } from "../testbed/TestIo";
+import { Compiler, VariableMap } from "../../src/mcl/Compiler";
+import { Parser } from "../../src/mcl/Parser";
+import { Tokenizer } from "../../src/mcl/TokenizerImpl";
+import { TemplateRegisterer } from "../../src/mcl/TemplateRegisterer";
+import { TestIo } from "../../src/testbed/TestIo";
 
 TemplateRegisterer.register();
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Tokenizer } from "./TokenizerImpl";
-import { Parser } from "./Parser";
-import { AstNode } from "./AstNode";
+import { Tokenizer } from "../../src/mcl/TokenizerImpl";
+import { Parser } from "../../src/mcl/Parser";
+import { AstNode } from "../../src/mcl/AstNode";
 
 function parseLoop(code: string): AstNode {
 	const tokens = Tokenizer.tokenize(code, "repeat-as-binding.mcb");

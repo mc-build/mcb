@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Tokenizer } from "./TokenizerImpl";
-import { Parser } from "./Parser";
-import { ParserError } from "./error/ParserError";
+import { Tokenizer } from "../../src/mcl/TokenizerImpl";
+import { Parser } from "../../src/mcl/Parser";
+import { ParserError } from "../../src/mcl/error/ParserError";
 
 /**
  * Regression tests for crashes where the parser called `reader.peek().type`

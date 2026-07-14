@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SourceRegistry } from "./SourceRegistry";
+import { SourceRegistry } from "../../src/mcl/SourceRegistry";
 
 describe("SourceRegistry", () => {
 	it("returns the requested line of a registered file", () => {
