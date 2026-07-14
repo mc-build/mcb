@@ -329,7 +329,7 @@ async function runCompile(
 	const handleError = (error: unknown) => {
 		didFail = true;
 		if (McbError.isMclError(error)) {
-			Logger.error(error.message);
+			Logger.printError(error.message);
 		} else {
 			Logger.error(
 				"A fatal error occurred during compilation. Please report this to the developers.",

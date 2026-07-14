@@ -1,7 +1,9 @@
 import { Token, PosInfo } from "./Tokenizer";
+import { SourceRegistry } from "./SourceRegistry";
 
 export class Tokenizer {
 	static tokenize(code: string, file: string): Token[] {
+		SourceRegistry.register(file, code);
 		let isInMultilineComment = false;
 		const indents: number[] = [];
 		const lines = code.split("\n").map((rawLine) => {

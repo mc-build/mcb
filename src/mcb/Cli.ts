@@ -4,6 +4,7 @@ import process from "node:process";
 import { create, doBuild, generate, BuildOpts } from "./AppMain";
 import { Logger } from "./Logger";
 import { getVersionString } from "./Version";
+import { McbError } from "../mcl/error/McbError";
 
 interface ParsedOptions {
 	libDir: string;
@@ -136,7 +137,11 @@ export async function run(argv = process.argv.slice(2)): Promise<void> {
 	try {
 		await runCommand(command, args, options);
 	} catch (error) {
-		Logger.error(error instanceof Error ? error.message : String(error));
+		if (McbError.isMclError(error)) {
+			Logger.printError(error.message);
+		} else {
+			Logger.error(error instanceof Error ? error.message : String(error));
+		}
 		process.exitCode = 1;
 	}
 }

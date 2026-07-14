@@ -36,33 +36,16 @@ function unreachable(token: Token): ParserError {
 	switch (token.type) {
 		case "Literal":
 			return new ParserError(
-				format(
-					"Unexpected token '{}' at {}:{}:{}",
-					token.v,
-					token.pos.file,
-					token.pos.line,
-					token.pos.col,
-				),
+				format("Unexpected token '{}'", token.v),
+				token.pos,
 			);
 		case "BracketOpen":
 			return new ParserError(
-				format(
-					"Unexpected '{' with data '{}' at {}:{}:{}",
-					token.data ?? "",
-					token.pos.file,
-					token.pos.line,
-					token.pos.col,
-				),
+				format("Unexpected '{' with data '{}'", token.data ?? ""),
+				token.pos,
 			);
 		case "BracketClose":
-			return new ParserError(
-				format(
-					"Unexpected '}' at {}:{}:{}",
-					token.pos.file,
-					token.pos.line,
-					token.pos.col,
-				),
-			);
+			return new ParserError("Unexpected '}'", token.pos);
 	}
 }
 
@@ -94,7 +77,7 @@ function block(
 	const data = expectThenData(reader, allowData) ?? null;
 	while (true) {
 		if (!reader.hasNext()) {
-			throw new ParserError("Unexpected end of file!");
+			throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
 		}
 		const peek = reader.peek();
 		if (peek.type === "BracketClose") {
@@ -183,7 +166,7 @@ function json(reader: TokenInput): AstNode {
 	let result = "";
 	do {
 		if (!reader.hasNext()) {
-			throw new ParserError("Unexpected end of file!");
+			throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
 		}
 		const token = reader.next();
 		if (token.type === "BracketOpen") {
@@ -256,12 +239,8 @@ function parseTLD(reader: TokenInput): AstNode {
 		const spaceIdx = payload.indexOf(" ");
 		if (spaceIdx === -1) {
 			throw new ParserError(
-				format(
-					'"Expected a name and a time for the clock command" at {}:{}:{}',
-					pos.file,
-					pos.line,
-					pos.col,
-				),
+				"Expected a name and a time for the clock command",
+				pos,
 			);
 		}
 		const name = payload.substring(0, spaceIdx + 1).trim();
@@ -293,7 +272,7 @@ function parseTLD(reader: TokenInput): AstNode {
 		const script: Token[] = [];
 		while (true) {
 			if (!reader.hasNext()) {
-				throw new ParserError("Unexpected end of file!");
+				throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
 			}
 			const peek = reader.peek();
 			if (peek.type === "Literal" && peek.v === "%%>") {
@@ -405,13 +384,8 @@ function createJsonInfo(
 			return { kind: "Enchantment", entries };
 		default:
 			throw new ParserError(
-				format(
-					"\"Unsupported json file type '{}' at {}:{}:{}",
-					type,
-					pos.file,
-					pos.line,
-					pos.col,
-				),
+				format("Unsupported json file type '{}'", type),
+				pos,
 			);
 	}
 }
@@ -430,7 +404,7 @@ function innerParse(reader: TokenInput): AstNode {
 			const script: Token[] = [];
 			while (true) {
 				if (!reader.hasNext()) {
-					throw new ParserError("Unexpected end of file!");
+					throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
 				}
 				const next = reader.peek();
 				if (next.type === "Literal" && next.v === "%%>") {
@@ -558,7 +532,7 @@ function readRaw(
 	let line = pos.line;
 	while (true) {
 		if (!reader.hasNext()) {
-			throw new ParserError("Unexpected end of file!");
+			throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
 		}
 		const peek = reader.peek();
 		if (peek.type === "Literal" && peek.pos.line === line) {
@@ -806,12 +780,8 @@ function parseSchedule(
 		}
 		if (!delay) {
 			throw new ParserError(
-				format(
-					'"Expected delay after function name in schedule command" at {}:{}:{}',
-					pos.file,
-					pos.line,
-					pos.col,
-				),
+				"Expected delay after function name in schedule command",
+				pos,
 			);
 		}
 		return { type: "ScheduleCall", pos, delay, target: name, mode, isMacro };
@@ -836,7 +806,10 @@ function parseSchedule(
 		payload = payload.substring(0, payload.length - " replace".length);
 	}
 	if (reader.peek().type !== "BracketOpen") {
-		throw new ParserError("Expected { after delay in schedule block command");
+		throw new ParserError(
+			"Expected { after delay in schedule block command",
+			pos,
+		);
 	}
 	const body: AstNode[] = [];
 	block(reader, () => body.push(innerParse(reader)));

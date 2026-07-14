@@ -31,6 +31,13 @@ export class Logger {
 		console.error(`${prefix}${chalk.redBright(String(message))}`);
 	}
 
+	static printError(message: unknown): void {
+		if (!Logger.enabled) {
+			return;
+		}
+		console.error(`${prefix}${String(message)}`);
+	}
+
 	static warn(message: unknown): void {
 		if (!Logger.enabled) {
 			return;

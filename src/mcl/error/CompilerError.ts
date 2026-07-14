@@ -1,4 +1,6 @@
+import chalk from "chalk";
 import { PosInfo } from "../Tokenizer";
+import { SourceRegistry } from "../SourceRegistry";
 import { McbError } from "./McbError";
 
 export interface CompilerContextLike {
@@ -9,7 +11,10 @@ export class CompilerError extends McbError {
 	readonly internal: boolean;
 
 	constructor(message: string, internal: boolean, stack: PosInfo[]) {
-		super(`${internal ? "Internal " : ""}Compiler Error:\n\t${message}`, stack);
+		super(
+			`${internal ? "Internal " : ""}Compiler Error:\n\t${ErrorUtil.render(message, stack)}`,
+			stack,
+		);
 		this.internal = internal;
 	}
 
@@ -18,11 +23,7 @@ export class CompilerError extends McbError {
 		pos: PosInfo | null,
 		context: CompilerContextLike,
 	): CompilerError {
-		return new CompilerError(
-			ErrorUtil.formatContext(message, pos, context),
-			true,
-			ErrorUtil.toStack(pos, context),
-		);
+		return new CompilerError(message, true, ErrorUtil.toStack(pos, context));
 	}
 
 	static create(
@@ -30,52 +31,55 @@ export class CompilerError extends McbError {
 		pos: PosInfo | null,
 		context: CompilerContextLike,
 	): CompilerError {
-		return new CompilerError(
-			ErrorUtil.formatContext(message, pos, context),
-			false,
-			ErrorUtil.toStack(pos, context),
-		);
+		return new CompilerError(message, false, ErrorUtil.toStack(pos, context));
 	}
 }
 
-export const ErrorUtil = {
-	format(message: string, pos: PosInfo | null): string {
-		if (!pos) {
-			return message;
-		}
-		return `${pos.file}:${pos.line}:${pos.col + 1}: ${message}`;
-	},
+const MAX_CALL_CHAIN_FRAMES = 10;
 
-	formatWithStack(message: string, stack: (PosInfo | null)[]): string {
-		let res = message;
-		for (const pos of stack) {
-			if (!pos) {
-				res += "\n\tat <unknown>";
-			} else {
-				res += `\n\tat ${pos.file}:${pos.line}:${pos.col + 1}`;
+export const ErrorUtil = {
+	render(message: string, stack: PosInfo[]): string {
+		const [primary, ...callers] = stack;
+		let result = message;
+
+		if (primary) {
+			result += `\n\n  ${chalk.dim("-->")} ${primary.file}:${primary.line}:${primary.col + 1}`;
+			const frame = ErrorUtil.codeFrame(primary);
+			if (frame) {
+				result += `\n${frame}`;
+			}
+		} else {
+			result += "\n\tat <unknown>";
+		}
+
+		if (callers.length > 0) {
+			result += `\n\n  Called from:`;
+			const shown = callers.slice(0, MAX_CALL_CHAIN_FRAMES);
+			for (const pos of shown) {
+				result += `\n    at ${pos.file}:${pos.line}:${pos.col + 1}`;
+			}
+			const remaining = callers.length - shown.length;
+			if (remaining > 0) {
+				result += `\n    ... and ${remaining} more call${remaining === 1 ? "" : "s"}`;
 			}
 		}
-		return res;
+
+		return result;
 	},
 
-	formatContext(
-		message: string,
-		pos: PosInfo | null,
-		context: CompilerContextLike,
-	): string {
-		return ErrorUtil.formatWithStack(message, [...context.stack, pos]);
-	},
-
-	unexpectedToken(
-		node: { pos?: PosInfo },
-		context: CompilerContextLike,
-	): string {
-		const pos = node.pos ?? null;
-		return ErrorUtil.formatContext(
-			`Unexpected: ${JSON.stringify(node)}`,
-			pos,
-			context,
-		);
+	codeFrame(pos: PosInfo): string | null {
+		const line = SourceRegistry.getLine(pos.file, pos.line);
+		if (line === undefined) {
+			return null;
+		}
+		const lineLabel = String(pos.line);
+		const gutter = " ".repeat(lineLabel.length);
+		const col = Math.max(0, pos.col);
+		return [
+			`    ${chalk.dim(`${gutter} |`)}`,
+			`    ${chalk.dim(`${lineLabel} |`)} ${line}`,
+			`    ${chalk.dim(`${gutter} |`)} ${" ".repeat(col)}${chalk.redBright("^")}`,
+		].join("\n");
 	},
 
 	toStack(pos: PosInfo | null, context: CompilerContextLike): PosInfo[] {

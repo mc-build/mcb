@@ -12,7 +12,7 @@ import { Globals } from "./Globals";
 import { Parser } from "./Parser";
 import { Token, TokenIds, PosInfo } from "./Tokenizer";
 import { Tokenizer } from "./TokenizerImpl";
-import { CompilerError, ErrorUtil } from "./error/CompilerError";
+import { CompilerError } from "./error/CompilerError";
 import { McbError } from "./error/McbError";
 import { StringUtils } from "../strutils/StringUtils";
 import { TagManager } from "./TagManager";
@@ -169,26 +169,20 @@ class McTemplate {
 					break;
 				case "LoadBlock":
 					if (this.loadBlock) {
-						throw new CompilerError(
-							ErrorUtil.format(
-								"Templates can only have one top-level load block",
-								node.pos,
-							),
-							true,
-							[],
+						throw CompilerError.createInternal(
+							"Templates can only have one top-level load block",
+							node.pos,
+							{ stack: [] },
 						);
 					}
 					this.loadBlock = node.body;
 					break;
 				case "TickBlock":
 					if (this.tickBlock) {
-						throw new CompilerError(
-							ErrorUtil.format(
-								"Templates can only have one top-level tick block",
-								node.pos,
-							),
-							true,
-							[],
+						throw CompilerError.createInternal(
+							"Templates can only have one top-level tick block",
+							node.pos,
+							{ stack: [] },
 						);
 					}
 					this.tickBlock = node.body;
@@ -196,13 +190,10 @@ class McTemplate {
 				case "Comment":
 					break;
 				default:
-					throw new CompilerError(
-						ErrorUtil.format(
-							"Unexpected node type: " + JSON.stringify(node),
-							AstNodeUtils.getPos(node),
-						),
-						true,
-						[],
+					throw CompilerError.createInternal(
+						"Unexpected node type: " + JSON.stringify(node),
+						AstNodeUtils.getPos(node),
+						{ stack: [] },
 					);
 			}
 		}
@@ -484,7 +475,7 @@ class McTemplate {
 				uidIndex: context.uidIndex,
 				variables: context.variables,
 				replacements: context.replacements,
-				stack: context.stack,
+				stack: [pos, ...context.stack],
 				isTemplate: false,
 				templates: this.file.templates,
 				requireTemplateKeyword: true,
@@ -639,7 +630,7 @@ class McTemplate {
 				uidIndex: context.uidIndex,
 				variables: context.variables,
 				replacements: context.replacements,
-				stack: context.stack,
+				stack: [pos, ...context.stack],
 				isTemplate: false,
 				templates: this.file.templates,
 				requireTemplateKeyword: true,
@@ -945,13 +936,10 @@ export class McFile {
 		}
 
 		if (!name.includes(":") && !name.startsWith("$")) {
-			throw new CompilerError(
-				ErrorUtil.format(
-					"Implicit function resolution is no longer supported, please prepend your function name with ./ to achieve the same behavior.",
-					pos,
-				),
-				false,
-				[],
+			throw CompilerError.create(
+				"Implicit function resolution is no longer supported, please prepend your function name with ./ to achieve the same behavior.",
+				pos,
+				context,
 			);
 		}
 		return `${tagPrefix}${name}`;
