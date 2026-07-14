@@ -7,7 +7,7 @@ import { AstNode, JsonTagType } from "./AstNode";
 type TokenInput = ArrayInput<Token>;
 type CompileTimeElse = { condition: string | null; node: AstNode[] };
 
-const loopRegExp = /(REPEAT\s*\(.+?\))\s\s*as\s\s*([a-zA-Z,\s]+)/;
+const loopRegExp = /(REPEAT\s*\(.+?\))\s\s*as\s\s*([\w$,\s]+)/;
 const executeRegExp = /\b(run\s+?)\b/;
 
 function format(

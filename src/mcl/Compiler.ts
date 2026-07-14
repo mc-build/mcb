@@ -2792,7 +2792,7 @@ export class McFile {
 					context.path,
 					context.uidIndex,
 					context.stack,
-					context.variables,
+					context.replacements,
 					context.templates,
 					context.requireTemplateKeyword,
 					context.compiler,
