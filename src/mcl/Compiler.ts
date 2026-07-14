@@ -126,6 +126,23 @@ type ScriptEmit = ((command: string) => void) & {
 	block?: (commands: string[], data?: string) => string;
 };
 
+/**
+ * Combines a template's own (defining-file) templates with whatever templates
+ * were visible in the calling context, so a template's body - including code
+ * emitted dynamically via `emit.mcb()` - can call templates the caller has in
+ * scope (e.g. one imported into the calling file but not the template's own
+ * file). Entries from `own` take precedence on name conflicts.
+ */
+function mergeTemplates(
+	caller: Map<string, McTemplate>,
+	own: Map<string, McTemplate>,
+): Map<string, McTemplate> {
+	if (caller.size === 0) {
+		return own;
+	}
+	return new Map([...caller, ...own]);
+}
+
 class McTemplate {
 	private overloads: TemplateArgumentMap = new Map();
 	private loadBlock: AstNode[] | null = null;
@@ -282,7 +299,7 @@ class McTemplate {
 			replacements: new VariableMap(null),
 			stack: context.stack,
 			isTemplate: false,
-			templates: this.file.templates,
+			templates: mergeTemplates(context.templates, this.file.templates),
 			requireTemplateKeyword: true,
 			compiler: context.compiler,
 			globalVariables: context.globalVariables,
@@ -326,7 +343,7 @@ class McTemplate {
 			replacements: new VariableMap(null),
 			stack: context.stack,
 			isTemplate: false,
-			templates: this.file.templates,
+			templates: mergeTemplates(context.templates, this.file.templates),
 			requireTemplateKeyword: true,
 			compiler: context.compiler,
 			globalVariables: context.globalVariables,
@@ -477,7 +494,7 @@ class McTemplate {
 				replacements: context.replacements,
 				stack: [pos, ...context.stack],
 				isTemplate: false,
-				templates: this.file.templates,
+				templates: mergeTemplates(context.templates, this.file.templates),
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
 				globalVariables: context.globalVariables,
@@ -632,7 +649,7 @@ class McTemplate {
 				replacements: context.replacements,
 				stack: [pos, ...context.stack],
 				isTemplate: false,
-				templates: this.file.templates,
+				templates: mergeTemplates(context.templates, this.file.templates),
 				requireTemplateKeyword: true,
 				compiler: context.compiler,
 				globalVariables: context.globalVariables,
