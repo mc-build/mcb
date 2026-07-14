@@ -425,7 +425,10 @@ export async function doBuild(opts: BuildOpts): Promise<void> {
 	Logger.log("Watch mode enabled, watching for changes...");
 	const watcher = chokidar.watch(path.join(opts.baseDir, "src"), {
 		ignoreInitial: true,
-		awaitWriteFinish: true,
+		awaitWriteFinish: {
+			stabilityThreshold: 500,
+			pollInterval: 20,
+		},
 	});
 
 	let building = false;
