@@ -1,3 +1,4 @@
+.temp/
 bin*
 node_modules/
 .haxelib

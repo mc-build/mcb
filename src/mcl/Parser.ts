@@ -254,6 +254,7 @@ function parseTLD(reader: TokenInput): AstNode {
 	}
 	if (
 		StringUtils.startsWithConstExpr(value, "dir ") &&
+		reader.hasNext() &&
 		reader.peek().type === "BracketOpen"
 	) {
 		const body: AstNode[] = [];
@@ -465,8 +466,9 @@ function innerParse(reader: TokenInput): AstNode {
 				line: pos.line,
 				col: pos.col + "return run ".length,
 			};
-			const peek = reader.peek();
-			if (peek.type === "BracketOpen" && sub.length === 0) {
+			const hadNext = reader.hasNext();
+			const peek = hadNext ? reader.peek() : null;
+			if (peek && peek.type === "BracketOpen" && sub.length === 0) {
 				const body: AstNode[] = [];
 				const data = block(reader, () => body.push(innerParse(reader)));
 				return {
@@ -483,6 +485,12 @@ function innerParse(reader: TokenInput): AstNode {
 					},
 					isMacro,
 				};
+			}
+			if (!hadNext && sub.length === 0) {
+				throw new ParserError(
+					"Expected a command or a block after 'return run'",
+					newPos,
+				);
 			}
 			reader.back();
 			reader.update({ type: "Literal", v: sub, pos: newPos });
