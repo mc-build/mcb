@@ -694,6 +694,7 @@ export class McFile {
 	private fileJs: Record<string, unknown> = {};
 	private functionsDir = "functions";
 	private tagsDir = "tags";
+	private inlineCounter = 0;
 
 	constructor(
 		public name: string,
@@ -2117,7 +2118,10 @@ export class McFile {
 		code: string,
 		isTLD = false,
 	): void {
-		const tokens = Tokenizer.tokenize(code, `<inline ${this.name}>`);
+		const tokens = Tokenizer.tokenize(
+			code,
+			`<inline ${this.name}#${this.inlineCounter++}>`,
+		);
 		const astNodes = isTLD
 			? Parser.parseInlineTLD(tokens)
 			: Parser.parseInline(tokens);
@@ -2135,7 +2139,10 @@ export class McFile {
 		code: string,
 		isTLD = false,
 	): AstNode {
-		const tokens = Tokenizer.tokenize(code, `<inline ${this.name}>`);
+		const tokens = Tokenizer.tokenize(
+			code,
+			`<inline ${this.name}#${this.inlineCounter++}>`,
+		);
 		const astNodes = isTLD
 			? Parser.parseInlineTLD(tokens)
 			: Parser.parseInline(tokens);
