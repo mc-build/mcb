@@ -63,9 +63,9 @@ export class BoundBlock {
 			currentFunction: this.context.currentFunction,
 		};
 		if (actuallyEmbed) {
-			file.embed(newContext, pos, new Map(), [this.node]);
+			file.embed(newContext, pos, new Map(), [this.node], false, this.context.variables);
 		} else {
-			file.embedTransform(newContext, pos, new Map(), [this.node]);
+			file.embedTransform(newContext, pos, new Map(), [this.node], false, this.context.variables);
 		}
 		return content.join("\n");
 	}

@@ -78,4 +78,79 @@ describe("REPEAT ... as <name> binding in loop body scripts", () => {
 		expect(output).toContain("say value=1");
 		expect(output).toContain("say value=2");
 	});
+
+	// Regression test: user-defined block-type templates (e.g. an "if" template
+	// implemented via a `block:block` argument and `embed(block)`, the common
+	// pattern for sugaring `execute if ... run { ... }`) must not lose the
+	// caller's local variable scope when the block argument is embedded back
+	// into the output. Previously `McFile.embed()` unconditionally rebuilt the
+	// compilation scope from `context.globalVariables`, discarding local scope
+	// such as a REPEAT `as` binding, so `kick` (etc.) became "not defined" as
+	// soon as it was referenced inside a `run { ... }` block passed through a
+	// template like this.
+	describe("loop variable visibility inside block-type template arguments", () => {
+		const ifTemplate = {
+			path: "if.mcbt",
+			content: [
+				"template if {",
+				"    with all:raw block:block {",
+				"        <%%",
+				"            emit.mcb(`execute if ${all.trim()} run ${embed(block)}`)",
+				"        %%>",
+				"    }",
+				"}",
+				"",
+			].join("\n"),
+		};
+
+		it("resolves a REPEAT 'as' variable referenced inside a template's embedded block", () => {
+			const io = compile([
+				ifTemplate,
+				{
+					path: "main.mcb",
+					content: [
+						"import ./if.mcbt",
+						"function tick {",
+						"    REPEAT([[0, 0], [1, 1]]) as kick {",
+						"        if score #y v matches 0 run {",
+						"            say <%kick[0]%> <%kick[1]%>",
+						"        }",
+						"    }",
+						"}",
+						"",
+					].join("\n"),
+				},
+			]);
+
+			const output = io.print();
+			expect(output).toContain("say 0 0");
+			expect(output).toContain("say 1 1");
+		});
+
+		it("resolves a REPEAT 'as' variable through two nested levels of the template", () => {
+			const io = compile([
+				ifTemplate,
+				{
+					path: "main.mcb",
+					content: [
+						"import ./if.mcbt",
+						"function tick {",
+						"    if score #x v matches 0 run {",
+						"        REPEAT([[0, 0], [1, 1]]) as kick {",
+						"            if score #y v matches 0 run {",
+						"                say <%kick[0]%> <%kick[1]%>",
+						"            }",
+						"        }",
+						"    }",
+						"}",
+						"",
+					].join("\n"),
+				},
+			]);
+
+			const output = io.print();
+			expect(output).toContain("say 0 0");
+			expect(output).toContain("say 1 1");
+		});
+	});
 });

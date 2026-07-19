@@ -1985,8 +1985,9 @@ export class McFile {
 		varmap: Map<string, unknown>,
 		body: AstNode[],
 		useTld = false,
+		baseVariables: VariableMap = context.globalVariables,
 	): void {
-		const forked = context.globalVariables.fork(varmap);
+		const forked = baseVariables.fork(varmap);
 		const newContext = this.createCompilerContext(
 			context.namespace,
 			context.append,
@@ -2019,8 +2020,9 @@ export class McFile {
 		varmap: Map<string, unknown>,
 		body: AstNode[],
 		useTld = false,
+		baseVariables: VariableMap = context.globalVariables,
 	): AstNode {
-		const forked = context.globalVariables.fork(varmap);
+		const forked = baseVariables.fork(varmap);
 		const newContext = this.createCompilerContext(
 			context.namespace,
 			context.append,
