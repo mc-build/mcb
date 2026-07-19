@@ -69,7 +69,7 @@ export class Config {
 		this.internalScoreboardName = "mcb.internal";
 	}
 
-	static create(base: UserConfig): Config {
+	static create(base: UserConfig, projectDir: string = process.cwd()): Config {
 		const config = new Config();
 
 		if (base.libDir) config.libDir = base.libDir;
@@ -88,22 +88,42 @@ export class Config {
 			config.formatVersion = base.formatVersion;
 		} else {
 			// Try to read format version from pack.mcmeta
-			try {
-				const packMetaPath = path.join(process.cwd(), "pack.mcmeta");
-				const content = fs.readFileSync(packMetaPath, "utf8");
-				const json = JSON.parse(content);
+			const packMetaPath = path.join(projectDir, "pack.mcmeta");
 
-				if (json?.pack?.pack_format != null) {
-					config.formatVersion = json.pack.pack_format;
-				} else {
-					Logger.error(
-						"Could not determine pack format version, please specify it in the config or pack.mcmeta file, if you have a pack.mcmeta file already this may be the result of a parsing error.",
-					);
-					process.exit(21);
-				}
+			if (!fs.existsSync(packMetaPath)) {
+				Logger.error(
+					`Could not determine pack format version: no pack.mcmeta file found at "${packMetaPath}". Please specify formatVersion in the config or add a pack.mcmeta file.`,
+				);
+				process.exit(21);
+			}
+
+			let content: string;
+			try {
+				content = fs.readFileSync(packMetaPath, "utf8");
 			} catch (error) {
 				Logger.error(
-					"Could not determine pack format version, please specify it in the config or pack.mcmeta file, if you have a pack.mcmeta file already this may be the result of a parsing error.",
+					`Could not determine pack format version: failed to read "${packMetaPath}": ${error instanceof Error ? error.message : String(error)}`,
+				);
+				process.exit(21);
+			}
+
+			let json: unknown;
+			try {
+				json = JSON.parse(content);
+			} catch (error) {
+				Logger.error(
+					`Could not determine pack format version: "${packMetaPath}" is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+				);
+				process.exit(21);
+			}
+
+			const packFormat = (json as { pack?: { pack_format?: unknown } })?.pack
+				?.pack_format;
+			if (typeof packFormat === "number") {
+				config.formatVersion = packFormat;
+			} else {
+				Logger.error(
+					`Could not determine pack format version: "${packMetaPath}" has no numeric "pack.pack_format" field. Please specify formatVersion in the config or fix the pack.mcmeta file.`,
 				);
 				process.exit(21);
 			}

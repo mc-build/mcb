@@ -3105,8 +3105,9 @@ export class Compiler {
 	constructor(
 		public baseDir: string,
 		config: UserConfig,
+		configDir: string = baseDir,
 	) {
-		this.config = Config.create(config);
+		this.config = Config.create(config, configDir);
 		this.io = this.config.io ?? {
 			write() {},
 			cleanup() {},

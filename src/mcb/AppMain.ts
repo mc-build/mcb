@@ -319,7 +319,7 @@ async function runCompile(
 	);
 	const config = loadConfig(resolvedConfigPath);
 	const compilerBaseDir = srcDir;
-	const compiler = new Compiler(compilerBaseDir, config);
+	const compiler = new Compiler(compilerBaseDir, config, resolvedBaseDir);
 	const io = new SyncIo();
 	compiler.io = io;
 
