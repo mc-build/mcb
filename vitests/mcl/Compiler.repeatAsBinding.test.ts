@@ -153,4 +153,97 @@ describe("REPEAT ... as <name> binding in loop body scripts", () => {
 			expect(output).toContain("say 1 1");
 		});
 	});
+
+	// Regression test: user-defined raw-argument-only templates (no `block`
+	// argument at all, e.g. a custom "positioned" wrapper around
+	// `execute positioned ... run <command>` as seen in mc-build projects'
+	// execute.mcbt) must also see the caller's local variable scope. These
+	// templates capture their whole argument as raw, unevaluated text and
+	// reassemble it into a new command via emit.mcb(), which recompiles that
+	// text in the template's own scope (deliberately isolated from caller
+	// locals) - so a REPEAT `as` binding referenced inside the raw text used
+	// to become "not defined" once emit.mcb() got to it.
+	describe("loop variable visibility inside raw-argument (non-block) template arguments", () => {
+		const positionedTemplate = {
+			path: "positioned.mcbt",
+			content: [
+				"template positioned {",
+				"    with all:raw {",
+				"        <%%",
+				"            emit.mcb(`execute positioned ${all}`)",
+				"        %%>",
+				"    }",
+				"}",
+				"",
+			].join("\n"),
+		};
+
+		it("resolves a REPEAT 'as' variable referenced inside a raw-argument template call", () => {
+			const io = compile([
+				positionedTemplate,
+				{
+					path: "main.mcb",
+					content: [
+						"import ./positioned.mcbt",
+						"function tick {",
+						"    REPEAT([{dx: 0, dy: 0}, {dx: 1, dy: 1}]) as cell {",
+						"        positioned ~ ~<%cell.dy * 0.25%> ~<%cell.dx * 0.25%> run say hi",
+						"    }",
+						"}",
+						"",
+					].join("\n"),
+				},
+			]);
+
+			const output = io.print();
+			expect(output).toContain("execute positioned ~ ~0 ~0 run say hi");
+			expect(output).toContain("execute positioned ~ ~0.25 ~0.25 run say hi");
+		});
+	});
+
+	// Regression test: "word"-typed template arguments (e.g. the `name` in a
+	// custom `set <name> <objective> <value>` template, the common pattern
+	// for sugaring `scoreboard players set ...`) never evaluated <%...%>
+	// expressions embedded in the captured word at all - unlike "raw"
+	// arguments (fixed above), which only lost caller scope but did at least
+	// resolve eventually. A word argument like `#row_<%row%>_complete` was
+	// passed through completely unevaluated, so the compiled output
+	// contained the literal, un-substituted "<%row%>" text.
+	describe("loop variable visibility inside word-argument template arguments", () => {
+		const setTemplate = {
+			path: "set.mcbt",
+			content: [
+				"template set {",
+				"    with name:word objective:word value:int {",
+				"        scoreboard players set <%name%> <%objective%> <%value%>",
+				"    }",
+				"}",
+				"",
+			].join("\n"),
+		};
+
+		it("resolves a REPEAT 'as' variable embedded in a word-argument template call", () => {
+			const io = compile([
+				setTemplate,
+				{
+					path: "main.mcb",
+					content: [
+						"import ./set.mcbt",
+						"function tick {",
+						"    REPEAT(0, 2) as row {",
+						"        set #is_row_<%row%>_complete v 0",
+						"    }",
+						"}",
+						"",
+					].join("\n"),
+				},
+			]);
+
+			const output = io.print();
+			expect(output).toContain("scoreboard players set #is_row_0_complete v 0");
+			expect(output).toContain("scoreboard players set #is_row_1_complete v 0");
+			expect(output).toContain("scoreboard players set #is_row_2_complete v 0");
+			expect(output).not.toContain("<%row%>");
+		});
+	});
 });

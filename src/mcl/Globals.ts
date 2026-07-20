@@ -40,7 +40,13 @@ const loopVariants: Array<{
 			const [min, max] = args as [number, number];
 			const actualMin = min < max ? min : max;
 			const actualMax = min < max ? max : min;
-			const step = Math.sign(max - min);
+			// Math.sign(max - min) is 0 when min === max, which would leave `i`
+			// stuck forever while the "reached the end" check stays true
+			// (i <= actualMax never becomes false). Force a non-zero step so a
+			// single-value range (e.g. REPEAT(5, 5)) yields once and stops -
+			// this is what nested REPEATs hit whenever an inner range's bounds
+			// happen to be equal on some outer iteration.
+			const step = Math.sign(max - min) || 1;
 			for (
 				let i = step < 0 ? actualMax : actualMin;
 				step < 0 ? i >= actualMin : i <= actualMax;
@@ -52,17 +58,28 @@ const loopVariants: Array<{
 	},
 	{
 		signature: [match("number"), match("number"), match("number")],
-		handler: function* (...args: unknown[]) {
+		// Not a generator: a step of 0 must be rejected before any iteration
+		// starts (throwing from inside a generator body would only surface
+		// once the loop is first iterated, deep inside the compiler loop,
+		// instead of as a normal compiler error at the REPEAT() call).
+		handler: (...args: unknown[]) => {
 			const [min, max, step] = args as [number, number, number];
+			if (step === 0) {
+				throw new Error(
+					`REPEAT step must not be 0 (min=${min}, max=${max}) - this would loop forever`,
+				);
+			}
 			const actualMin = min < max ? min : max;
 			const actualMax = min < max ? max : min;
-			for (
-				let i = step < 0 ? actualMax : actualMin;
-				step < 0 ? i >= actualMin : i <= actualMax;
-				i += step
-			) {
-				yield i;
-			}
+			return (function* () {
+				for (
+					let i = step < 0 ? actualMax : actualMin;
+					step < 0 ? i >= actualMin : i <= actualMax;
+					i += step
+				) {
+					yield i;
+				}
+			})();
 		},
 	},
 	{

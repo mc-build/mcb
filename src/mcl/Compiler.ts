@@ -12,6 +12,7 @@ import { Globals } from "./Globals";
 import { Parser } from "./Parser";
 import { Token, TokenIds, PosInfo } from "./Tokenizer";
 import { Tokenizer } from "./TokenizerImpl";
+import { injectExpressions, advancePos } from "./InlineExpressionUtils";
 import { CompilerError } from "./error/CompilerError";
 import { McbError } from "./error/McbError";
 import { StringUtils } from "../strutils/StringUtils";
@@ -375,6 +376,11 @@ class McTemplate {
 	): void {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
+		const argStringPos = advancePos(
+			pos,
+			value.substring(0, value.length - argString.length),
+		);
+		const extrasPos = (extras ?? []).map((e) => AstNodeUtils.getPos(e));
 		this.jsValueCache.clear();
 		TemplateArgument.resetJsCache(this.jsValueCache);
 
@@ -383,6 +389,7 @@ class McTemplate {
 			let successCount = 0;
 			let pidx = 0;
 			const argList: unknown[] = [argString, ...(extras ?? [])].map(_=>typeof _ === "string" ? _ : _.type === "Raw" ? _.value : _);
+			const argPosList: PosInfo[] = [argStringPos, ...extrasPos];
 			let lastEntryWasBlock = false;
 			let jsCacheIdx = 0;
 
@@ -423,13 +430,14 @@ class McTemplate {
 				}
 				const original = candidate;
 				let working = candidate;
+				const currentArgPos = argPosList[pidx];
 				let jsBlockRaw: string | null = null;
 				if (working.startsWith("<%") && !arg.expectJsValue) {
 					const end = working.indexOf("%>");
 					if (end === -1) {
 						throw CompilerError.create(
 							"Unexpected end of inline script block",
-							pos,
+							currentArgPos,
 							context,
 						);
 					}
@@ -439,7 +447,11 @@ class McTemplate {
 					if (this.jsValueCache.has(jsCacheIdx)) {
 						valueResult = this.jsValueCache.get(jsCacheIdx);
 					} else {
-						valueResult = McFile.invokeExpressionInline(script, context, pos);
+						valueResult = McFile.invokeExpressionInline(
+							script,
+							context,
+							currentArgPos,
+						);
 						this.jsValueCache.set(jsCacheIdx, valueResult);
 					}
 					working = McTemplate.stringifyInlineResult(valueResult);
@@ -449,7 +461,7 @@ class McTemplate {
 					jsCacheIdx++;
 				}
 
-				const parsed = arg.parseValue(working, pos, context);
+				const parsed = arg.parseValue(working, currentArgPos, context);
 				if (!parsed.success) {
 					break;
 				}
@@ -469,6 +481,13 @@ class McTemplate {
 					const remainder = original.substring(rawValue.length);
 					argList[pidx] = McTemplate.ltrim(remainder);
 				}
+				argPosList[pidx] = advancePos(
+					currentArgPos,
+					original.substring(
+						0,
+						original.length - (argList[pidx] as string).length,
+					),
+				);
 				successCount++;
 				lastEntryWasBlock = false;
 			}
@@ -528,6 +547,11 @@ class McTemplate {
 	): AstNode {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
+		const argStringPos = advancePos(
+			pos,
+			value.substring(0, value.length - argString.length),
+		);
+		const extrasPos = (extras ?? []).map((e) => AstNodeUtils.getPos(e));
 		this.jsValueCache.clear();
 		TemplateArgument.resetJsCache(this.jsValueCache);
 
@@ -536,6 +560,7 @@ class McTemplate {
 			let successCount = 0;
 			let pidx = 0;
 			const argList: unknown[] = [argString, ...(extras ?? [])];
+			const argPosList: PosInfo[] = [argStringPos, ...extrasPos];
 			let lastEntryWasBlock = false;
 			let jsCacheIdx = 0;
 
@@ -576,13 +601,14 @@ class McTemplate {
 				}
 				const original = candidate;
 				let working = candidate;
+				const currentArgPos = argPosList[pidx];
 				let jsBlockRaw: string | null = null;
 				if (working.startsWith("<%") && !arg.expectJsValue) {
 					const end = working.indexOf("%>");
 					if (end === -1) {
 						throw CompilerError.create(
 							"Unexpected end of inline script block",
-							pos,
+							currentArgPos,
 							context,
 						);
 					}
@@ -592,7 +618,11 @@ class McTemplate {
 					if (this.jsValueCache.has(jsCacheIdx)) {
 						valueResult = this.jsValueCache.get(jsCacheIdx);
 					} else {
-						valueResult = McFile.invokeExpressionInline(script, context, pos);
+						valueResult = McFile.invokeExpressionInline(
+							script,
+							context,
+							currentArgPos,
+						);
 						this.jsValueCache.set(jsCacheIdx, valueResult);
 					}
 					working = McTemplate.stringifyInlineResult(valueResult);
@@ -602,7 +632,7 @@ class McTemplate {
 					jsCacheIdx++;
 				}
 
-				const parsed = arg.parseValue(working, pos, context);
+				const parsed = arg.parseValue(working, currentArgPos, context);
 				if (!parsed.success) {
 					break;
 				}
@@ -622,6 +652,13 @@ class McTemplate {
 					const remainder = original.substring(rawValue.length);
 					argList[pidx] = McTemplate.ltrim(remainder);
 				}
+				argPosList[pidx] = advancePos(
+					currentArgPos,
+					original.substring(
+						0,
+						original.length - (argList[pidx] as string).length,
+					),
+				);
 				successCount++;
 				lastEntryWasBlock = false;
 			}
@@ -1919,35 +1956,21 @@ export class McFile {
 			argValues.push(value);
 		}
 
-		const parts = target.split(/(<%[\s\S]*?%>)/g);
-		const output: string[] = [];
-
-		for (const part of parts) {
-			if (!part) {
-				continue;
+		return injectExpressions(target, pos, (expr, exprPos) => {
+			try {
+				// eslint-disable-next-line no-new-func
+				const fn = new Function(...argNames, `return (${expr});`);
+				return fn(...argValues);
+			} catch (error) {
+				const message =
+					error instanceof Error ? error.message : String(error);
+				throw CompilerError.create(
+					`Error whilst evaluating expression: ${message}`,
+					exprPos,
+					context,
+				);
 			}
-			if (part.startsWith("<%") && part.endsWith("%>")) {
-				const expr = part.slice(2, -2);
-				try {
-					// eslint-disable-next-line no-new-func
-					const fn = new Function(...argNames, `return (${expr});`);
-					const result = fn(...argValues);
-					output.push(result == null ? "" : String(result));
-				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : String(error);
-					throw CompilerError.create(
-						`Error whilst evaluating expression: ${message}`,
-						pos,
-						context,
-					);
-				}
-			} else {
-				output.push(part);
-			}
-		}
-
-		return output.join("");
+		});
 	}
 
 	static invokeExpressionInline(
