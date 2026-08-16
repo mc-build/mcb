@@ -1150,20 +1150,19 @@ export class McFile {
 				const append = (command: string) => {
 					commands.push(command);
 				};
-				const uid = String(context.uidIndex.get());
-				const callSignature = `${context.namespace}:${context.path
-					.concat([context.compiler.config.generatedDirName, uid])
+				const id = String(context.uidIndex.get());
+				const generatedPath = `${context.namespace}:${context.path
+					.concat([context.compiler.config.generatedDirName, id])
 					.join("/")}`;
 				const newContext = this.forkCompilerContextWithAppend(
 					context,
 					append,
-					context.functions.concat([callSignature]),
+					context.functions.concat([generatedPath]),
 				);
 				for (const child of node.body) {
 					this.compileCommand(child, newContext);
 				}
 				const result = commands.join("\n");
-				const id = String(context.uidIndex.get());
 				this.saveContent(
 					context,
 					path.join(
@@ -1176,9 +1175,6 @@ export class McFile {
 					),
 					result,
 				);
-				const generatedPath = `${context.namespace}:${context.path
-					.concat([context.compiler.config.generatedDirName, id])
-					.join("/")}`;
 				context.append(
 					this.makeMacro(
 						node.isMacro ?? false,
