@@ -4,9 +4,7 @@
 function kills_inc{
 	scoreboard players add #kills counters 1
 }
-damage_type kills {
-	"exhaustion": 0, "message_id": "generic", "scaling": "never"
-}
+damage_type kills { "exhaustion": 0, "message_id": "generic", "scaling": "never" }
 tag functions kills_tag {
 	./kills_inc
 }
@@ -19,9 +17,7 @@ dir nested{
 	function deaths_inc{
 		scoreboard players add #deaths counters 1
 	}
-	damage_type deaths {
-		"exhaustion": 0, "message_id": "generic", "scaling": "never"
-	}
+	damage_type deaths { "exhaustion": 0, "message_id": "generic", "scaling": "never" }
 	tag functions deaths_tag {
 		./deaths_inc
 	}
@@ -34,9 +30,7 @@ dir nested{
 function loop_1_inc{
 	scoreboard players add #loop_1 counters 1
 }
-damage_type loop_1 {
-	"exhaustion": 0, "message_id": "generic", "scaling": "never"
-}
+damage_type loop_1 { "exhaustion": 0, "message_id": "generic", "scaling": "never" }
 tag functions loop_1_tag {
 	./loop_1_inc
 }
@@ -48,9 +42,7 @@ dir loop_1_dir{
 function loop_2_inc{
 	scoreboard players add #loop_2 counters 1
 }
-damage_type loop_2 {
-	"exhaustion": 0, "message_id": "generic", "scaling": "never"
-}
+damage_type loop_2 { "exhaustion": 0, "message_id": "generic", "scaling": "never" }
 tag functions loop_2_tag {
 	./loop_2_inc
 }

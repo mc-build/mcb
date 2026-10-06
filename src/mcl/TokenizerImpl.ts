@@ -60,6 +60,7 @@ export class Tokenizer {
 			}
 
 			const basePos: PosInfo = { line: lineNum, col: colNum + indent, file };
+			const raw = line;
 
 			if (isInMultilineComment) {
 				result.push({ type: "Literal", v: `### ${line}`, pos: basePos });
@@ -75,12 +76,12 @@ export class Tokenizer {
 				(line.charAt(0) === "#" ||
 					(line.charAt(0) === "\\" && line.charAt(1) === "#"))
 			) {
-				result.push({ type: "Literal", v: line, pos: basePos });
+				result.push({ type: "Literal", v: line, pos: basePos, raw });
 				continue;
 			}
 
 			if (line.length > 0 && line.charAt(0) === "}") {
-				result.push({ type: "BracketClose", pos: basePos });
+				result.push({ type: "BracketClose", pos: basePos, raw });
 				line = line.substring(1);
 			}
 
@@ -98,13 +99,14 @@ export class Tokenizer {
 					if (braces.length === 0) {
 						const content = line.substring(0, idx).trim();
 						if (content.length > 0) {
-							result.push({ type: "Literal", v: content, pos: basePos });
+							result.push({ type: "Literal", v: content, pos: basePos, raw });
 						}
 						const dataRaw = line.substring(idx + 1).trim();
 						result.push({
 							type: "BracketOpen",
 							pos: { line: lineNum, col: colNum + indent + idx, file },
 							data: dataRaw.length > 0 ? dataRaw : undefined,
+							raw,
 						});
 						matchedOpeningBrace = true;
 						break;
@@ -120,7 +122,7 @@ export class Tokenizer {
 				continue;
 			}
 
-			result.push({ type: "Literal", v: trimmed, pos: basePos });
+			result.push({ type: "Literal", v: trimmed, pos: basePos, raw });
 		}
 
 		return result;
