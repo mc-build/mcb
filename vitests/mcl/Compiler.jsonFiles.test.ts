@@ -118,6 +118,17 @@ describe("json files", () => {
 		expect(files.get("data/main/sub1/file_2.json")).toBe("[1]");
 	});
 
+	it("writes chat_type and damage_type files to their real folders", () => {
+		const { files } = compile([
+			"chat_type chat { a: 1 }",
+			"damage_type damage { a: 1 }",
+		]);
+		expect([...files.keys()]).toEqual([
+			"data/main/chat_type/chat.json",
+			"data/main/damage_type/damage.json",
+		]);
+	});
+
 	it("warns about duplicate keys at the source line that repeats them", () => {
 		const { files, warnings, file } = compile([
 			"json data dupes {",
