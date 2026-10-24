@@ -3,7 +3,6 @@ data/main/function/test/with-args.mcfunction:
 
 say a=1 (number)
 say b=2 (string)
-#---------
 say a=1
 say b=2
 say c=3

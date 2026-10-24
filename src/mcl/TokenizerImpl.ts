@@ -66,7 +66,15 @@ export class Tokenizer {
 				continue;
 			}
 
-			if (line.length > 0 && line.charAt(0) === "#") {
+			// Lines starting with '#' (comments / tag references) or an escaped
+			// '\#' comment are emitted verbatim, skipping brace processing. The
+			// escape handling and comment-evaluation rules are applied later by the
+			// parser and compiler, where the surrounding context is known.
+			if (
+				line.length > 0 &&
+				(line.charAt(0) === "#" ||
+					(line.charAt(0) === "\\" && line.charAt(1) === "#"))
+			) {
 				result.push({ type: "Literal", v: line, pos: basePos });
 				continue;
 			}

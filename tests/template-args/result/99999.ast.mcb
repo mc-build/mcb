@@ -3,7 +3,6 @@ dir test{
 	function with-args{
 		say a=1 (number)
 		say b=2 (string)
-		# #---------
 		say a=1
 		say b=2
 		say c=3

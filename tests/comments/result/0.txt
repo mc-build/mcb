@@ -1,11 +1,11 @@
 data/main/functions/test/zzz/0.mcfunction:
 # Generated with MC-Build
 
-# a comment in a block should not be discarded
+# escaped comment in a block, kept
 ----------------
 data/main/functions/test/test.mcfunction:
 # Generated with MC-Build
 
-# a comment in a function should not be discarded
+# escaped comment in a function, kept
 function main:test/zzz/0
 ----------------

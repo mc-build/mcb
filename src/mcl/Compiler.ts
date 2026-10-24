@@ -45,6 +45,23 @@ function describeScriptValue(value: unknown): string {
 	return `a ${typeof value}`;
 }
 
+/**
+ * Determines how a comment node should be emitted into a function body.
+ * Returns the text to emit, or null if the comment should be discarded.
+ * - "### ..." multiline comment content is emitted unchanged.
+ * - "\# ..." escaped comments are emitted with the leading backslash removed.
+ * - unescaped "# ..." comments are no longer emitted.
+ */
+function resolveEmittedComment(value: string): string | null {
+	if (StringUtils.startsWithConstExpr(value, "###")) {
+		return value;
+	}
+	if (StringUtils.startsWithConstExpr(value, "\\#")) {
+		return value.substring(1);
+	}
+	return null;
+}
+
 class UidTracker {
 	private uid = 0;
 
@@ -1025,11 +1042,13 @@ export class McFile {
 					node.isMacro ?? false,
 				);
 				return;
-			case "Comment":
-				if (!context.compiler.config.dontEmitComments) {
-					context.append(this.injectValues(node.value,context,node.pos));
+			case "Comment": {
+				const emitted = resolveEmittedComment(node.value);
+				if (emitted !== null && !context.compiler.config.dontEmitComments) {
+					context.append(this.injectValues(emitted, context, node.pos));
 				}
 				return;
+			}
 			case "Block": {
 				if (node.isInline) {
 					if (node.data != null) {
@@ -1459,11 +1478,13 @@ export class McFile {
 					node.continuations ?? null,
 					node.isMacro ?? false,
 				);
-			case "Comment":
-				if (context.compiler.config.dontEmitComments) {
+			case "Comment": {
+				const emitted = resolveEmittedComment(node.value);
+				if (emitted === null || context.compiler.config.dontEmitComments) {
 					return { type: "Void" };
 				}
-				return node;
+				return { ...node, value: emitted };
+			}
 			case "ReturnRun":
 				return {
 					type: "ReturnRun",

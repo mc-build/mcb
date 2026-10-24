@@ -21,6 +21,13 @@ function format(
 	return result;
 }
 
+const ESCAPED_COMMENT_SCOPE_ERROR =
+	"Escaped comments (\\#) are only valid inside a function or template body";
+
+function isEscapedComment(value: string): boolean {
+	return StringUtils.startsWithConstExpr(value, "\\#");
+}
+
 function tokenId(token: Token): TokenIds {
 	switch (token.type) {
 		case "Literal":
@@ -138,7 +145,7 @@ function innerParseTemplate(reader: TokenInput): AstNode | null {
 		block(reader, () => body.push(innerParse(reader)), false);
 		return { type: "TemplateOverload", pos, args, body };
 	}
-	if (StringUtils.startsWithConstExpr(value, "#")) {
+	if (isEscapedComment(value) || StringUtils.startsWithConstExpr(value, "#")) {
 		reader.skip();
 		return null;
 	}
@@ -205,6 +212,8 @@ function parseMcbtFile(reader: TokenInput): AstNode[] {
 			if (StringUtils.startsWithConstExpr(value, "template ")) {
 				const name = value.substring("template ".length).trim();
 				nodes.push(readTemplate(name, reader, token.pos));
+			} else if (isEscapedComment(value)) {
+				throw new ParserError(ESCAPED_COMMENT_SCOPE_ERROR, token.pos);
 			} else if (StringUtils.startsWithConstExpr(value, "#")) {
 				nodes.push({ type: "Comment", pos: token.pos, value });
 			} else if (StringUtils.startsWithConstExpr(value, "import ")) {
@@ -283,6 +292,9 @@ function parseTLD(reader: TokenInput): AstNode {
 			script.push(reader.next());
 		}
 		return { type: "MultiLineScript", pos, value: script };
+	}
+	if (isEscapedComment(value)) {
+		throw new ParserError(ESCAPED_COMMENT_SCOPE_ERROR, pos);
 	}
 	if (StringUtils.startsWithConstExpr(value, "#")) {
 		return { type: "Comment", pos, value };
@@ -442,7 +454,10 @@ function innerParse(reader: TokenInput): AstNode {
 		if (StringUtils.startsWithConstExpr(value, "REPEAT")) {
 			return parserCompilerLoop(value, pos, reader, () => innerParse(reader));
 		}
-		if (StringUtils.startsWithConstExpr(value, "#")) {
+		if (isEscapedComment(value) || StringUtils.startsWithConstExpr(value, "#")) {
+			// The raw value (including any leading "\#") is preserved so the
+			// compiler can apply comment-evaluation rules in a context-aware way
+			// (function body vs. tag reference).
 			return { type: "Comment", pos, value };
 		}
 		if (value === "block" || StringUtils.startsWithConstExpr(value, "block ")) {
