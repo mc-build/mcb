@@ -1,0 +1,15 @@
+import ./lib.mcbt
+counter kills
+dir nested {
+    counter deaths
+}
+REPEAT([1, 2]) as i {
+    counter loop_<%i%>
+}
+make_function greet {
+    say hello
+    say world
+}
+function use_counter {
+    counter kills
+}

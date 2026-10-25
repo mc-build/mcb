@@ -246,6 +246,10 @@ export class AstStringifier {
 						this.write(continuation, false, true);
 					}
 				}
+				if (node.tail) {
+					this.literal(" ");
+					this.write(node.tail, false, true);
+				}
 				if (indent) {
 					this.literal("\n");
 				}
@@ -426,6 +430,8 @@ export class AstStringifier {
 			}
 			case "WorldGen": {
 				this.literal("worldgen ");
+				this.literal(info.subType);
+				this.literal(" ");
 				this.literal(info.name);
 				this.literal(" {\n");
 				this.inc();
@@ -438,10 +444,40 @@ export class AstStringifier {
 				break;
 			}
 			default: {
-				this.literal(String(info));
+				this.literal(
+					info.kind === "Registry"
+						? `json ${info.directory}`
+						: AstStringifier.jsonKeywords[info.kind],
+				);
+				this.literal(" ");
+				this.literal(name);
+				this.literal(" {\n");
+				this.inc();
+				for (const entry of info.entries) {
+					this.write(entry);
+				}
+				this.dec();
+				this.tab();
+				this.literal("}\n");
 			}
 		}
 	}
+
+	private static readonly jsonKeywords: Record<
+		Exclude<JsonTagType["kind"], "Tag" | "WorldGen" | "Registry">,
+		string
+	> = {
+		Advancement: "advancement",
+		ChatType: "chat_type",
+		DamageType: "damage_type",
+		Dimension: "dimension",
+		DimensionType: "dimension_type",
+		Enchantment: "enchantment",
+		ItemModifier: "item_modifier",
+		LootTable: "loot_table",
+		Predicate: "predicate",
+		Recipe: "recipe",
+	};
 
 	private toString(node: AstNode): string {
 		this.write(node);

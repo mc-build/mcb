@@ -14,4 +14,21 @@ function test{
 	} else $run {
 		say 3
 	}
+	execute unless {
+		return fail
+	} run say tail
+
+
+	execute if {
+		return 1
+	} run {
+		say block tail
+	}
+	execute if {
+		return 1
+	} if {
+		return 1
+	} as @a run say chained
+
+
 }

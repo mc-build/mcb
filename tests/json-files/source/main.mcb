@@ -19,6 +19,15 @@ dir dir {
         #foo:bar
         <%"#foo:bar/baz"%>
     }
+    tag worldgen/biome worldgen_biome_tag {
+        minecraft:plains
+    }
+    tag damage_type damage_type_tag {
+        minecraft:generic
+    }
+    tag items items_tag {
+        minecraft:stone
+    }
     worldgen biome worldgen_biome {
         "a":1
     }
@@ -58,6 +67,17 @@ dir dir {
     worldgen flat_level_generator_preset worldgen_flat_level_generator_preset {
         "a":1
     }
+    worldgen biome worldgen_nested {
+        "downfall": 0.4,
+        "effects": {
+            "fog_color": 12638463,
+            "nested": {
+                "a": [1, 2]
+            }
+        },
+        "spawn_costs": {},
+        "temperature": 0.8
+    }
     dimension_type dimension_type {
         "test":1
     }
@@ -88,4 +108,16 @@ dir dir {
     advancement advancement {
         "test":1
     }
+    painting_variant painting_variant {
+        "test":1
+    }
+    trim_material trim_material {
+        "test":1
+    }
+    json some_future_registry generic_json {
+        "test":1
+    }
+    damage_type inline_json { "test": 1, "nested": { "a": [1, 2] } }
+    worldgen biome inline_worldgen { "a": 1 }
+    tag blocks inline_tag replace { minecraft:stone, minecraft:dirt replace, #minecraft:logs }
 }

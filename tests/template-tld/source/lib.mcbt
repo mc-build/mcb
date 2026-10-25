@@ -1,0 +1,36 @@
+template counter {
+    load {
+        scoreboard objectives add counters dummy
+    }
+    tld with name:word {
+        function <%name%>_inc {
+            scoreboard players add #<%name%> counters 1
+        }
+        damage_type <%name%> { "exhaustion": 0, "message_id": "generic", "scaling": "never" }
+        tag functions <%name%>_tag {
+            ./<%name%>_inc
+        }
+        dir <%name%>_dir {
+            function reset {
+                scoreboard players set #<%name%> counters 0
+            }
+        }
+    }
+    with name:word {
+        function ./<%name%>_inc
+    }
+}
+
+template make_function {
+    tld with name:word body:block {
+        function <%name%> {
+            <%embed(body)%>
+        }
+    }
+}
+
+template command_only {
+    with {
+        say only usable inside functions
+    }
+}

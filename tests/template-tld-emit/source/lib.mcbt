@@ -1,0 +1,19 @@
+template gen {
+    tld with name:word count:int {
+        <%%
+            for (let i = 0; i < count; i++) {
+                emit.mcb(`function ${name}_${i} {\nsay ${name} ${i}\n}`);
+            }
+            emit.mcb(`damage_type ${name} { "scaling": "never" }`);
+            emit.mcb(`inner ${name}_inner`);
+        %%>
+    }
+}
+
+template inner {
+    tld with name:word {
+        function <%name%> {
+            say from inner
+        }
+    }
+}

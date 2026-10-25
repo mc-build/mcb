@@ -37,7 +37,9 @@ export class SyncIo implements IoLike {
 	readonly revertTracker = new RevertTracker();
 
 	write(filePath: string, content: string): void {
-		this.fileData.set(filePath, this.hash(content));
+		// Keys end up in .mcb/fs-cache.txt, which is often committed, so use
+		// `/` on every OS to keep the file stable across platforms.
+		this.fileData.set(filePath.replace(/\\/g, "/"), this.hash(content));
 		this.revertTracker.track(filePath);
 		fs.mkdirSync(path.dirname(filePath), { recursive: true });
 		fs.writeFileSync(filePath, content, "utf8");

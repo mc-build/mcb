@@ -12,6 +12,7 @@ export type JsonTagType =
 	| { kind: "Dimension"; entries: AstNode[] }
 	| { kind: "DimensionType"; entries: AstNode[] }
 	| { kind: "Enchantment"; entries: AstNode[] }
+	| { kind: "Registry"; directory: string; entries: AstNode[] }
 	| { kind: "WorldGen"; subType: string; name: string; entries: AstNode[] };
 
 export type CompileTimeIfElseExpressions = Array<{
@@ -70,6 +71,9 @@ export type AstNode =
 			data?: string | null;
 			body: AstNode[];
 			continuations?: AstNode[] | null;
+			// The rest of the execute chain after the closing brace, without the
+			// leading `execute`, e.g. `run say hi` in `execute if { ... } run say hi`.
+			tail?: AstNode | null;
 			isMacro?: boolean;
 	  }
 	| {
@@ -84,7 +88,13 @@ export type AstNode =
 	| { type: "RuntimeLoop"; pos: PosInfo; expression: string; body: AstNode[] }
 	| { type: "Comment"; pos: PosInfo; value: string }
 	| { type: "JsonFile"; pos: PosInfo; name: string; info: JsonTagType }
-	| { type: "TemplateOverload"; pos: PosInfo; args: string; body: AstNode[] }
+	| {
+			type: "TemplateOverload";
+			pos: PosInfo;
+			args: string;
+			body: AstNode[];
+			isTld?: boolean;
+	  }
 	| {
 			type: "ClockExpr";
 			pos: PosInfo;

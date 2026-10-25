@@ -164,6 +164,7 @@ function mergeTemplates(
 
 class McTemplate {
 	private overloads: TemplateArgumentMap = new Map();
+	private tldOverloads: TemplateArgumentMap = new Map();
 	private loadBlock: AstNode[] | null = null;
 	private tickBlock: AstNode[] | null = null;
 	private hasBeenUsed = false;
@@ -201,7 +202,10 @@ class McTemplate {
 		for (const node of nodes) {
 			switch (node.type) {
 				case "TemplateOverload":
-					this.overloads.set(this.compileArgs(node.args, node.pos), node.body);
+					(node.isTld ? this.tldOverloads : this.overloads).set(
+						this.compileArgs(node.args, node.pos),
+						node.body,
+					);
 					break;
 				case "LoadBlock":
 					if (this.loadBlock) {
@@ -390,6 +394,7 @@ class McTemplate {
 		value: string,
 		extras: AstNode[] | null,
 		isMacro: boolean,
+		useTld = false,
 	): void {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
@@ -401,7 +406,8 @@ class McTemplate {
 		this.jsValueCache.clear();
 		TemplateArgument.resetJsCache(this.jsValueCache);
 
-		for (const [types, overloadBody] of this.overloads.entries()) {
+		const overloads = useTld ? this.tldOverloads : this.overloads;
+		for (const [types, overloadBody] of overloads.entries()) {
 			const args = new Map<string, unknown>();
 			let successCount = 0;
 			let pidx = 0;
@@ -543,12 +549,12 @@ class McTemplate {
 				currentFunction: context.currentFunction,
 				baseNamespaceInfo: context.baseNamespaceInfo,
 			};
-			file.embed(newContext, pos, args, overloadBody);
+			file.embed(newContext, pos, args, overloadBody, useTld);
 			return;
 		}
 
 		throw CompilerError.create(
-			`Failed to find matching template overload for: ${value}`,
+			`Failed to find matching ${useTld ? "top-level (tld with) " : ""}template overload for: ${value}`,
 			pos,
 			context,
 		);
@@ -561,6 +567,7 @@ class McTemplate {
 		value: string,
 		extras: AstNode[] | null,
 		isMacro: boolean,
+		useTld = false,
 	): AstNode {
 		let argString = value.substring(this.name.length);
 		argString = McTemplate.ltrim(argString);
@@ -572,7 +579,8 @@ class McTemplate {
 		this.jsValueCache.clear();
 		TemplateArgument.resetJsCache(this.jsValueCache);
 
-		for (const [types, overloadBody] of this.overloads.entries()) {
+		const overloads = useTld ? this.tldOverloads : this.overloads;
+		for (const [types, overloadBody] of overloads.entries()) {
 			const args = new Map<string, unknown>();
 			let successCount = 0;
 			let pidx = 0;
@@ -719,13 +727,21 @@ class McTemplate {
 				baseNamespaceInfo: context.baseNamespaceInfo,
 			};
 			nodes.push(
-				file.embedTransform(newContext, pos, args, overloadBody, false),
+				file.embedTransform(
+					newContext,
+					pos,
+					args,
+					overloadBody,
+					useTld,
+					undefined,
+					false,
+				),
 			);
 			return { type: "Group", body: nodes };
 		}
 
 		throw CompilerError.create(
-			`Failed to find matching template overload for: ${value}`,
+			`Failed to find matching ${useTld ? "top-level (tld with) " : ""}template overload for: ${value}`,
 			pos,
 			context,
 		);
@@ -1293,9 +1309,30 @@ export class McFile {
 					result,
 				);
 				const baseCommand = `${node.execute} function ${callSignature}`;
-				const fullCommand = node.data
+				let fullCommand = node.data
 					? `${baseCommand} ${this.injectValues(node.data, context, node.pos)}`
 					: baseCommand;
+				if (node.tail) {
+					const tailCommands: string[] = [];
+					this.compileCommand(
+						node.tail,
+						this.forkCompilerContextWithAppend(
+							context,
+							(value) => {
+								tailCommands.push(value);
+							},
+							context.functions,
+						),
+					);
+					if (tailCommands.length !== 1) {
+						throw CompilerError.create(
+							`Expected exactly 1 command after execute block, got ${tailCommands.length}`,
+							AstNodeUtils.getPos(node.tail),
+							context,
+						);
+					}
+					fullCommand = `${fullCommand} ${tailCommands[0]}`;
+				}
 				context.append(
 					this.injectValues(
 						this.makeMacro(node.isMacro ?? false, fullCommand),
@@ -1579,6 +1616,7 @@ export class McFile {
 								this.transformCommand(child, context),
 							)
 						: [],
+					tail: node.tail ? this.transformCommand(node.tail, context) : null,
 					isMacro: node.isMacro ?? false,
 				};
 			case "CompileTimeLoop": {
@@ -1802,6 +1840,19 @@ export class McFile {
 				return;
 			case "Comment":
 				return;
+			case "Raw": {
+				const template = this.findTldTemplate(node, context);
+				template.process(
+					this,
+					context,
+					node.pos,
+					this.stripTemplateKeyword(node.value),
+					node.continuations ?? null,
+					false,
+					true,
+				);
+				return;
+			}
 			default:
 				throw CompilerError.createInternal(
 					`unexpected node type: ${node.type}`,
@@ -1809,6 +1860,32 @@ export class McFile {
 					context,
 				);
 		}
+	}
+
+	private stripTemplateKeyword(value: string): string {
+		return StringUtils.startsWithConstExpr(value, "template ")
+			? value.substring("template ".length)
+			: value;
+	}
+
+	// A Raw node at the top level is only valid as a call to a template with a `tld with` overload.
+	private findTldTemplate(
+		node: Extract<AstNode, { type: "Raw" }>,
+		context: CompilerContext,
+	): McTemplate {
+		if (context.compiler.templateParsingEnabled) {
+			const value = this.stripTemplateKeyword(node.value);
+			for (const [key, template] of context.templates.entries()) {
+				if (value === key || value.startsWith(`${key} `)) {
+					return template;
+				}
+			}
+		}
+		throw CompilerError.create(
+			`Unexpected token '${node.value}'`,
+			node.pos,
+			context,
+		);
 	}
 
 	private transformTld(node: AstNode, context: CompilerContext): AstNode {
@@ -1862,7 +1939,7 @@ export class McFile {
 					return {
 						type: "JsonFile",
 						pos: node.pos,
-						name: node.name,
+						name: this.injectValues(node.name, context, node.pos),
 						info: {
 							kind: "Tag",
 							subType: node.info.subType,
@@ -1919,6 +1996,16 @@ export class McFile {
 				);
 			case "Comment":
 				return node;
+			case "Raw":
+				return this.findTldTemplate(node, context).transform(
+					this,
+					context,
+					node.pos,
+					this.stripTemplateKeyword(node.value),
+					node.continuations ?? null,
+					false,
+					true,
+				);
 			default:
 				throw CompilerError.createInternal(
 					`unexpected node type: ${node.type}`,
@@ -2061,6 +2148,9 @@ export class McFile {
 		body: AstNode[],
 		useTld = false,
 		baseVariables: VariableMap = context.globalVariables,
+		// Injected load/tick functions are hoisted to the file root; top-level
+		// template calls stay where they are so they keep their `dir` path.
+		hoist = useTld,
 	): AstNode {
 		const forked = baseVariables.fork(varmap);
 		const newContext = this.createCompilerContext(
@@ -2086,10 +2176,11 @@ export class McFile {
 				: this.transformCommand(node, newContext),
 		);
 		const result: AstNode = { type: "Group", body: transformed };
-		if (useTld) {
+		if (hoist) {
 			context.compiler.addTopLevelAstNode(result);
+			return { type: "Void" };
 		}
-		return useTld ? { type: "Void" } : result;
+		return result;
 	}
 
 	private transformTemplate(
@@ -2504,6 +2595,20 @@ export class McFile {
 		return { type: "Group", body: results };
 	}
 
+	private static readonly legacyPluralTagDirs = new Map<string, string>([
+		["blocks", "block"],
+		["items", "item"],
+		["entity_types", "entity_type"],
+		["fluids", "fluid"],
+		["game_events", "game_event"],
+	]);
+	private static readonly legacySingularTagDirs = new Map<string, string>(
+		Array.from(McFile.legacyPluralTagDirs, ([plural, singular]) => [
+			singular,
+			plural,
+		]),
+	);
+
 	private compileJsonFileImpl(
 		pos: PosInfo,
 		name: string,
@@ -2521,10 +2626,10 @@ export class McFile {
 					: "advancements";
 				break;
 			case "ChatType":
-				directory = "chat";
+				directory = "chat_type";
 				break;
 			case "DamageType":
-				directory = "damage";
+				directory = "damage_type";
 				break;
 			case "Dimension":
 				directory = "dimension";
@@ -2554,6 +2659,9 @@ export class McFile {
 				break;
 			case "Enchantment":
 				directory = "enchantment";
+				break;
+			case "Registry":
+				directory = info.directory;
 				break;
 			default:
 				throw CompilerError.createInternal(
@@ -2715,14 +2823,11 @@ export class McFile {
 						}
 					}
 					const data = JSON.stringify({ replace: info.replace, values });
-					const isPlural = info.subType.charAt(info.subType.length - 1) === "s";
+					// Only these tag folders were plural before pack format 48;
+					// every other registry's tag folder has always been singular.
 					const writePath = context.compiler.config.features.useFolderRenames48
-						? isPlural
-							? info.subType.substring(0, info.subType.length - 1)
-							: info.subType
-						: isPlural
-							? info.subType
-							: `${info.subType}s`;
+						? (McFile.legacyPluralTagDirs.get(info.subType) ?? info.subType)
+						: (McFile.legacySingularTagDirs.get(info.subType) ?? info.subType);
 					this.saveContent(
 						context,
 						path.join(
@@ -2748,6 +2853,7 @@ export class McFile {
 			case "Predicate":
 			case "Recipe":
 			case "Enchantment":
+			case "Registry":
 				this.compileJsonFileImpl(pos, name, info, info.entries, context);
 				return;
 			case "WorldGen": {

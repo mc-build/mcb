@@ -1,6 +1,15 @@
 data/main/tags/blocks/dir/test.json:
 {"replace":false,"values":["main:foobar",{"id":"minecraft:stone","replace":true},"minecraft:dirt","#foo:bar","#foo:bar/baz"]}
 ----------------
+data/main/tags/worldgen/biome/dir/worldgen_biome_tag.json:
+{"replace":false,"values":["minecraft:plains"]}
+----------------
+data/main/tags/damage_type/dir/damage_type_tag.json:
+{"replace":false,"values":["minecraft:generic"]}
+----------------
+data/main/tags/items/dir/items_tag.json:
+{"replace":false,"values":["minecraft:stone"]}
+----------------
 data/main/worldgen/biome/dir/worldgen_biome.json:
 {"a":1}
 ----------------
@@ -40,16 +49,19 @@ data/main/worldgen/world_preset/dir/worldgen_world_preset.json:
 data/main/worldgen/flat_level_generator_preset/dir/worldgen_flat_level_generator_preset.json:
 {"a":1}
 ----------------
+data/main/worldgen/biome/dir/worldgen_nested.json:
+{"downfall": 0.4,"effects":{"fog_color": 12638463,"nested":{"a": [1, 2]}},"spawn_costs": {},"temperature": 0.8}
+----------------
 data/main/dimension_type/dir/dimension_type.json:
 {"test":1}
 ----------------
 data/main/dimension/dir/dimension.json:
 {"test":1}
 ----------------
-data/main/damage/dir/damage_type.json:
+data/main/damage_type/dir/damage_type.json:
 {"test":1}
 ----------------
-data/main/chat/dir/chat_type.json:
+data/main/chat_type/dir/chat_type.json:
 {"test":1}
 ----------------
 data/main/recipes/dir/recipe.json:
@@ -69,6 +81,24 @@ data/main/enchantment/dir/enchantment.json:
 ----------------
 data/main/advancements/dir/advancement.json:
 {"test":1}
+----------------
+data/main/painting_variant/dir/painting_variant.json:
+{"test":1}
+----------------
+data/main/trim_material/dir/trim_material.json:
+{"test":1}
+----------------
+data/main/some_future_registry/dir/generic_json.json:
+{"test":1}
+----------------
+data/main/damage_type/dir/inline_json.json:
+{"test": 1, "nested": { "a": [1, 2] }}
+----------------
+data/main/worldgen/biome/dir/inline_worldgen.json:
+{"a": 1}
+----------------
+data/main/tags/blocks/dir/inline_tag.json:
+{"replace":true,"values":["minecraft:stone",{"id":"minecraft:dirt","replace":true},"#minecraft:logs"]}
 ----------------
 data/main/tags/functions/test.json:
 {"values":["a:b"],"replace":true}

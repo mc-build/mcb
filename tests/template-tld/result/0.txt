@@ -1,0 +1,88 @@
+data/lib/functions/counter/load.mcfunction:
+# Generated with MC-Build
+
+scoreboard objectives add counters dummy
+----------------
+data/main/functions/kills_inc.mcfunction:
+# Generated with MC-Build
+
+scoreboard players add #kills counters 1
+----------------
+data/main/damage_type/kills.json:
+{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+----------------
+data/main/functions/kills_dir/reset.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #kills counters 0
+----------------
+data/main/functions/nested/deaths_inc.mcfunction:
+# Generated with MC-Build
+
+scoreboard players add #deaths counters 1
+----------------
+data/main/damage_type/nested/deaths.json:
+{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+----------------
+data/main/functions/nested/deaths_dir/reset.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #deaths counters 0
+----------------
+data/main/functions/loop_1_inc.mcfunction:
+# Generated with MC-Build
+
+scoreboard players add #loop_1 counters 1
+----------------
+data/main/damage_type/loop_1.json:
+{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+----------------
+data/main/functions/loop_1_dir/reset.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #loop_1 counters 0
+----------------
+data/main/functions/loop_2_inc.mcfunction:
+# Generated with MC-Build
+
+scoreboard players add #loop_2 counters 1
+----------------
+data/main/damage_type/loop_2.json:
+{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+----------------
+data/main/functions/loop_2_dir/reset.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set #loop_2 counters 0
+----------------
+data/main/functions/zzz/0.mcfunction:
+# Generated with MC-Build
+
+say hello
+say world
+----------------
+data/main/functions/greet.mcfunction:
+# Generated with MC-Build
+
+function main:zzz/0
+----------------
+data/main/functions/use_counter.mcfunction:
+# Generated with MC-Build
+
+function main:kills_inc
+----------------
+data/minecraft/tags/functions/load.json:
+{"values":["lib:counter/load"]}
+----------------
+data/main/tags/functions/kills_tag.json:
+{"values":["main:kills_inc"]}
+----------------
+data/main/tags/functions/nested/deaths_tag.json:
+{"values":["main:nested/deaths_inc"]}
+----------------
+data/main/tags/functions/loop_1_tag.json:
+{"values":["main:loop_1_inc"]}
+----------------
+data/main/tags/functions/loop_2_tag.json:
+{"values":["main:loop_2_inc"]}
+----------------

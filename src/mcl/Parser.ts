@@ -28,6 +28,98 @@ function isEscapedComment(value: string): boolean {
 	return StringUtils.startsWithConstExpr(value, "\\#");
 }
 
+// Returns the index of the first `ch` in `value` that is not inside an
+// inline `<% %>` script, or -1.
+function indexOfOutsideScripts(value: string, ch: string, from = 0): number {
+	let depth = 0;
+	for (let i = from; i < value.length; i++) {
+		if (value.startsWith("<%", i)) {
+			depth++;
+			i++;
+		} else if (depth > 0 && value.startsWith("%>", i)) {
+			depth--;
+			i++;
+		} else if (depth === 0 && value.charAt(i) === ch) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// The tokenizer keeps a line with balanced braces as one literal, so
+// `tag blocks foo { minecraft:stone }` arrives here whole. Splits it into
+// the header and the text between the outer braces.
+function splitInlineBody(
+	value: string,
+): { header: string; body: string } | null {
+	if (!value.endsWith("}")) {
+		return null;
+	}
+	const open = indexOfOutsideScripts(value, "{");
+	if (open === -1) {
+		return null;
+	}
+	return {
+		header: value.substring(0, open).trim(),
+		body: value.substring(open + 1, value.length - 1).trim(),
+	};
+}
+
+function splitOutsideScripts(value: string, ch: string): string[] {
+	const parts: string[] = [];
+	let start = 0;
+	while (true) {
+		const idx = indexOfOutsideScripts(value, ch, start);
+		if (idx === -1) {
+			parts.push(value.substring(start));
+			return parts;
+		}
+		parts.push(value.substring(start, idx));
+		start = idx + 1;
+	}
+}
+
+function inlineJsonEntries(body: string, pos: PosInfo): AstNode[] {
+	return body.length === 0
+		? []
+		: [{ type: "Raw", pos, value: body, continuations: [], isMacro: false }];
+}
+
+// Data pack registries whose keyword is also their folder under
+// data/<namespace>/. Registries not listed here can be written with
+// `json <folder> <name> { ... }`.
+const registryJsonFiles = [
+	"banner_pattern",
+	"block_transformer",
+	"cat_variant",
+	"chicken_variant",
+	"context_float_provider",
+	"context_int_provider",
+	"cow_variant",
+	"decorated_pot_pattern",
+	"dialog",
+	"enchantment_provider",
+	"frog_variant",
+	"instrument",
+	"jukebox_song",
+	"painting_variant",
+	"pig_variant",
+	"slot_source",
+	"sulfur_cube_archetype",
+	"test_environment",
+	"test_instance",
+	"timeline",
+	"trade_set",
+	"trial_spawner",
+	"trim_material",
+	"trim_pattern",
+	"villager_trade",
+	"wolf_sound_variant",
+	"wolf_variant",
+	"world_clock",
+	"zombie_nautilus_variant",
+];
+
 function tokenId(token: Token): TokenIds {
 	switch (token.type) {
 		case "Literal":
@@ -144,6 +236,16 @@ function innerParseTemplate(reader: TokenInput): AstNode | null {
 		const body: AstNode[] = [];
 		block(reader, () => body.push(innerParse(reader)), false);
 		return { type: "TemplateOverload", pos, args, body };
+	}
+	if (
+		value === "tld with" ||
+		StringUtils.startsWithConstExpr(value, "tld with ")
+	) {
+		reader.skip();
+		const args = value.substring("tld with ".length).trim();
+		const body: AstNode[] = [];
+		block(reader, () => body.push(parseTLD(reader)), false);
+		return { type: "TemplateOverload", pos, args, body, isTld: true };
 	}
 	if (isEscapedComment(value) || StringUtils.startsWithConstExpr(value, "#")) {
 		reader.skip();
@@ -306,12 +408,37 @@ function parseTLD(reader: TokenInput): AstNode {
 		return parseCompileTimeIf(value, pos, reader, () => parseTLD(reader));
 	}
 	if (StringUtils.startsWithConstExpr(value, "tag ")) {
-		const parts = value.substring("tag ".length).trim().split(" ");
+		const inline = splitInlineBody(value);
+		const parts = (inline?.header ?? value)
+			.substring("tag ".length)
+			.trim()
+			.split(" ")
+			.filter((x) => x !== "");
 		const type = parts.shift() ?? "";
 		const name = parts.shift() ?? "";
 		const replace = (parts.shift() ?? "") === "replace";
 		const entries: AstNode[] = [];
-		block(reader, () => entries.push(innerParse(reader)));
+		if (inline) {
+			for (const part of splitOutsideScripts(inline.body, ",")) {
+				const entry = part.trim();
+				if (entry.length === 0) {
+					continue;
+				}
+				entries.push(
+					entry.startsWith("#")
+						? { type: "Comment", pos, value: entry }
+						: {
+								type: "Raw",
+								pos,
+								value: entry,
+								continuations: [],
+								isMacro: false,
+							},
+				);
+			}
+		} else {
+			block(reader, () => entries.push(innerParse(reader)));
+		}
 		return {
 			type: "JsonFile",
 			pos,
@@ -331,16 +458,25 @@ function parseTLD(reader: TokenInput): AstNode {
 			"damage_type ",
 			"dimension ",
 			"dimension_type ",
+			"json ",
+			...registryJsonFiles.map((registry) => `${registry} `),
 		].some((prefix) => StringUtils.startsWithConstExpr(value, prefix))
 	) {
 		return readPlainJsonFile(value, pos, reader);
 	}
 	if (StringUtils.startsWithConstExpr(value, "worldgen ")) {
-		let payload = value.substring("worldgen ".length).trim();
+		const inline = splitInlineBody(value);
+		let payload = (inline?.header ?? value)
+			.substring("worldgen ".length)
+			.trim();
 		const subtype = payload.substring(0, payload.indexOf(" "));
-		payload = payload.substring(payload.indexOf(" ") + 1);
-		const entries: AstNode[] = [];
-		block(reader, () => entries.push(innerParse(reader)));
+		payload = payload.substring(payload.indexOf(" ") + 1).trim();
+		let entries: AstNode[] = [];
+		if (inline) {
+			entries = inlineJsonEntries(inline.body, pos);
+		} else {
+			block(reader, () => entries.push(json(reader)));
+		}
 		return {
 			type: "JsonFile",
 			pos,
@@ -348,7 +484,7 @@ function parseTLD(reader: TokenInput): AstNode {
 			info: { kind: "WorldGen", subType: subtype, name: payload, entries },
 		};
 	}
-	throw unreachable(token);
+	return readRaw(pos, value, reader, false);
 }
 
 function readPlainJsonFile(
@@ -356,16 +492,33 @@ function readPlainJsonFile(
 	pos: PosInfo,
 	reader: TokenInput,
 ): AstNode {
-	const bits = v.split(" ").filter((x) => x !== "");
+	const inline = splitInlineBody(v);
+	const bits = (inline?.header ?? v).split(" ").filter((x) => x !== "");
 	const type = bits.shift() ?? "";
+	const directory = type === "json" ? (bits.shift() ?? "") : type;
 	const name = bits.shift() ?? "";
-	const entries: AstNode[] = [];
-	block(reader, () => entries.push(json(reader)));
+	if (directory === "" || name === "") {
+		throw new ParserError(
+			type === "json"
+				? "Expected 'json <folder> <name> { ... }'"
+				: format("Expected '{} <name> { ... }'", type),
+			pos,
+		);
+	}
+	let entries: AstNode[] = [];
+	if (inline) {
+		entries = inlineJsonEntries(inline.body, pos);
+	} else {
+		block(reader, () => entries.push(json(reader)));
+	}
 	return {
 		type: "JsonFile",
 		pos,
 		name,
-		info: createJsonInfo(type, entries, pos),
+		info:
+			type === "json" || registryJsonFiles.includes(type)
+				? { kind: "Registry", directory, entries }
+				: createJsonInfo(type, entries, pos),
 	};
 }
 
@@ -672,7 +825,15 @@ function parseExecute(
 				};
 			}
 		}
-		const data = block(reader, () => body.push(innerParse(reader)));
+		let close: Token | undefined;
+		const data = block(
+			reader,
+			() => body.push(innerParse(reader)),
+			true,
+			(token) => {
+				close = token;
+			},
+		);
 		const continuations: AstNode[] = [];
 		while (reader.hasNext()) {
 			const peek = reader.peek();
@@ -744,6 +905,14 @@ function parseExecute(
 			}
 			break;
 		}
+		let tail: AstNode | undefined;
+		if (continuations.length === 0 && close && reader.hasNext()) {
+			const peek = reader.peek();
+			if (peek.type === "Literal" && peek.pos.line === close.pos.line) {
+				reader.skip();
+				tail = parseExecute(peek.v, peek.pos, reader, false);
+			}
+		}
 		return {
 			type: "ExecuteBlock",
 			pos,
@@ -751,6 +920,7 @@ function parseExecute(
 			data: data ?? undefined,
 			body,
 			continuations: continuations.length > 0 ? continuations : undefined,
+			tail,
 			isMacro,
 		};
 	}

@@ -1,0 +1,31 @@
+data/main/functions/alpha_0.mcfunction:
+# Generated with MC-Build
+
+say alpha 0
+----------------
+data/main/functions/alpha_1.mcfunction:
+# Generated with MC-Build
+
+say alpha 1
+----------------
+data/main/damage_type/alpha.json:
+{"scaling": "never"}
+----------------
+data/main/functions/alpha_inner.mcfunction:
+# Generated with MC-Build
+
+say from inner
+----------------
+data/main/functions/nested/beta_0.mcfunction:
+# Generated with MC-Build
+
+say beta 0
+----------------
+data/main/damage_type/nested/beta.json:
+{"scaling": "never"}
+----------------
+data/main/functions/nested/beta_inner.mcfunction:
+# Generated with MC-Build
+
+say from inner
+----------------

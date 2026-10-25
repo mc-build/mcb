@@ -236,6 +236,10 @@ export async function create(name: string): Promise<void> {
 	Logger.log(`Created project ${name} in ${destDir}`);
 }
 
+function normalizeCachePath(file: string): string {
+	return file.replace(/\\/g, "/");
+}
+
 function readCache(cacheFile: string): Map<string, string> {
 	if (!fs.existsSync(cacheFile)) {
 		return new Map();
@@ -244,11 +248,15 @@ function readCache(cacheFile: string): Map<string, string> {
 		.readFileSync(cacheFile, "utf8")
 		.split("\n")
 		.filter((line) => line.trim().length > 0)
-		.map((line) => line.split(":"));
+		.map((line) => {
+			const idx = line.lastIndexOf(":");
+			return [line.substring(0, idx), line.substring(idx + 1)];
+		});
 	const result = new Map<string, string>();
 	for (const [file, hash] of entries) {
 		if (file) {
-			result.set(file, hash);
+			// Caches written before paths were normalized may use `\`.
+			result.set(normalizeCachePath(file), hash.trim());
 		}
 	}
 	return result;
@@ -425,6 +433,8 @@ export async function doBuild(opts: BuildOpts): Promise<void> {
 	Logger.log("Watch mode enabled, watching for changes...");
 	const watcher = chokidar.watch(path.join(opts.baseDir, "src"), {
 		ignoreInitial: true,
+		// The project path may contain glob characters such as `[` and `]`.
+		disableGlobbing: true,
 		awaitWriteFinish: {
 			stabilityThreshold: 500,
 			pollInterval: 20,

@@ -34,6 +34,31 @@ data/main/function/zzz/5.mcfunction:
 scoreboard players set #ifelse _internal_scoreboard 1
 say 3
 ----------------
+data/main/function/zzz/6.mcfunction:
+# Generated with MC-Build
+
+return fail
+----------------
+data/main/function/zzz/7.mcfunction:
+# Generated with MC-Build
+
+return 1
+----------------
+data/main/function/zzz/8.mcfunction:
+# Generated with MC-Build
+
+say block tail
+----------------
+data/main/function/zzz/9.mcfunction:
+# Generated with MC-Build
+
+return 1
+----------------
+data/main/function/zzz/10.mcfunction:
+# Generated with MC-Build
+
+return 1
+----------------
 data/main/function/test.mcfunction:
 # Generated with MC-Build
 
@@ -45,4 +70,7 @@ scoreboard players set #ifelse _internal_scoreboard 0
 $execute if score a b = 2 run function main:zzz/3
 $execute if score #ifelse _internal_scoreboard matches 0 if score a b = 3 run function main:zzz/4
 $execute if score #ifelse _internal_scoreboard matches 0 run function main:zzz/5
+execute unless function main:zzz/6 run say tail
+execute if function main:zzz/7 run function main:zzz/8
+execute if function main:zzz/9 if function main:zzz/10 as @a run say chained
 ----------------
