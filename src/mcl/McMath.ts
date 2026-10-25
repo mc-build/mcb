@@ -514,11 +514,15 @@ function organize(node: ExpressionNode): ExpressionNode {
 							right: { type: "Literal", value: intValue },
 						};
 					case "-":
+						// L - R => (-R) + L, keeping the literal on the right.
 						return {
 							type: "Binary",
 							operator: "+",
-							left: organizedRight,
-							right: { type: "Literal", value: -intValue },
+							left:
+								organizedRight.type === "Literal"
+									? { type: "Literal", value: -organizedRight.value }
+									: { type: "Unary", operator: "-", operand: organizedRight },
+							right: { type: "Literal", value: intValue },
 						};
 					case "*":
 						return {

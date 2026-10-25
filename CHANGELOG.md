@@ -2,6 +2,13 @@
 
 All notable changes to `mc-build`.
 
+## 4.3.1
+
+### Fixes
+
+- `eq` no longer reverses subtraction when an expression starts with a number:
+  `eq p s = 7 - 2` gave `-5`, and `eq p s = 7 - a b` gave `a b - 7`.
+
 ## 4.3.0
 
 ### New

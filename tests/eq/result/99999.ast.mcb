@@ -66,4 +66,16 @@ dir test{
 	function 21{
 		eq #a.b c = #d.e f + 2
 	}
+	function 22{
+		eq leadingLiteral sub = 7 - 2
+	}
+	function 23{
+		eq leadingLiteral chain = 10 - 3 - 2
+	}
+	function 24{
+		eq leadingLiteral score = 7 - a b
+	}
+	function 25{
+		eq leadingLiteral add += 7 - 2
+	}
 }

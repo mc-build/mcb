@@ -138,6 +138,28 @@ data/main/functions/test/21.mcfunction:
 scoreboard players operation #a.b c = #d.e f
 scoreboard players add #a.b c 2
 ----------------
+data/main/functions/test/22.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set leadingLiteral sub 5
+----------------
+data/main/functions/test/23.mcfunction:
+# Generated with MC-Build
+
+scoreboard players set leadingLiteral chain 5
+----------------
+data/main/functions/test/24.mcfunction:
+# Generated with MC-Build
+
+scoreboard players operation leadingLiteral score = a b
+scoreboard players operation leadingLiteral score *= -1 mcb.eq.const
+scoreboard players add leadingLiteral score 7
+----------------
+data/main/functions/test/25.mcfunction:
+# Generated with MC-Build
+
+scoreboard players add leadingLiteral add 5
+----------------
 data/main/functions/zzz/load.mcfunction:
 # Generated with MC-Build
 
