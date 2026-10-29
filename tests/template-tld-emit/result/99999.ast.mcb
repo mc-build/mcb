@@ -7,9 +7,7 @@ function alpha_0{
 function alpha_1{
 	say alpha 1
 }
-damage_type alpha {
-	"scaling": "never"
-}
+damage_type alpha { "scaling": "never" }
 function alpha_inner{
 	say from inner
 }
@@ -17,9 +15,7 @@ dir nested{
 	function beta_0{
 		say beta 0
 	}
-	damage_type beta {
-		"scaling": "never"
-	}
+	damage_type beta { "scaling": "never" }
 	function beta_inner{
 		say from inner
 	}

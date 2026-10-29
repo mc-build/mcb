@@ -50,7 +50,7 @@ data/main/worldgen/flat_level_generator_preset/dir/worldgen_flat_level_generator
 {"a":1}
 ----------------
 data/main/worldgen/biome/dir/worldgen_nested.json:
-{"downfall": 0.4,"effects":{"fog_color": 12638463,"nested":{"a": [1, 2]}},"spawn_costs": {},"temperature": 0.8}
+{"downfall":0.4,"effects":{"fog_color":12638463,"nested":{"a":[1,2]}},"spawn_costs":{},"temperature":0.8}
 ----------------
 data/main/dimension_type/dir/dimension_type.json:
 {"test":1}
@@ -92,10 +92,10 @@ data/main/some_future_registry/dir/generic_json.json:
 {"test":1}
 ----------------
 data/main/damage_type/dir/inline_json.json:
-{"test": 1, "nested": { "a": [1, 2] }}
+{"test":1,"nested":{"a":[1,2]}}
 ----------------
 data/main/worldgen/biome/dir/inline_worldgen.json:
-{"a": 1}
+{"a":1}
 ----------------
 data/main/tags/block/dir/inline_tag.json:
 {"replace":true,"values":["minecraft:stone",{"id":"minecraft:dirt","replace":true},"#minecraft:logs"]}

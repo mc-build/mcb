@@ -330,6 +330,7 @@ async function runCompile(
 	const compiler = new Compiler(compilerBaseDir, config, resolvedBaseDir);
 	const io = new SyncIo();
 	compiler.io = io;
+	compiler.onWarning = (message) => Logger.warn(message);
 
 	let didFail = true;
 	const start = performance.now();

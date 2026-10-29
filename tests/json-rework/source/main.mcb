@@ -1,0 +1,73 @@
+json sync_setting player_data {
+}
+dir subfolder {
+    json sync_setting player_data {
+        "a": 1
+    }
+}
+json a/b nested_folder {
+}
+json settings nested/name {
+}
+REPEAT([0, 1]) as i {
+    json settings file_<%i%> {
+        "v": <%i%>
+    }
+}
+IF (true) {
+    json cond flag {
+        "enabled": true
+    }
+} ELSE {
+    json cond flag {
+        "enabled": false
+    }
+}
+json foo arr [
+    1, 2, 3
+]
+# in-body IF/ELSE selecting which keys to emit
+json body_if config {
+    "always": 1,
+    IF (true) {
+        "on": true
+    } ELSE {
+        "off": true
+    }
+}
+# in-body REPEAT building an object's entries
+json body_repeat counters {
+    REPEAT([1, 2, 3]) as n {
+        "key_<%n%>": <%n%>,
+    }
+    "done": true
+}
+# dir tags insert their name into the output path, between the <subfolder>
+# and the file <name>, and they nest: data/main/<subfolder>/<dir...>/<name>.json
+dir outer {
+    json settings in_dir {
+        "x": 1
+    }
+    dir inner {
+        json settings deep {
+            "y": 2
+        }
+        # the <name> may still contain slashes on top of the dir segments
+        json a/b deep/leaf {
+            "z": 3
+        }
+    }
+}
+# braceless top-level values — the JSON value follows <name> directly on the
+# same line (no wrapping braces) and is emitted verbatim
+json foo arr [1, 2, 3]
+json foo dyn <% JSON.stringify([1, 2]) %>
+# braceless value inside a dir, so the dir segment is still inserted into the
+# path: data/main/settings/wrapped/braceless.json
+dir wrapped {
+    json settings braceless [4, 5, 6]
+}
+# single-line balanced-brace bodies — no keyword needed, works like multiline
+json oneline empty {}
+json oneline obj { "a": 1 }
+json oneline dyn <% JSON.stringify({ x: 1 }) %>

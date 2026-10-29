@@ -70,9 +70,12 @@ dir dir{
 	}
 	worldgen biome worldgen_nested {
 		"downfall": 0.4,
-		"effects":
-		{"fog_color": 12638463,"nested":{"a": [1, 2]}}
-		,
+		"effects": {
+		"fog_color": 12638463,
+		"nested": {
+		"a": [1, 2]
+		}
+		},
 		"spawn_costs": {},
 		"temperature": 0.8
 	}
@@ -115,12 +118,8 @@ dir dir{
 	json some_future_registry generic_json {
 		"test":1
 	}
-	damage_type inline_json {
-		"test": 1, "nested": { "a": [1, 2] }
-	}
-	worldgen biome inline_worldgen {
-		"a": 1
-	}
+	damage_type inline_json { "test": 1, "nested": { "a": [1, 2] } }
+	worldgen biome inline_worldgen { "a": 1 }
 	tag blocks inline_tag replace {
 		minecraft:stone
 		minecraft:dirt replace

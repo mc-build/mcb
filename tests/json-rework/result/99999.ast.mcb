@@ -1,0 +1,56 @@
+### main.mcb
+json sync_setting player_data {
+}
+dir subfolder{
+	json sync_setting player_data {
+		"a": 1
+	}
+}
+json a/b nested_folder {
+}
+json settings nested/name {
+}
+json settings file_0 {
+	"v": 0
+}
+json settings file_1 {
+	"v": 1
+}
+json cond flag {
+	"enabled": true
+}
+json foo arr [
+	1, 2, 3
+]
+json body_if config {
+	"always": 1,
+	"on": true
+}
+json body_repeat counters {
+	"key_1": 1,
+	"key_2": 2,
+	"key_3": 3,
+	"done": true
+}
+dir outer{
+	json settings in_dir {
+		"x": 1
+	}
+	dir inner{
+		json settings deep {
+			"y": 2
+		}
+		# # the <name> may still contain slashes on top of the dir segments
+		json a/b deep/leaf {
+			"z": 3
+		}
+	}
+}
+json foo arr [1, 2, 3]
+json foo dyn [1,2]
+dir wrapped{
+	json settings braceless [4, 5, 6]
+}
+json oneline empty {}
+json oneline obj { "a": 1 }
+json oneline dyn {"x":1}
