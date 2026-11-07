@@ -1,5 +1,21 @@
 import { AstNode, JsonTagType } from "./AstNode";
 
+const JSON_FILE_KEYWORDS: Record<
+	Exclude<JsonTagType["kind"], "Tag" | "Generic" | "WorldGen">,
+	string
+> = {
+	Advancement: "advancement",
+	ChatType: "chat_type",
+	DamageType: "damage_type",
+	Dimension: "dimension",
+	DimensionType: "dimension_type",
+	Enchantment: "enchantment",
+	ItemModifier: "item_modifier",
+	LootTable: "loot_table",
+	Predicate: "predicate",
+	Recipe: "recipe",
+};
+
 export class AstStringifier {
 	private segments: string[] = [];
 	private indent = 0;
@@ -428,56 +444,73 @@ export class AstStringifier {
 				this.literal("}\n");
 				break;
 			}
-			case "WorldGen": {
-				this.literal("worldgen ");
-				this.literal(info.subType);
-				this.literal(" ");
-				this.literal(info.name);
-				this.literal(" {\n");
-				this.inc();
-				for (const entry of info.entries) {
-					this.write(entry);
-				}
-				this.dec();
-				this.tab();
-				this.literal("}\n");
+			case "Generic":
+				this.literal(`json ${info.subFolder} ${name} `);
+				this.writeJsonBody(info.entries);
 				break;
-			}
-			default: {
-				this.literal(
-					info.kind === "Registry"
-						? `json ${info.directory}`
-						: AstStringifier.jsonKeywords[info.kind],
-				);
-				this.literal(" ");
-				this.literal(name);
-				this.literal(" {\n");
-				this.inc();
-				for (const entry of info.entries) {
-					this.write(entry);
-				}
-				this.dec();
-				this.tab();
-				this.literal("}\n");
-			}
+			case "WorldGen":
+				this.literal(`worldgen ${info.subType} ${name} `);
+				this.writeJsonBody(info.entries);
+				break;
+			default:
+				this.literal(`${JSON_FILE_KEYWORDS[info.kind]} ${name} `);
+				this.writeJsonBody(info.entries);
 		}
 	}
 
-	private static readonly jsonKeywords: Record<
-		Exclude<JsonTagType["kind"], "Tag" | "WorldGen" | "Registry">,
-		string
-	> = {
-		Advancement: "advancement",
-		ChatType: "chat_type",
-		DamageType: "damage_type",
-		Dimension: "dimension",
-		DimensionType: "dimension_type",
-		Enchantment: "enchantment",
-		ItemModifier: "item_modifier",
-		LootTable: "loot_table",
-		Predicate: "predicate",
-		Recipe: "recipe",
-	};
+	private writeJsonBody(entries: AstNode[]): void {
+		const [first, ...rest] = entries;
+		this.literal(first?.type === "Raw" ? first.value : "");
+		this.literal("\n");
+		const last = rest.at(-1);
+		const closing =
+			last?.type === "Raw" && /^[}\]]/.test(last.value) ? rest.pop() : null;
+		this.inc();
+		rest.forEach((node) => this.writeJsonNode(node));
+		this.dec();
+		if (closing) {
+			this.writeJsonNode(closing);
+		}
+	}
+
+	private writeJsonNode(node: AstNode): void {
+		switch (node.type) {
+			case "Raw":
+				this.tab();
+				this.literal(`${node.value}\n`);
+				break;
+			case "CompileTimeLoop":
+				this.tab();
+				this.literal(
+					`${node.expression}${node.as ? ` as ${node.as.join(", ")}` : ""} {\n`,
+				);
+				this.writeJsonBlock(node.body);
+				this.literal("\n");
+				break;
+			case "CompileTimeIf":
+				this.tab();
+				this.literal(`IF ${node.expression} {\n`);
+				this.writeJsonBlock(node.body);
+				for (const { condition, node: body } of node.elseExpressions) {
+					this.literal(
+						` ELSE ${condition == null ? "" : `IF ${condition} `}{\n`,
+					);
+					this.writeJsonBlock(body);
+				}
+				this.literal("\n");
+				break;
+			default:
+				throw new Error(`unexpected node in json body: ${node.type}`);
+		}
+	}
+
+	private writeJsonBlock(body: AstNode[]): void {
+		this.inc();
+		body.forEach((node) => this.writeJsonNode(node));
+		this.dec();
+		this.tab();
+		this.literal("}");
+	}
 
 	private toString(node: AstNode): string {
 		this.write(node);

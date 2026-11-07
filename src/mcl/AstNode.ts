@@ -1,7 +1,12 @@
 import { PosInfo, Token } from "./Tokenizer";
 
+/**
+ * Except for `Tag`, `entries` is a JSON body: `Raw` lines (the first holds the root's
+ * opening bracket) mixed with `CompileTimeIf` and `CompileTimeLoop` nodes.
+ */
 export type JsonTagType =
 	| { kind: "Tag"; subType: string; replace: boolean; entries: AstNode[] }
+	| { kind: "Generic"; subFolder: string; entries: AstNode[] }
 	| { kind: "Advancement"; entries: AstNode[] }
 	| { kind: "ItemModifier"; entries: AstNode[] }
 	| { kind: "LootTable"; entries: AstNode[] }
@@ -12,8 +17,7 @@ export type JsonTagType =
 	| { kind: "Dimension"; entries: AstNode[] }
 	| { kind: "DimensionType"; entries: AstNode[] }
 	| { kind: "Enchantment"; entries: AstNode[] }
-	| { kind: "Registry"; directory: string; entries: AstNode[] }
-	| { kind: "WorldGen"; subType: string; name: string; entries: AstNode[] };
+	| { kind: "WorldGen"; subType: string; entries: AstNode[] };
 
 export type CompileTimeIfElseExpressions = Array<{
 	condition: string | null;

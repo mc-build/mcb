@@ -4,10 +4,11 @@ export interface PosInfo {
 	file: string;
 }
 
+/** `raw` is the full source line the token came from, without indentation. */
 export type Token =
-	| { type: "Literal"; v: string; pos: PosInfo }
-	| { type: "BracketOpen"; pos: PosInfo; data?: string }
-	| { type: "BracketClose"; pos: PosInfo };
+	| { type: "Literal"; v: string; pos: PosInfo; raw?: string }
+	| { type: "BracketOpen"; pos: PosInfo; data?: string; raw?: string }
+	| { type: "BracketClose"; pos: PosInfo; raw?: string };
 
 export enum TokenIds {
 	Literal = 0,

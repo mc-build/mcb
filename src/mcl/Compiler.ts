@@ -1,5 +1,6 @@
 import path from "node:path";
 import Module from "node:module";
+import chalk from "chalk";
 
 import {
 	AstNode,
@@ -13,18 +14,38 @@ import { Parser } from "./Parser";
 import { Token, TokenIds, PosInfo } from "./Tokenizer";
 import { Tokenizer } from "./TokenizerImpl";
 import { injectExpressions, advancePos } from "./InlineExpressionUtils";
-import { CompilerError } from "./error/CompilerError";
+import { CompilerError, ErrorUtil } from "./error/CompilerError";
 import { McbError } from "./error/McbError";
 import { StringUtils } from "../strutils/StringUtils";
 import { TagManager } from "./TagManager";
 import { TemplateArgument } from "./args/TemplateArgument";
 import * as McMath from "./McMath";
 import { BoundBlock } from "./args/BlockTemplateArgument";
+import { JsonParser, JsonSyntaxError } from "./JsonParser";
 
 let __require: (file: string) => any;
 const selfRequire = (file: string): any => {
 	if (__require === undefined) __require = Module.createRequire(__filename);
 	return __require(file);
+}
+
+type RawNode = Extract<AstNode, { type: "Raw" }>;
+
+/** Renders the line of generated JSON containing `offset`, with a pointer under it. */
+function renderJsonPointer(text: string, offset: number): string {
+	const lineStart = text.lastIndexOf("\n", offset - 1) + 1;
+	const lineEnd = text.indexOf("\n", offset);
+	const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+	const label = String(text.substring(0, lineStart).split("\n").length);
+	const gutter = " ".repeat(label.length);
+	const pointerColumn = line
+		.substring(0, offset - lineStart)
+		.replace(/\t/g, "    ").length;
+	return [
+		"  Generated JSON:",
+		`    ${chalk.dim(`${label} |`)} ${line.replace(/\t/g, "    ")}`,
+		`    ${chalk.dim(`${gutter} |`)} ${" ".repeat(pointerColumn)}${chalk.redBright("↑")}`,
+	].join("\n");
 }
 
 function describeScriptValue(value: unknown): string {
@@ -1952,7 +1973,19 @@ export class McFile {
 					type: "JsonFile",
 					pos: node.pos,
 					name: this.injectValues(node.name, context, node.pos),
-					info: node.info,
+					info: {
+						...node.info,
+						...(node.info.kind === "Generic" && {
+							subFolder: this.injectValues(
+								node.info.subFolder,
+								context,
+								node.pos,
+							),
+						}),
+						entries: this.expandJsonBody(node.info.entries, context).map(
+							({ node: line, value }) => ({ ...line, value }),
+						),
+					},
 				};
 			case "CompileTimeLoop": {
 				const results: AstNode[] = [];
@@ -2609,78 +2642,155 @@ export class McFile {
 		]),
 	);
 
-	private compileJsonFileImpl(
+	private getJsonFileDirectory(
 		pos: PosInfo,
-		name: string,
-		info: JsonTagType,
-		entries: AstNode[],
+		info: Exclude<JsonTagType, { kind: "Tag" }>,
 		context: CompilerContext,
-	): void {
-		const injectedName = this.injectValues(name, context, pos);
-		const values = `{${this.stringifyJsonTag(pos, injectedName, entries, context)}}`;
-		let directory: string;
+	): string {
+		const renamed = context.compiler.config.features.useFolderRenames48;
 		switch (info.kind) {
+			case "Generic":
+				return this.injectValues(info.subFolder, context, pos);
+			case "WorldGen":
+				return path.join("worldgen", info.subType);
 			case "Advancement":
-				directory = context.compiler.config.features.useFolderRenames48
-					? "advancement"
-					: "advancements";
-				break;
+				return renamed ? "advancement" : "advancements";
 			case "ChatType":
-				directory = "chat_type";
-				break;
+				return "chat_type";
 			case "DamageType":
-				directory = "damage_type";
-				break;
+				return "damage_type";
 			case "Dimension":
-				directory = "dimension";
-				break;
+				return "dimension";
 			case "DimensionType":
-				directory = "dimension_type";
-				break;
-			case "ItemModifier":
-				directory = context.compiler.config.features.useFolderRenames48
-					? "item_modifier"
-					: "item_modifiers";
-				break;
-			case "LootTable":
-				directory = context.compiler.config.features.useFolderRenames48
-					? "loot_table"
-					: "loot_tables";
-				break;
-			case "Predicate":
-				directory = context.compiler.config.features.useFolderRenames48
-					? "predicate"
-					: "predicates";
-				break;
-			case "Recipe":
-				directory = context.compiler.config.features.useFolderRenames48
-					? "recipe"
-					: "recipes";
-				break;
+				return "dimension_type";
 			case "Enchantment":
-				directory = "enchantment";
-				break;
-			case "Registry":
-				directory = info.directory;
-				break;
-			default:
+				return "enchantment";
+			case "ItemModifier":
+				return renamed ? "item_modifier" : "item_modifiers";
+			case "LootTable":
+				return renamed ? "loot_table" : "loot_tables";
+			case "Predicate":
+				return renamed ? "predicate" : "predicates";
+			case "Recipe":
+				return renamed ? "recipe" : "recipes";
+			default: {
+				const exhaustive: never = info;
 				throw CompilerError.createInternal(
-					`unexpected json tag type: ${info.kind}`,
+					`unexpected json file kind: ${(exhaustive as JsonTagType).kind}`,
 					pos,
 					context,
 				);
+			}
 		}
-		this.saveContent(
-			context,
-			path.join(
-				"data",
-				context.namespace,
-				directory,
-				...context.path,
-				`${injectedName}.json`,
-			),
-			values,
-		);
+	}
+
+	/** Expands a JSON body's IF/REPEAT blocks and injects `<% %>` values into each line. */
+	private expandJsonBody(
+		entries: AstNode[],
+		context: CompilerContext,
+	): Array<{ node: RawNode; value: string }> {
+		const lines: Array<{ node: RawNode; value: string }> = [];
+		const expand = (node: AstNode, ctx: CompilerContext): void => {
+			switch (node.type) {
+				case "Raw":
+					lines.push({ node, value: this.injectValues(node.value, ctx, node.pos) });
+					return;
+				case "CompileTimeLoop":
+					this.processCompilerLoop(
+						node.expression,
+						node.as ?? null,
+						ctx,
+						node.body,
+						node.pos,
+						(loopCtx, child) => expand(child, loopCtx),
+					);
+					return;
+				case "CompileTimeIf":
+					this.compileTimeIf(
+						node.expression,
+						node.body,
+						node.elseExpressions,
+						node.pos,
+						ctx,
+						(child) => expand(child, ctx),
+					);
+					return;
+				default:
+					throw CompilerError.createInternal(
+						`unexpected node type in json body: ${node.type}`,
+						AstNodeUtils.getPos(node),
+						ctx,
+					);
+			}
+		};
+		for (const entry of entries) {
+			expand(entry, context);
+		}
+		return lines;
+	}
+
+	/**
+	 * Expands a JSON body, then parses it into minified JSON.
+	 * Errors and warnings point back at the MCB source.
+	 */
+	private compileJsonBody(
+		entries: AstNode[],
+		target: string,
+		context: CompilerContext,
+	): string {
+		const segments: Array<{ offset: number; node: RawNode; value: string }> =
+			[];
+		let text = "";
+		for (const line of this.expandJsonBody(entries, context)) {
+			segments.push({ offset: text.length, ...line });
+			text += `${line.value}\n`;
+		}
+
+		const locate = (offset: number): PosInfo | null => {
+			let segment = segments[0];
+			for (const candidate of segments) {
+				if (candidate.offset > offset) break;
+				segment = candidate;
+			}
+			if (!segment) {
+				return AstNodeUtils.getPos(entries[0]);
+			}
+			const { node, value } = segment;
+			const column = Math.min(offset - segment.offset, node.value.length);
+			const expressionIndex = node.value.indexOf("<%");
+			const sourceColumn =
+				value !== node.value &&
+				expressionIndex !== -1 &&
+				column >= expressionIndex
+					? expressionIndex
+					: column;
+			return { ...node.pos, col: node.pos.col + sourceColumn };
+		};
+
+		let parsed: ReturnType<typeof JsonParser.parse>;
+		try {
+			parsed = JsonParser.parse(text);
+		} catch (error) {
+			if (!(error instanceof JsonSyntaxError)) {
+				throw error;
+			}
+			const offset = Math.min(error.offset, text.trimEnd().length);
+			throw CompilerError.create(
+				`Invalid JSON in '${target}': ${error.message}\n\n${renderJsonPointer(text, offset)}`,
+				locate(offset),
+				context,
+			);
+		}
+		for (const warning of parsed.warnings) {
+			const pos = locate(warning.offset);
+			context.compiler.onWarning(
+				ErrorUtil.render(
+					`JSON warning in '${target}': ${warning.message}`,
+					pos ? [pos] : [],
+				),
+			);
+		}
+		return JsonParser.stringify(parsed.value);
 	}
 
 	private compileJsonFile(
@@ -2843,43 +2953,21 @@ export class McFile {
 				}
 				return;
 			}
-			case "Advancement":
-			case "ChatType":
-			case "DamageType":
-			case "Dimension":
-			case "DimensionType":
-			case "ItemModifier":
-			case "LootTable":
-			case "Predicate":
-			case "Recipe":
-			case "Enchantment":
-			case "Registry":
-				this.compileJsonFileImpl(pos, name, info, info.entries, context);
-				return;
-			case "WorldGen": {
-				const injectedName = this.injectValues(info.name, context, pos);
-				const values = `{${this.stringifyJsonTag(pos, injectedName, info.entries, context)}}`;
+			default: {
+				const injectedName = this.injectValues(name, context, pos);
+				const target = path.join(
+					"data",
+					context.namespace,
+					this.getJsonFileDirectory(pos, info, context),
+					...context.path,
+					`${injectedName}.json`,
+				);
 				this.saveContent(
 					context,
-					path.join(
-						"data",
-						context.namespace,
-						"worldgen",
-						info.subType,
-						...context.path,
-						`${injectedName}.json`,
-					),
-					values,
+					target,
+					this.compileJsonBody(info.entries, target, context),
 				);
 				return;
-			}
-			default: {
-				const exhaustive: never = info;
-				throw CompilerError.createInternal(
-					"unexpected json info kind",
-					pos,
-					context,
-				);
 			}
 		}
 	}
@@ -2962,70 +3050,6 @@ export class McFile {
 				}
 			}
 		}
-	}
-
-	private stringifyJsonTag(
-		pos: PosInfo,
-		name: string,
-		entries: AstNode[],
-		context: CompilerContext,
-	): string {
-		const values: string[] = [];
-		const valueContext = this.forkCompilerContextWithAppend(
-			context,
-			(value) => {
-				values.push(value);
-			},
-			context.functions,
-		);
-		for (const entry of entries) {
-			switch (entry.type) {
-				case "Raw":
-					if (
-						(entry.continuations && entry.continuations.length > 0) ||
-						(entry.isMacro ?? false)
-					) {
-						throw CompilerError.create(
-							"Unexpected extra data in json tag",
-							entry.pos,
-							context,
-						);
-					}
-					values.push(this.injectValues(entry.value, context, entry.pos));
-					break;
-				case "CompileTimeLoop":
-					this.processCompilerLoop(
-						entry.expression,
-						entry.as ?? null,
-						context,
-						entry.body,
-						entry.pos,
-						(ctx, node) => {
-							this.compileCommand(node, ctx);
-						},
-					);
-					break;
-				case "CompileTimeIf":
-					this.compileTimeIf(
-						entry.expression,
-						entry.body,
-						entry.elseExpressions,
-						entry.pos,
-						valueContext,
-						(node) => {
-							this.compileCommand(node, context);
-						},
-					);
-					break;
-				default:
-					throw CompilerError.createInternal(
-						`unexpected node type: ${entry.type}`,
-						AstNodeUtils.getPos(entry),
-						context,
-					);
-			}
-		}
-		return values.join("");
 	}
 
 	private transformCompileTimeIf(
@@ -3252,6 +3276,8 @@ export class Compiler {
 	disableRequire = false;
 	templateParsingEnabled = true;
 	success = true;
+	/** Receives non-fatal build warnings, like duplicate JSON keys. */
+	onWarning: (message: string) => void = (message) => console.warn(message);
 
 	private files: Map<string, McFile> = new Map();
 	private alreadySetupFiles: Map<string, boolean> = new Map();

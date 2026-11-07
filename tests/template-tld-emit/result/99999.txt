@@ -9,7 +9,7 @@ data/main/function/alpha_1.mcfunction:
 say alpha 1
 ----------------
 data/main/damage_type/alpha.json:
-{"scaling": "never"}
+{"scaling":"never"}
 ----------------
 data/main/function/alpha_inner.mcfunction:
 # Generated with MC-Build
@@ -22,7 +22,7 @@ data/main/function/nested/beta_0.mcfunction:
 say beta 0
 ----------------
 data/main/damage_type/nested/beta.json:
-{"scaling": "never"}
+{"scaling":"never"}
 ----------------
 data/main/function/nested/beta_inner.mcfunction:
 # Generated with MC-Build

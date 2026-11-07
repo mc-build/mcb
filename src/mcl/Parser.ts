@@ -79,15 +79,9 @@ function splitOutsideScripts(value: string, ch: string): string[] {
 	}
 }
 
-function inlineJsonEntries(body: string, pos: PosInfo): AstNode[] {
-	return body.length === 0
-		? []
-		: [{ type: "Raw", pos, value: body, continuations: [], isMacro: false }];
-}
-
 // Data pack registries whose keyword is also their folder under
 // data/<namespace>/. Registries not listed here can be written with
-// `json <folder> <name> { ... }`.
+// `json <folder> <name> <value>`.
 const registryJsonFiles = [
 	"banner_pattern",
 	"block_transformer",
@@ -269,34 +263,6 @@ function readTemplate(name: string, reader: TokenInput, pos: PosInfo): AstNode {
 	return { type: "TemplateDef", pos, name, body };
 }
 
-function json(reader: TokenInput): AstNode {
-	const start = reader.peek().pos;
-	let depth = 0;
-	let result = "";
-	do {
-		if (!reader.hasNext()) {
-			throw new ParserError("Unexpected end of file!", reader.last()?.pos ?? null);
-		}
-		const token = reader.next();
-		if (token.type === "BracketOpen") {
-			result += "{" + (token.data ?? "");
-			depth++;
-		} else if (token.type === "BracketClose") {
-			depth--;
-			result += "}";
-		} else {
-			result += token.v;
-		}
-	} while (depth > 0);
-	return {
-		type: "Raw",
-		pos: start,
-		value: result,
-		continuations: [],
-		isMacro: false,
-	};
-}
-
 function parseMcbFile(reader: TokenInput): AstNode[] {
 	const nodes: AstNode[] = [];
 	while (reader.hasNext()) {
@@ -446,79 +412,371 @@ function parseTLD(reader: TokenInput): AstNode {
 			info: { kind: "Tag", subType: type, replace, entries },
 		};
 	}
-	if (
-		[
-			"advancement ",
-			"enchantment ",
-			"item_modifier ",
-			"loot_table ",
-			"predicate ",
-			"recipe ",
-			"chat_type ",
-			"damage_type ",
-			"dimension ",
-			"dimension_type ",
-			"json ",
-			...registryJsonFiles.map((registry) => `${registry} `),
-		].some((prefix) => StringUtils.startsWithConstExpr(value, prefix))
-	) {
-		return readPlainJsonFile(value, pos, reader);
-	}
-	if (StringUtils.startsWithConstExpr(value, "worldgen ")) {
-		const inline = splitInlineBody(value);
-		let payload = (inline?.header ?? value)
-			.substring("worldgen ".length)
-			.trim();
-		const subtype = payload.substring(0, payload.indexOf(" "));
-		payload = payload.substring(payload.indexOf(" ") + 1).trim();
-		let entries: AstNode[] = [];
-		if (inline) {
-			entries = inlineJsonEntries(inline.body, pos);
-		} else {
-			block(reader, () => entries.push(json(reader)));
-		}
+	if (StringUtils.startsWithConstExpr(value, "json ")) {
+		const { words, entries } = readJsonFile(
+			token,
+			reader,
+			3,
+			"json <subfolder> <name> <value>",
+		);
 		return {
 			type: "JsonFile",
 			pos,
-			name: payload,
-			info: { kind: "WorldGen", subType: subtype, name: payload, entries },
+			name: words[2],
+			info: { kind: "Generic", subFolder: words[1], entries },
+		};
+	}
+	if (
+		registryJsonFiles.some((registry) =>
+			StringUtils.startsWithConstExpr(value, `${registry} `),
+		)
+	) {
+		const { words, entries } = readJsonFile(
+			token,
+			reader,
+			2,
+			"<type> <name> <value>",
+		);
+		return {
+			type: "JsonFile",
+			pos,
+			name: words[1],
+			info: { kind: "Generic", subFolder: words[0], entries },
+		};
+	}
+	if (
+		JSON_FILE_TYPES.some((type) =>
+			StringUtils.startsWithConstExpr(value, `${type} `),
+		)
+	) {
+		const { words, entries } = readJsonFile(
+			token,
+			reader,
+			2,
+			"<type> <name> <value>",
+		);
+		return {
+			type: "JsonFile",
+			pos,
+			name: words[1],
+			info: createJsonInfo(words[0], entries, pos),
+		};
+	}
+	if (StringUtils.startsWithConstExpr(value, "worldgen ")) {
+		const { words, entries } = readJsonFile(
+			token,
+			reader,
+			3,
+			"worldgen <type> <name> <value>",
+		);
+		return {
+			type: "JsonFile",
+			pos,
+			name: words[2],
+			info: { kind: "WorldGen", subType: words[1], entries },
 		};
 	}
 	return readRaw(pos, value, reader, false);
 }
 
-function readPlainJsonFile(
-	v: string,
-	pos: PosInfo,
-	reader: TokenInput,
-): AstNode {
-	const inline = splitInlineBody(v);
-	const bits = (inline?.header ?? v).split(" ").filter((x) => x !== "");
-	const type = bits.shift() ?? "";
-	const directory = type === "json" ? (bits.shift() ?? "") : type;
-	const name = bits.shift() ?? "";
-	if (directory === "" || name === "") {
-		throw new ParserError(
-			type === "json"
-				? "Expected 'json <folder> <name> { ... }'"
-				: format("Expected '{} <name> { ... }'", type),
-			pos,
-		);
+const JSON_FILE_TYPES = [
+	"advancement",
+	"enchantment",
+	"item_modifier",
+	"loot_table",
+	"predicate",
+	"recipe",
+	"chat_type",
+	"damage_type",
+	"dimension",
+	"dimension_type",
+];
+const JSON_CONTROL_REGEX = /^(?:IF|REPEAT)[\s(]/;
+const JSON_ELSE_REGEX = /^ELSE(?:[\s{]|$)/;
+
+interface JsonLine {
+	text: string;
+	pos: PosInfo;
+}
+
+function isSameLine(a: Token, b: Token): boolean {
+	return a.pos.line === b.pos.line && a.pos.file === b.pos.file;
+}
+
+/** Fallback for tokens without a `raw` source line. */
+function tokenText(token: Token): string {
+	switch (token.type) {
+		case "Literal":
+			return token.v;
+		case "BracketOpen":
+			return token.data ? `{ ${token.data}` : "{";
+		case "BracketClose":
+			return "}";
 	}
-	let entries: AstNode[] = [];
-	if (inline) {
-		entries = inlineJsonEntries(inline.body, pos);
-	} else {
-		block(reader, () => entries.push(json(reader)));
+}
+
+/** Consumes the rest of `first`'s source line and returns the line's text. */
+function readJsonLine(first: Token, reader: TokenInput): JsonLine {
+	const tokens = [first];
+	while (reader.hasNext() && isSameLine(reader.peek(), first)) {
+		tokens.push(reader.next());
+	}
+	const text = first.raw ?? tokens.map(tokenText).join(" ");
+	return { text: text.trimEnd(), pos: first.pos };
+}
+
+function peekLineText(reader: TokenInput): string {
+	const token = reader.peek();
+	return (token.raw ?? tokenText(token)).trim();
+}
+
+/**
+ * Splits `count` whitespace-separated words off the front of `text`.
+ * `<% %>` expressions stay whole, and `{` or `[` ends a word.
+ */
+function splitWords(
+	text: string,
+	count: number,
+): { words: string[]; restIndex: number } {
+	const words: string[] = [];
+	let i = 0;
+	while (words.length < count) {
+		while (i < text.length && /\s/.test(text[i])) i++;
+		const start = i;
+		while (i < text.length && !/[\s{[]/.test(text[i])) {
+			if (text.startsWith("<%", i)) {
+				const end = text.indexOf("%>", i + 2);
+				i = end === -1 ? text.length : end + 2;
+			} else {
+				i++;
+			}
+		}
+		if (i === start) break;
+		words.push(text.substring(start, i));
+	}
+	while (i < text.length && /\s/.test(text[i])) i++;
+	return { words, restIndex: i };
+}
+
+/** Tracks bracket depth across JSON lines, skipping strings, comments and `<% %>` expressions. */
+class JsonDepthScanner {
+	depth = 0;
+	inBlockComment = false;
+
+	scan(text: string): void {
+		let i = 0;
+		while (i < text.length) {
+			if (this.inBlockComment) {
+				const end = text.indexOf("*/", i);
+				if (end === -1) return;
+				this.inBlockComment = false;
+				i = end + 2;
+				continue;
+			}
+			const char = text[i];
+			if (char === '"' || char === "'") {
+				i = JsonDepthScanner.skipString(text, i);
+			} else if (text.startsWith("<%", i)) {
+				const end = text.indexOf("%>", i + 2);
+				if (end === -1) return;
+				i = end + 2;
+			} else if (text.startsWith("//", i)) {
+				return;
+			} else if (text.startsWith("/*", i)) {
+				this.inBlockComment = true;
+				i += 2;
+			} else {
+				if (char === "{" || char === "[") this.depth++;
+				else if (char === "}" || char === "]") this.depth--;
+				i++;
+			}
+		}
+	}
+
+	private static skipString(text: string, start: number): number {
+		const quote = text[start];
+		let i = start + 1;
+		while (i < text.length) {
+			if (text[i] === "\\") {
+				i += 2;
+			} else if (text[i] === quote) {
+				return i + 1;
+			} else {
+				i++;
+			}
+		}
+		return i;
+	}
+}
+
+function jsonRaw(line: JsonLine): AstNode {
+	return {
+		type: "Raw",
+		pos: line.pos,
+		value: line.text,
+		continuations: [],
+		isMacro: false,
+	};
+}
+
+/**
+ * Reads a JSON file header (`wordCount` words, then the value) starting at `token`,
+ * followed by the JSON body.
+ */
+function readJsonFile(
+	token: Token & { type: "Literal" },
+	reader: TokenInput,
+	wordCount: number,
+	usage: string,
+): { words: string[]; entries: AstNode[] } {
+	const line = readJsonLine(token, reader);
+	const headerStart = Math.max(0, line.text.indexOf(token.v));
+	const header = line.text.substring(headerStart);
+	const { words, restIndex } = splitWords(header, wordCount);
+	if (words.length < wordCount) {
+		throw new ParserError(format("Expected '{}'", usage), token.pos);
+	}
+	const first: JsonLine = {
+		text: header.substring(restIndex),
+		pos: { ...token.pos, col: token.pos.col + headerStart + restIndex },
+	};
+	return { words, entries: parseJsonBody(reader, first, usage) };
+}
+
+/** Reads a JSON value whose first line is `first`. */
+function parseJsonBody(
+	reader: TokenInput,
+	first: JsonLine,
+	usage: string,
+): AstNode[] {
+	if (first.text.length === 0) {
+		throw new ParserError(format("Expected '{}'", usage), first.pos);
+	}
+	const nodes = [jsonRaw(first)];
+	// Anything other than a bracketed root is a single-line value, like `<% %>`.
+	if (first.text[0] !== "{" && first.text[0] !== "[") {
+		return nodes;
+	}
+	const scanner = new JsonDepthScanner();
+	scanner.scan(first.text);
+	if (scanner.depth > 0) {
+		nodes.push(...parseJsonLines(reader, scanner, 0, null, first.pos).nodes);
+	}
+	return nodes;
+}
+
+/**
+ * Reads JSON lines until the bracket depth drops back to `baseDepth`, or, inside an
+ * IF/ELSE/REPEAT block (`blockPos` set), until the line that closes the block.
+ */
+function parseJsonLines(
+	reader: TokenInput,
+	scanner: JsonDepthScanner,
+	baseDepth: number,
+	blockPos: PosInfo | null,
+	openPos: PosInfo,
+): { nodes: AstNode[]; closing: JsonLine } {
+	const nodes: AstNode[] = [];
+	while (true) {
+		if (!reader.hasNext()) {
+			throw new ParserError(
+				blockPos ? "Expected '}' to close this block" : "Unexpected end of file in JSON value",
+				openPos,
+			);
+		}
+		const line = readJsonLine(reader.next(), reader);
+		const text = line.text.trim();
+		if (!scanner.inBlockComment) {
+			if (text.startsWith("#")) {
+				continue;
+			}
+			if (JSON_CONTROL_REGEX.test(text) && text.endsWith("{")) {
+				nodes.push(parseJsonControl(reader, scanner, line, text));
+				continue;
+			}
+			if (blockPos && text.startsWith("}") && scanner.depth === baseDepth) {
+				return {
+					nodes,
+					closing: { text: text.substring(1).trim(), pos: line.pos },
+				};
+			}
+		}
+		nodes.push(jsonRaw(line));
+		scanner.scan(line.text);
+		if (scanner.depth < baseDepth) {
+			throw new ParserError(
+				blockPos
+					? "This closes a bracket opened outside the IF/ELSE/REPEAT block"
+					: "Unbalanced closing bracket",
+				line.pos,
+			);
+		}
+		if (!blockPos && scanner.depth === baseDepth) {
+			return { nodes, closing: line };
+		}
+	}
+}
+
+/** Reads an IF/ELSE or REPEAT block inside a JSON value. `text` is its trimmed header line. */
+function parseJsonControl(
+	reader: TokenInput,
+	scanner: JsonDepthScanner,
+	line: JsonLine,
+	text: string,
+): AstNode {
+	const header = text.substring(0, text.length - 1).trim();
+	const body = parseJsonLines(reader, scanner, scanner.depth, line.pos, line.pos);
+	if (StringUtils.startsWithConstExpr(header, "REPEAT")) {
+		if (body.closing.text.length > 0) {
+			throw new ParserError(
+				format("Unexpected '{}' after '}'", body.closing.text),
+				body.closing.pos,
+			);
+		}
+		return createCompilerLoop(header, line.pos, body.nodes);
+	}
+	const elseExpressions: CompileTimeElse[] = [];
+	let closing = body.closing;
+	while (true) {
+		let elseLine = closing;
+		if (elseLine.text.length === 0) {
+			if (!reader.hasNext() || !JSON_ELSE_REGEX.test(peekLineText(reader))) {
+				break;
+			}
+			const next = readJsonLine(reader.next(), reader);
+			elseLine = { text: next.text.trim(), pos: next.pos };
+		}
+		if (!JSON_ELSE_REGEX.test(elseLine.text) || !elseLine.text.endsWith("{")) {
+			throw new ParserError(
+				format("Unexpected '{}' after '}'", elseLine.text),
+				elseLine.pos,
+			);
+		}
+		let condition = elseLine.text
+			.substring("ELSE".length, elseLine.text.length - 1)
+			.trim();
+		if (StringUtils.startsWithConstExpr(condition, "IF")) {
+			condition = condition.substring("IF".length).trim();
+		}
+		const elseBody = parseJsonLines(
+			reader,
+			scanner,
+			scanner.depth,
+			elseLine.pos,
+			elseLine.pos,
+		);
+		elseExpressions.push({
+			condition: condition.length > 0 ? condition : null,
+			node: elseBody.nodes,
+		});
+		closing = elseBody.closing;
 	}
 	return {
-		type: "JsonFile",
-		pos,
-		name,
-		info:
-			type === "json" || registryJsonFiles.includes(type)
-				? { kind: "Registry", directory, entries }
-				: createJsonInfo(type, entries, pos),
+		type: "CompileTimeIf",
+		pos: line.pos,
+		expression: header.substring("IF".length).trim(),
+		body: body.nodes,
+		elseExpressions,
 	};
 }
 
@@ -784,6 +1042,10 @@ function parserCompilerLoop(
 ): AstNode {
 	const body: AstNode[] = [];
 	block(reader, () => body.push(handler()));
+	return createCompilerLoop(v, pos, body);
+}
+
+function createCompilerLoop(v: string, pos: PosInfo, body: AstNode[]): AstNode {
 	const match = loopRegExp.exec(v);
 	if (match) {
 		const loop = match[1];

@@ -9,7 +9,7 @@ data/main/function/kills_inc.mcfunction:
 scoreboard players add #kills counters 1
 ----------------
 data/main/damage_type/kills.json:
-{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+{"exhaustion":0,"message_id":"generic","scaling":"never"}
 ----------------
 data/main/function/kills_dir/reset.mcfunction:
 # Generated with MC-Build
@@ -22,7 +22,7 @@ data/main/function/nested/deaths_inc.mcfunction:
 scoreboard players add #deaths counters 1
 ----------------
 data/main/damage_type/nested/deaths.json:
-{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+{"exhaustion":0,"message_id":"generic","scaling":"never"}
 ----------------
 data/main/function/nested/deaths_dir/reset.mcfunction:
 # Generated with MC-Build
@@ -35,7 +35,7 @@ data/main/function/loop_1_inc.mcfunction:
 scoreboard players add #loop_1 counters 1
 ----------------
 data/main/damage_type/loop_1.json:
-{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+{"exhaustion":0,"message_id":"generic","scaling":"never"}
 ----------------
 data/main/function/loop_1_dir/reset.mcfunction:
 # Generated with MC-Build
@@ -48,7 +48,7 @@ data/main/function/loop_2_inc.mcfunction:
 scoreboard players add #loop_2 counters 1
 ----------------
 data/main/damage_type/loop_2.json:
-{"exhaustion": 0, "message_id": "generic", "scaling": "never"}
+{"exhaustion":0,"message_id":"generic","scaling":"never"}
 ----------------
 data/main/function/loop_2_dir/reset.mcfunction:
 # Generated with MC-Build
